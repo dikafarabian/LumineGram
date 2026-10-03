@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import desu.inugram.InuConfig
 import desu.inugram.SearchRegistry
+import desu.inugram.helpers.badges.BadgeRegistry
 import desu.inugram.helpers.CrashReporter
 import desu.inugram.helpers.InuUtils
 import desu.inugram.helpers.LogsHelper
@@ -319,6 +320,12 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
                 (view as? NotificationsCheckCell)?.isChecked = new
             }
 
+            TOGGLE_HIDE_DEV_BADGES -> {
+                (view as? NotificationsCheckCell)?.isChecked = InuConfig.HIDE_DEV_BADGES.toggle()
+                // lumine: update badge on cached TLRPC user/chat objects so toggle takes effect without app restart
+                BadgeRegistry.refreshCached()
+            }
+
             TOGGLE_LOGS_ENABLED -> {
                 if (LogsHelper.isEnabled()) {
                     setLogsEnabled(false, view)
@@ -595,6 +602,7 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
     companion object {
         private val TOGGLE_AUTO_UPDATE_CHECK = InuUtils.generateId()
         private val TOGGLE_UPDATES_INCLUDE_BETA = InuUtils.generateId()
+        private val TOGGLE_HIDE_DEV_BADGES = InuUtils.generateId()
         private val TOGGLE_LOGS_ENABLED = InuUtils.generateId()
         private val BUTTON_DONATE = InuUtils.generateId()
         private val BUTTON_COPY_SYSINFO = InuUtils.generateId()

@@ -377,9 +377,7 @@ lumine/round-recorder-zoom-buttons.patch
 lumine/hide-channel-share-button.patch
 lumine/non-island-shared-media-scroll.patch
 lumine/redundant-lang-code-native-calls.patch
-lumine/optimize-build.patch
 lumine/wide-channel-posts.patch
-lumine/translate-restrictions.patch
 lumine/local-custom-emoji.patch
 lumine/simple-text-view-left-slot.patch
 lumine/settings-search-uppercase.patch
@@ -389,8 +387,7 @@ lumine/chat-menu-live-reorder.patch
 lumine/parallel-account-init.patch
 bugfix/positional-format-args.patch
 lumine/remote-badges.patch
-lumine/translate-target-language-override.patch
-lumine/preserve-media-cache-fallback.patch
+lumine/restore-archived-media.patch
 lumine/feed-menu-entry.patch
 lumine/dialogs-menu-customization.patch
 lumine/small-gifs.patch
@@ -403,7 +400,6 @@ lumine/recent-chats.patch
 lumine/pill-stack.patch
 lumine/proxy-management.patch
 lumine/dialog-avatar-tap-profile.patch
-lumine/translate-bugfixes.patch
 lumine/confirm-before-sending.patch
 lumine/hijri-calendar.patch
 lumine/input-translate.patch
@@ -429,9 +425,7 @@ lumine/centered-header-fixes.patch
 lumine/hide-recent-chats-shortcut.patch
 lumine/theme-switch-recovery.patch
 lumine/badge-emoji-size.patch
-lumine/confirm-send-preview-fix.patch
 lumine/animated-preview-speed-fix.patch
-lumine/presence-dots-ttl-overlap.patch
 lumine/translate-in-send-preview.patch
 lumine/translate-preview-fixes.patch
 lumine/main-tabs-separate-search.patch
@@ -449,7 +443,6 @@ lumine/liquid-glass-live-update.patch
 lumine/auto-save-one-time.patch
 lumine/auto-save-stories.patch
 lumine/chat-header-light-colors.patch
-lumine/pill-stack-in-header.patch
 lumine/main-tabs-search-tuck.patch
 lumine/archive-lock-once.patch
 lumine/translate-failure-bulletin.patch
@@ -457,10 +450,7 @@ lumine/input-menu-reserve.patch
 lumine/call-rotation.patch
 lumine/recent-chats-sidebar.patch
 lumine/m3-tabs-full-width.patch
-lumine/service-notification-icon.patch
 lumine/recent-chats-strip.patch
-lumine/voice-preview-no-confirm.patch
-lumine/background-service-toggle.patch
 lumine/device-spoof.patch
 lumine/ai-summary-inline.patch
 lumine/media-size.patch
@@ -470,7 +460,12 @@ lumine/remember-selected-folder.patch
 lumine/animated-file-drawable-recycle-crash.patch
 lumine/attach-camera-square.patch
 lumine/feed-chatactivity.patch
-lumine/restore-archived-media.patch
 lumine/chat-header-pill-bounds.patch
+lumine/collapsed-quote-link-highlight.patch
+lumine/ios-input-top-icons-gap.patch
 lumine/save-selected-files.patch
 lumine/local-names.patch
+lumine/round-recorder-remember-exposure.patch
+lumine/folder-tags-local-premium.patch
+lumine/rtl-checkbox-text.patch
+lumine/logs-respect-toggle.patch
