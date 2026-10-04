@@ -20,6 +20,10 @@ import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLRPC
 import java.io.File
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -64,7 +68,22 @@ object UpdateHelper {
             val abis = Build.SUPPORTED_ABIS
             return "Telegram for Android v${stockVersionName} (${BuildConfig.STOCK_VERSION_CODE})\ndirect ${abis.getOrNull(0)} ${abis.getOrNull(1)}"
         }
-        return "${getVersionInfoString()}\nBuilt on: ${BuildVars.BUILD_DATE}"
+        return "${getDisplayVersionString()}\nBuilt on ${getDisplayBuildDate()}"
+    }
+
+    private fun getDisplayVersionString(): String {
+        val base = LocaleController.formatString(R.string.InuVersionShort, stockVersionName)
+        val withBeta = if (BuildVars.isBetaApp()) "$base ${LocaleController.getString(R.string.InuVersionBetaSuffix)}" else base
+        val commitSuffix = commitSha?.let { " @$it" } ?: ""
+        return "$withBeta$commitSuffix ${BuildConfig.INU_BUILD_TYPE}"
+    }
+
+    private fun getDisplayBuildDate(): String {
+        return try {
+            LocalDate.parse(BuildVars.BUILD_DATE).format(DateTimeFormatter.ofPattern("EEE MMM d yyyy", Locale.ENGLISH))
+        } catch (e: DateTimeParseException) {
+            BuildVars.BUILD_DATE
+        }
     }
 
     @Volatile

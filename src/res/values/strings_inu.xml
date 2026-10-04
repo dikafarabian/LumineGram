@@ -903,6 +903,7 @@
     <string name="InuCut">Cut</string>
     <string name="InuCodeLanguage">Code language</string>
     <string name="InuVersion">LumineGram %1$s (%2$s)</string>
+    <string name="InuVersionShort">LumineGram %1$s</string>
     <string name="InuCategories">Categories</string>
     <string name="InuDataBackup">Backup &amp; Sync</string>
 
