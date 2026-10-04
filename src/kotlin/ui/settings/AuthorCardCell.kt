@@ -50,7 +50,7 @@ class AuthorCardCell(
             setColor(0)
             setStroke(AndroidUtilities.dp(2f), brand)
         }
-        addView(avatarView, LayoutHelper.createFrame(60, 60f, Gravity.CENTER))
+        addView(avatarView, LayoutHelper.createFrame(60, 60, Gravity.CENTER))
     }
 
     private val chipView = TextView(context).apply {
