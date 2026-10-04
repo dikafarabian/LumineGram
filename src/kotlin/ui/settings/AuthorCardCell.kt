@@ -29,7 +29,9 @@ class AuthorCardCell(
     context: Context,
     private val resourcesProvider: Theme.ResourcesProvider?,
     private val username: String,
-    onOpen: () -> Unit,
+    githubUsername: String,
+    onOpenTelegram: () -> Unit,
+    onOpenGithub: () -> Unit,
 ) : FrameLayout(context), NotificationCenter.NotificationCenterDelegate {
 
     private val brand = 0xFFFA456C.toInt()
@@ -80,30 +82,59 @@ class AuthorCardCell(
         text = username
     }
 
-    private val handleView = TextView(context).apply {
-        setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14f)
-        setTextColor(brand)
-        maxLines = 1
-        ellipsize = TextUtils.TruncateAt.END
-        text = "@$username"
-    }
-
-    private val actionView = FrameLayout(context).apply {
-        background = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(ColorUtils.setAlphaComponent(brand, 0x24))
+    private fun mkLinkChip(iconRes: Int, label: String, description: String, onClick: () -> Unit): LinearLayout {
+        val radius = AndroidUtilities.dp(17f)
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            background = Theme.createSimpleSelectorRoundRectDrawable(
+                radius,
+                ColorUtils.setAlphaComponent(brand, 0x24),
+                ColorUtils.setAlphaComponent(brand, 0x4D),
+            )
+            setPadding(AndroidUtilities.dp(10f), 0, AndroidUtilities.dp(12f), 0)
+            isClickable = true
+            isFocusable = true
+            contentDescription = description
+            setOnClickListener { onClick() }
+            addView(
+                ImageView(context).apply {
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setImageResource(iconRes)
+                    setColorFilter(brand)
+                },
+                LayoutHelper.createLinear(18, 18),
+            )
+            addView(
+                TextView(context).apply {
+                    setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
+                    setTypeface(AndroidUtilities.bold())
+                    setTextColor(brand)
+                    maxLines = 1
+                    ellipsize = TextUtils.TruncateAt.END
+                    text = label
+                },
+                LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f, Gravity.CENTER_VERTICAL, 6, 0, 0, 0),
+            )
         }
-        addView(
-            ImageView(context).apply {
-                scaleType = ImageView.ScaleType.CENTER_INSIDE
-                setImageResource(R.drawable.inu_tabler_brand_telegram)
-                setColorFilter(brand)
-            },
-            LayoutHelper.createFrame(20, 20f, Gravity.CENTER),
-        )
     }
 
-    private val card = FrameLayout(context).apply {
+    private val telegramChip = mkLinkChip(
+        R.drawable.inu_tabler_brand_telegram,
+        "@$username",
+        "Telegram @$username",
+        onOpenTelegram,
+    )
+
+    private val githubChip = mkLinkChip(
+        R.drawable.inu_tabler_brand_github,
+        "@$githubUsername",
+        "GitHub @$githubUsername",
+        onOpenGithub,
+    )
+
+    private val card = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
         background = GradientDrawable(
             GradientDrawable.Orientation.TL_BR,
             intArrayOf(
@@ -114,50 +145,37 @@ class AuthorCardCell(
             cornerRadius = AndroidUtilities.dp(20f).toFloat()
             setStroke(AndroidUtilities.dp(1f), ColorUtils.setAlphaComponent(brand, 0x40))
         }
-        foreground = Theme.createRadSelectorDrawable(
-            Theme.getColor(Theme.key_listSelector, resourcesProvider),
-            20,
-            20,
-        )
-        isClickable = true
-        isFocusable = true
-        contentDescription = "${LocaleController.getString(R.string.InuAboutAuthor)} @$username"
-        setOnClickListener { onOpen() }
+        setPadding(AndroidUtilities.dp(14f), AndroidUtilities.dp(14f), AndroidUtilities.dp(14f), AndroidUtilities.dp(14f))
 
-        addView(
-            ringView,
-            LayoutHelper.createFrame(68, 68f, Gravity.START or Gravity.CENTER_VERTICAL, 14f, 0f, 0f, 0f),
-        )
-
-        val texts = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            addView(chipView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT))
+        val top = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(ringView, LayoutHelper.createLinear(68, 68))
+            val texts = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(chipView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT))
+                addView(
+                    nameView,
+                    LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 6f, 0f, 0f),
+                )
+            }
             addView(
-                nameView,
-                LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 6f, 0f, 0f),
-            )
-            addView(
-                handleView,
-                LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 1f, 0f, 0f),
+                texts,
+                LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f, Gravity.CENTER_VERTICAL, 14, 0, 0, 0),
             )
         }
-        addView(
-            texts,
-            LayoutHelper.createFrame(
-                LayoutHelper.MATCH_PARENT,
-                LayoutHelper.WRAP_CONTENT.toFloat(),
-                Gravity.START or Gravity.CENTER_VERTICAL,
-                96f, 0f, 62f, 0f,
-            ),
-        )
-        addView(
-            actionView,
-            LayoutHelper.createFrame(36, 36f, Gravity.END or Gravity.CENTER_VERTICAL, 0f, 0f, 16f, 0f),
-        )
+        addView(top, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 68))
+
+        val links = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(telegramChip, LayoutHelper.createLinear(0, 34, 1f))
+            addView(githubChip, LayoutHelper.createLinear(0, 34, 1f, Gravity.NO_GRAVITY, 8, 0, 0, 0))
+        }
+        addView(links, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 34, 0f, 12f, 0f, 0f))
     }
 
     init {
-        addView(card, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 88f, Gravity.CENTER, 16f, 0f, 16f, 0f))
+        addView(card, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140f, Gravity.CENTER, 16f, 0f, 16f, 0f))
         showPlaceholder()
     }
 
@@ -198,7 +216,7 @@ class AuthorCardCell(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(104f), MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(156f), MeasureSpec.EXACTLY),
         )
     }
 

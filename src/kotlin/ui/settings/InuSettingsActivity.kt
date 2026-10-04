@@ -68,9 +68,14 @@ class InuSettingsActivity : SettingsPageActivity() {
     private fun getOrCreateAuthorCard(): AuthorCardCell {
         authorCard?.let { return it }
         val ctx = context!!
-        val card = AuthorCardCell(ctx, resourceProvider, AUTHOR_USERNAME) {
-            Browser.openUrl(ctx, "https://t.me/$AUTHOR_USERNAME")
-        }
+        val card = AuthorCardCell(
+            ctx,
+            resourceProvider,
+            AUTHOR_USERNAME,
+            AUTHOR_GITHUB,
+            onOpenTelegram = { Browser.openUrl(ctx, "https://t.me/$AUTHOR_USERNAME") },
+            onOpenGithub = { Browser.openUrl(ctx, "https://github.com/$AUTHOR_GITHUB") },
+        )
         authorCard = card
         return card
     }
@@ -176,6 +181,7 @@ class InuSettingsActivity : SettingsPageActivity() {
         private val CAT_SYSTEM = InuUtils.generateId()
         private val CAT_NICHE = InuUtils.generateId()
         private const val AUTHOR_USERNAME = "chainonyourdoor"
+        private const val AUTHOR_GITHUB = "chainonyourdoor"
         private const val HEADER_TAP_COUNT = 5
         private const val HEADER_TAP_WINDOW_MS = 2000L
         private val BUTTON_AUTHOR = InuUtils.generateId()
