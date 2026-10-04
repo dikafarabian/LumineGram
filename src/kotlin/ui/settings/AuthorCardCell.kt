@@ -139,7 +139,7 @@ class AuthorCardCell(
 
     private val card = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(AndroidUtilities.dp(18f), AndroidUtilities.dp(14f), AndroidUtilities.dp(18f), AndroidUtilities.dp(14f))
+        setPadding(AndroidUtilities.dp(16f), AndroidUtilities.dp(16f), AndroidUtilities.dp(16f), AndroidUtilities.dp(16f))
 
         val top = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -210,7 +210,7 @@ class AuthorCardCell(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(142f), MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(146f), MeasureSpec.EXACTLY),
         )
     }
 
