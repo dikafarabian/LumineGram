@@ -9,7 +9,9 @@
         "ru": "Официальный канал LumineGram",
         "tr": "Resmi LumineGram kanalı",
         "ja": "LumineGram公式チャンネル",
-        "zh": "LumineGram 官方频道"
+        "zh": "LumineGram 官方频道",
+        "ar": "القناة الرسمية لـ LumineGram",
+        "fa": "کانال رسمی LumineGram"
       },
       "description": {
         "en": "Official channel with LumineGram news and updates",
@@ -17,7 +19,9 @@
         "ru": "Официальный канал с новостями и обновлениями LumineGram",
         "tr": "LumineGram haberleri ve güncellemelerinin yer aldığı resmi kanal",
         "ja": "LumineGramのニュースとアップデートを届ける公式チャンネル",
-        "zh": "发布 LumineGram 新闻和更新的官方频道"
+        "zh": "发布 LumineGram 新闻和更新的官方频道",
+        "ar": "القناة الرسمية لأخبار LumineGram وتحديثاته",
+        "fa": "کانال رسمی اخبار و به‌روزرسانی‌های LumineGram"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5260594734346313076"
@@ -30,7 +34,9 @@
         "ru": "Разработчик LumineGram",
         "tr": "LumineGram geliştiricisi",
         "ja": "LumineGram開発者",
-        "zh": "LumineGram 开发者"
+        "zh": "LumineGram 开发者",
+        "ar": "مطوّر LumineGram",
+        "fa": "توسعه‌دهنده LumineGram"
       },
       "description": {
         "en": "This user creates and develops LumineGram",
@@ -38,7 +44,9 @@
         "ru": "Этот пользователь создаёт и развивает LumineGram",
         "tr": "Bu kullanıcı LumineGram'ı oluşturuyor ve geliştiriyor",
         "ja": "LumineGramを制作・開発しているユーザーです",
-        "zh": "该用户负责创建和开发 LumineGram"
+        "zh": "该用户负责创建和开发 LumineGram",
+        "ar": "هذا المستخدم يُنشئ LumineGram ويطوّره",
+        "fa": "این کاربر LumineGram را می‌سازد و توسعه می‌دهد"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5260594734346313076"
@@ -51,7 +59,9 @@
         "ru": "Первый человек в LumineGram",
         "tr": "LumineGram'daki ilk kişi",
         "ja": "LumineGramの最初の人",
-        "zh": "LumineGram 第一人"
+        "zh": "LumineGram 第一人",
+        "ar": "أول شخص في LumineGram",
+        "fa": "اولین نفر در LumineGram"
       },
       "description": {
         "en": "He's the first one in both the chat and the channel. I'm shocked!",
@@ -59,7 +69,9 @@
         "ru": "Он первый и в чате, и в канале. Я в шоке!",
         "tr": "Hem sohbette hem de kanalda ilk o. Şok oldum!",
         "ja": "チャンネルでもチャットでも彼が一番乗り。驚きました!",
-        "zh": "他在群组和频道里都是第一个。我很震惊!"
+        "zh": "他在群组和频道里都是第一个。我很震惊!",
+        "ar": "هو الأول في الدردشة والقناة معًا. أنا مصدوم!",
+        "fa": "او هم در گفتگو و هم در کانال اولین نفر است. شوکه شدم!"
       },
       "icon": "inu_lumine_first",
       "emojiId": "5264955358807369439"
@@ -72,7 +84,9 @@
         "ru": "Канал с плагинами LumineGram",
         "tr": "LumineGram eklenti kanalı",
         "ja": "LumineGramプラグインチャンネル",
-        "zh": "LumineGram 插件频道"
+        "zh": "LumineGram 插件频道",
+        "ar": "قناة إضافات LumineGram",
+        "fa": "کانال افزونه‌های LumineGram"
       },
       "description": {
         "en": "Channel with plugins for LumineGram",
@@ -80,7 +94,9 @@
         "ru": "Канал с плагинами для LumineGram",
         "tr": "LumineGram için eklentilerin paylaşıldığı kanal",
         "ja": "LumineGram用プラグインを配布するチャンネル",
-        "zh": "发布 LumineGram 插件的频道"
+        "zh": "发布 LumineGram 插件的频道",
+        "ar": "قناة تحتوي على إضافات LumineGram",
+        "fa": "کانالی با افزونه‌های LumineGram"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5325747421131612375"
@@ -93,7 +109,9 @@
         "ru": "Канал с настройками LumineGram",
         "tr": "LumineGram ayarlar kanalı",
         "ja": "LumineGram設定チャンネル",
-        "zh": "LumineGram 设置频道"
+        "zh": "LumineGram 设置频道",
+        "ar": "قناة إعدادات LumineGram",
+        "fa": "کانال تنظیمات LumineGram"
       },
       "description": {
         "en": "Channel with LumineGram settings and configs",
@@ -101,7 +119,9 @@
         "ru": "Канал с настройками и конфигами LumineGram",
         "tr": "LumineGram ayarları ve yapılandırmalarının paylaşıldığı kanal",
         "ja": "LumineGramの設定と構成を共有するチャンネル",
-        "zh": "分享 LumineGram 设置和配置的频道"
+        "zh": "分享 LumineGram 设置和配置的频道",
+        "ar": "قناة تحتوي على إعدادات LumineGram وملفات التهيئة",
+        "fa": "کانالی با تنظیمات و پیکربندی‌های LumineGram"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5323484093625707895"
@@ -114,7 +134,9 @@
         "ru": "Бета-тестер LumineGram",
         "tr": "LumineGram beta test kullanıcısı",
         "ja": "LumineGramベータテスター",
-        "zh": "LumineGram 测试版体验官"
+        "zh": "LumineGram 测试版体验官",
+        "ar": "مختبر بيتا لـ LumineGram",
+        "fa": "آزمایشگر بتای LumineGram"
       },
       "description": {
         "en": "Helps with and finds bugs in the app",
@@ -122,7 +144,9 @@
         "ru": "Помогает и находит баги в приложении",
         "tr": "Uygulamadaki hataları bulup yardımcı oluyor",
         "ja": "アプリのバグを見つけて協力してくれています",
-        "zh": "协助发现应用中的漏洞"
+        "zh": "协助发现应用中的漏洞",
+        "ar": "يساعد في اكتشاف الأخطاء في التطبيق وإصلاحها",
+        "fa": "در یافتن اشکالات برنامه کمک می‌کند"
       },
       "icon": "inu_badge_tester",
       "emojiId": "5265209225734304965"
@@ -135,7 +159,9 @@
         "ru": "Официальный канал inuGram",
         "tr": "Resmi inuGram kanalı",
         "ja": "inuGram公式チャンネル",
-        "zh": "inuGram 官方频道"
+        "zh": "inuGram 官方频道",
+        "ar": "القناة الرسمية لـ inuGram",
+        "fa": "کانال رسمی inuGram"
       },
       "description": {
         "en": "Original inuGram fork that LumineGram is based on",
@@ -143,7 +169,9 @@
         "ru": "Оригинальный форк inuGram, на основе которого создан LumineGram",
         "tr": "LumineGram'ın temelini oluşturan orijinal inuGram forku",
         "ja": "LumineGramのベースとなったオリジナルのinuGramフォーク",
-        "zh": "LumineGram 所基于的原始 inuGram 分支"
+        "zh": "LumineGram 所基于的原始 inuGram 分支",
+        "ar": "نسخة inuGram الأصلية التي بُني عليها LumineGram",
+        "fa": "فورک اصلی inuGram که LumineGram بر پایه آن ساخته شده"
       },
       "icon": "inu_badge_inu",
       "emojiId": "5260551076003753813"
@@ -156,7 +184,9 @@
         "ru": "Разработчица inuGram",
         "tr": "inuGram geliştiricisi",
         "ja": "inuGram開発者",
-        "zh": "inuGram 开发者"
+        "zh": "inuGram 开发者",
+        "ar": "مطوّر inuGram",
+        "fa": "توسعه‌دهنده inuGram"
       },
       "description": {
         "en": "This user is the author of inuGram, the fork LumineGram is based on",
@@ -164,10 +194,37 @@
         "ru": "Эта пользовательница — автор inuGram, форка, на основе которого создан LumineGram",
         "tr": "LumineGram'ın temelini oluşturan inuGram forkunun yazarı",
         "ja": "LumineGramのベースとなったinuGramの作者です",
-        "zh": "LumineGram 所基于的 inuGram 分支的作者"
+        "zh": "LumineGram 所基于的 inuGram 分支的作者",
+        "ar": "هذا المستخدم هو مؤلف inuGram، النسخة المشتقة التي بُني عليها LumineGram",
+        "fa": "این کاربر سازنده inuGram است، فورکی که LumineGram بر پایه آن ساخته شده"
       },
       "icon": "inu_badge_inu",
       "emojiId": "5260551076003753813"
+    },
+    {
+      "slug": "popmods",
+      "title": {
+        "en": "popMODS",
+        "uk": "popMODS",
+        "ru": "popMODS",
+        "tr": "popMODS",
+        "ja": "popMODS",
+        "zh": "popMODS",
+        "ar": "popMODS",
+        "fa": "popMODS"
+      },
+      "description": {
+        "en": "Official popMODS channel and its creator",
+        "uk": "Офіційний канал popMODS та його автор",
+        "ru": "Официальный канал popMODS и его автор",
+        "tr": "popMODS resmi kanalı ve yaratıcısı",
+        "ja": "popMODSの公式チャンネルとその制作者",
+        "zh": "popMODS 官方频道及其创作者",
+        "ar": "القناة الرسمية لـ popMODS ومنشئها",
+        "fa": "کانال رسمی popMODS و سازنده آن"
+      },
+      "icon": "",
+      "emojiId": "5336821234095139503"
     }
   ],
   "holders": [
@@ -270,6 +327,16 @@
       "id": "8926481003",
       "kind": "user",
       "badge": "lumine-dev"
+    },
+    {
+      "id": "1573913011",
+      "kind": "chat",
+      "badge": "popmods"
+    },
+    {
+      "id": "5036582087",
+      "kind": "user",
+      "badge": "popmods"
     }
   ]
 }
