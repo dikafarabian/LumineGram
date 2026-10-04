@@ -210,7 +210,10 @@ class AuthorCardCell(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(146f), MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(
+                AndroidUtilities.dp(16f) * 2 + AndroidUtilities.dp(68f) + AndroidUtilities.dp(12f) + AndroidUtilities.dp(34f),
+                MeasureSpec.EXACTLY,
+            ),
         )
     }
 
