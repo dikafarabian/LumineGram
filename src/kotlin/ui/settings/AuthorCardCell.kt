@@ -93,7 +93,7 @@ class AuthorCardCell(
                 color,
                 ColorUtils.blendARGB(color, Color.WHITE, 0.18f),
             )
-            setPadding(AndroidUtilities.dp(10f), 0, AndroidUtilities.dp(12f), 0)
+            setPadding(AndroidUtilities.dp(12f), 0, AndroidUtilities.dp(12f), 0)
             isClickable = true
             isFocusable = true
             contentDescription = description
@@ -111,11 +111,12 @@ class AuthorCardCell(
                     setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
                     setTypeface(AndroidUtilities.bold())
                     setTextColor(Color.WHITE)
+                    includeFontPadding = false
                     maxLines = 1
                     ellipsize = TextUtils.TruncateAt.END
                     text = label
                 },
-                LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f, Gravity.CENTER_VERTICAL, 6, 0, 0, 0),
+                LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0f, Gravity.CENTER_VERTICAL, 6, 0, 0, 0),
             )
         }
     }
