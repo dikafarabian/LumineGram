@@ -125,18 +125,10 @@ class InuSettingsActivity : SettingsPageActivity() {
 
         items.add(
             UItem.asButton(
-                BUTTON_CHANNEL_LINK,
+                BUTTON_AUTHOR,
                 R.drawable.inu_tabler_brand_telegram,
-                LocaleController.getString(R.string.InuAboutChannel),
-                "LumineGram"
-            )
-        )
-        items.add(
-            UItem.asButton(
-                BUTTON_GITHUB,
-                R.drawable.inu_tabler_brand_github,
-                LocaleController.getString(R.string.InuAboutGitHub),
-                "dikafarabian/LumineGram"
+                LocaleController.getString(R.string.InuAboutAuthor),
+                "@chainonyourdoor"
             )
         )
     }
@@ -163,8 +155,7 @@ class InuSettingsActivity : SettingsPageActivity() {
             BUTTON_TOS -> presentFragment(TosSettingsActivity())
             CAT_SYSTEM -> presentFragment(AdditionalSettingsActivity())
             CAT_NICHE -> presentFragment(NicheSettingsActivity())
-            BUTTON_CHANNEL_LINK -> Browser.openUrl(ctx, "https://t.me/+K-a0hdgiorE4OWM1")
-            BUTTON_GITHUB -> Browser.openUrl(ctx, "https://github.com/dikafarabian/LumineGram")
+            BUTTON_AUTHOR -> Browser.openUrl(ctx, "https://t.me/chainonyourdoor")
         }
     }
 
@@ -182,8 +173,7 @@ class InuSettingsActivity : SettingsPageActivity() {
         private val CAT_NICHE = InuUtils.generateId()
         private const val HEADER_TAP_COUNT = 5
         private const val HEADER_TAP_WINDOW_MS = 2000L
-        private val BUTTON_CHANNEL_LINK = InuUtils.generateId()
-        private val BUTTON_GITHUB = InuUtils.generateId()
+        private val BUTTON_AUTHOR = InuUtils.generateId()
 
         @JvmField
         val PAGE = SearchRegistry.Page(
@@ -192,8 +182,7 @@ class InuSettingsActivity : SettingsPageActivity() {
             iconRes = R.drawable.icon_settings_inu,
             factory = ::InuSettingsActivity,
             entries = listOf(
-                SearchRegistry.Entry("channel", R.string.InuAboutChannel, BUTTON_CHANNEL_LINK),
-                SearchRegistry.Entry("github", R.string.InuAboutGitHub, BUTTON_GITHUB),
+                SearchRegistry.Entry("author", R.string.InuAboutAuthor, BUTTON_AUTHOR),
                 SearchRegistry.Entry("open-translator", R.string.InuTranslator, CAT_TRANSLATOR),
             ),
         )

@@ -1708,5 +1708,5 @@
     <string name="InuDonateWebsite">All methods on the website</string>
     <string name="InuDonateCopied">Copied</string>
     <string name="InuShowMediaSize">Show media size</string>
-    <string name="InuAboutChannel">Updates channel</string>
+    <string name="InuAboutAuthor">Author</string>
 </resources>
