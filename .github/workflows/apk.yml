@@ -1,0 +1,204 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      abi:
+        description: ABI
+        type: choice
+        options:
+          - arm64-v8a
+          - armeabi-v7a
+          - all
+        default: arm64-v8a
+      build_type:
+        description: Build type
+        type: choice
+        options:
+          - beta
+          - release
+        default: beta
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-24.04
+    outputs:
+      abis: ${{ steps.abis.outputs.value }}
+      runs-today: ${{ steps.count.outputs.value }}
+
+    steps:
+      - name: Select ABIs
+        id: abis
+        env:
+          ABI_INPUT: ${{ inputs.abi }}
+        run: |
+          if [ "$ABI_INPUT" = "all" ]; then
+            echo 'value=["arm64-v8a","armeabi-v7a"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "value=[\"$ABI_INPUT\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Count today's builds
+        id: count
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          today=$(date -u +%F)
+          total=$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/apk.yml/runs" -f created=">=$today" -f per_page=1 --jq '.total_count')
+          echo "value=$total" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.abi }}
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: ${{ fromJSON(needs.prepare.outputs.abis) }}
+
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: false
+          swap-storage: false
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config --global user.email ci@luminegram
+          git config --global user.name 'luminegram ci'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2
+        with:
+          append-timestamp: true
+          key: ${{ runner.os }}-ndk-27.2-${{ matrix.abi }}
+          restore-keys: |
+            ${{ runner.os }}-ndk-27.2-${{ matrix.abi }}
+            ${{ runner.os }}-ndk-27.2-release
+            ${{ runner.os }}-
+          max-size: 5G
+          save: true
+
+      - name: Set up worktree
+        run: bun run setup -- --no-stgit
+
+      - name: Write google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          printf '%s' "$GOOGLE_SERVICES_JSON" > worktree/TMessagesProj/google-services.json
+          printf '%s' "$GOOGLE_SERVICES_JSON" > worktree/TMessagesProj_App/google-services.json
+
+      - name: Compute build info
+        id: info
+        env:
+          RUNS_TODAY: ${{ needs.prepare.outputs.runs-today }}
+        run: bun run tsx scripts/ci/version.ts
+
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
+        with:
+          cache-cleanup: always
+
+      - name: Cache Android NDK & CMake
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+            ${{ env.ANDROID_HOME }}/cmake/3.10.2.4988404
+          key: android-ndk-cmake-27.2.12479018-3.10.2.4988404
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4
+        with:
+          packages: >-
+            platforms;android-35
+            build-tools;35.0.0
+            cmake;3.10.2.4988404
+            ndk;27.2.12479018
+
+      - name: Tune Gradle
+        run: |
+          echo 'org.gradle.caching=true'                                                >> ~/.gradle/gradle.properties
+          echo 'org.gradle.parallel=true'                                               >> ~/.gradle/gradle.properties
+          echo 'org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8 -XX:+UseParallelGC'  >> ~/.gradle/gradle.properties
+          echo 'kotlin.daemon.jvm.options=-Xmx2048m'                                    >> ~/.gradle/gradle.properties
+
+      - name: Build ${{ matrix.abi }}
+        working-directory: worktree
+        env:
+          COMMIT_ID: ${{ github.sha }}
+          INU_BUILD: ${{ steps.info.outputs.ver-code }}
+          INU_BUILD_TYPE: ${{ inputs.build_type }}
+          ABI_FILTERS: ${{ matrix.abi }}
+          APK_NAME: ${{ matrix.abi == 'arm64-v8a' && steps.info.outputs.apk-arm64 || steps.info.outputs.apk-arm7 }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime,locale,system_headers
+          CCACHE_BASEDIR: ${{ github.workspace }}/worktree
+        run: |
+          ./gradlew --no-daemon :TMessagesProj_App:assembleRelease
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp TMessagesProj_App/build/outputs/apk/release/app.apk "$GITHUB_WORKSPACE/out/$APK_NAME"
+
+      - name: Sign
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          umask 077
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          apksigner="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          for apk in out/*.apk; do
+            "$apksigner" sign \
+              --ks "$RUNNER_TEMP/release.keystore" \
+              --ks-type PKCS12 \
+              --ks-key-alias lumine \
+              --ks-pass "pass:$KEYSTORE_PASSWORD" \
+              --key-pass "pass:$KEY_PASSWORD" \
+              --v1-signing-enabled false \
+              --in "$apk" \
+              --out "$apk.signed"
+            mv "$apk.signed" "$apk"
+            "$apksigner" verify --print-certs "$apk"
+          done
+          rm -f "$RUNNER_TEMP/release.keystore"
+
+      - name: Send to Telegram
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_DM_CHAT: ${{ vars.TELEGRAM_DM_CHAT_ID }}
+          APK_DIR: out
+          VER_NAME: ${{ steps.info.outputs.ver-name }}
+          BUILD_DATE: ${{ steps.info.outputs.date }}
+        run: bun run tsx scripts/ci/upload.ts

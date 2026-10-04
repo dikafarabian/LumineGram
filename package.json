@@ -1,0 +1,30 @@
+{
+  "name": "luminegram",
+  "type": "module",
+  "private": true,
+  "packageManager": "bun@1.3.13",
+  "scripts": {
+    "setup": "bun scripts/setup.ts",
+    "generate-icons": "bun scripts/generate-icons.ts",
+    "export": "bun scripts/export.ts",
+    "rebase": "bun scripts/rebase.ts",
+    "find-patches": "bun scripts/find-patches.ts",
+    "lint-patches": "bun scripts/lint-patches.ts",
+    "luminechecker": "bun scripts/luminechecker.ts"
+  },
+  "dependencies": {
+    "@antfu/eslint-config": "^8.1.0",
+    "@fuman/utils": "^0.0.19",
+    "@iconify-json/tabler": "^1.2.33",
+    "@mtcute/node": "^0.31.0",
+    "eslint": "^10.2.0",
+    "tinyglobby": "^0.2.16",
+    "zx": "^8.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "sharp": "^0.35.3",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

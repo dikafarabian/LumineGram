@@ -1,0 +1,144 @@
+package desu.inugram.helpers
+
+import android.content.res.Configuration
+import android.content.res.Resources
+import org.telegram.messenger.ApplicationLoader
+import org.telegram.messenger.LocaleController
+import java.util.Locale
+import desu.inugram.helpers.security.ParanoiaHelper
+
+object LocaleHelper {
+    @Volatile
+    private var cachedKey: String? = null
+    @Volatile
+    private var cachedDefault: Resources? = null
+    @Volatile
+    private var cachedCandidates: List<Resources> = emptyList()
+
+    @JvmStatic
+    fun isLocalOnlyString(key: String?): Boolean {
+        if (key == null) return false
+        return key.startsWith("Inu") ||
+            key == "AppName" ||
+            key == "AppNameBeta" ||
+            key == "AppUpdate" ||
+            key == "AppUpdateBeta" ||
+            key == "Page1Title"
+    }
+
+    @JvmStatic
+    fun getLocalString(key: String?, res: Int): String? {
+        if (!isLocalOnlyString(key)) return null
+        disguiseName(key)?.let { return it }
+        if (res == 0) return getLocalString(key)
+        return resolve(res)
+    }
+
+    @JvmStatic
+    fun getLocalString(key: String?): String? {
+        if (!isLocalOnlyString(key)) return null
+        disguiseName(key)?.let { return it }
+        val ctx = ApplicationLoader.applicationContext ?: return null
+        val id = ctx.resources.getIdentifier(key, "string", ctx.packageName)
+        if (id == 0) return null
+        return resolve(id)
+    }
+
+    // lumine: disguised app name must read as stock Telegram regardless of locale
+    private fun disguiseName(key: String?): String? {
+        if (!ParanoiaHelper.isDisguised()) return null
+        return when (key) {
+            "AppName" -> "Telegram"
+            "AppNameBeta" -> "Telegram Beta"
+            "AppUpdate" -> "Update Telegram"
+            "AppUpdateBeta" -> "Update Telegram Beta"
+            "Page1Title" -> "Telegram"
+            else -> null
+        }
+    }
+
+    // lumine: local-only keys must resolve locally regardless of whether the value happens
+    // to match ROOT (e.g. "en" with no values-en/ falls back to the same base resource) --
+    // otherwise a null here sends AppName/Inu* through getStringV2 into the stock lang pack.
+    private fun resolve(res: Int): String? {
+        if (!ensureCache()) return null
+        for (r in cachedCandidates) {
+            try {
+                return r.getString(res)
+            } catch (_: Exception) {
+                continue
+            }
+        }
+        return try {
+            cachedDefault?.getString(res)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    @Synchronized
+    private fun ensureCache(): Boolean {
+        val info = try {
+            LocaleController.getInstance().currentLocaleInfo
+        } catch (_: Throwable) {
+            null
+        } ?: return false
+        val key = "${info.shortName}|${info.baseLangCode}|${info.pluralLangCode}|${info.isLocal}"
+        if (key == cachedKey) return cachedCandidates.isNotEmpty()
+        cachedKey = key
+        cachedDefault = null
+        cachedCandidates = emptyList()
+        val locales = candidatesFor(info)
+        if (locales.isEmpty()) return false
+        cachedDefault = buildResources(Locale.ROOT) ?: return false
+        cachedCandidates = locales.mapNotNull { buildResources(it) }
+        return cachedCandidates.isNotEmpty()
+    }
+
+    private fun buildResources(locale: Locale): Resources? {
+        val ctx = ApplicationLoader.applicationContext ?: return null
+        val cfg = Configuration(ctx.resources.configuration)
+        cfg.setLocale(locale)
+        return try {
+            ctx.createConfigurationContext(cfg).resources
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    private fun candidatesFor(info: LocaleController.LocaleInfo): List<Locale> {
+        val out = LinkedHashSet<Locale>()
+        addFromRaw(out, info.pluralLangCode)
+        addFromRaw(out, info.baseLangCode)
+        addFromRaw(out, info.shortName)
+        return out.toList()
+    }
+
+    private fun addFromRaw(out: MutableSet<Locale>, raw: String?) {
+        if (raw.isNullOrEmpty()) return
+        val norm = raw.lowercase().replace('_', '-')
+        when {
+            norm.startsWith("zh-hans") || norm.startsWith("zh-cn") -> {
+                out.add(Locale.SIMPLIFIED_CHINESE); return
+            }
+
+            norm.startsWith("zh-hant") || norm.startsWith("zh-tw") -> {
+                out.add(Locale.TRADITIONAL_CHINESE); return
+            }
+        }
+        if (norm.startsWith("classic-")) {
+            addFromRaw(out, norm.substring("classic-".length))
+            return
+        }
+        val parts = norm.split("-").filter { p -> p.isNotEmpty() && p != "raw" && p != "beta" && p.all { it.isLetterOrDigit() } }
+        if (parts.isEmpty()) return
+        if (parts.size >= 2 && parts[1].length in 2..3) {
+            runCatching { Locale.Builder().setLanguage(parts[0]).setRegion(parts[1].uppercase()).build() }
+                .getOrNull()?.let { out.add(it) }
+        }
+        if (parts[0].length in 2..3) {
+            runCatching { Locale.Builder().setLanguage(parts[0]).build() }
+                .getOrNull()?.let { out.add(it) }
+        }
+    }
+}
