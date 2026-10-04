@@ -135,7 +135,7 @@ index 0000000..0000000 100644
      telegram_mask = create_textured_rectangle(CSizeMake(200, 150), telegram_mask_texture);
 -    telegram_plane = create_textured_rectangle(CSizeMake(82, 74), telegram_plane_texture);
 -    telegram_plane.params.anchor = xyzMake(6, -5, 0);
-+    telegram_plane = create_textured_rectangle(CSizeMake(120, 108), telegram_plane_texture);
++    telegram_plane = create_textured_rectangle(CSizeMake(120, 120), telegram_plane_texture);
 +    // anchor was (6, -5) to compensate for the stock paper-plane art being off-center
 +    // in its own bounds; our glyph is symmetric, so no compensation is needed.
 +    telegram_plane.params.anchor = xyzMake(0, 0, 0);
@@ -329,7 +329,7 @@ index 0000000..0000000 100644
              loadTexture(v -> {
                  Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 -                paint.setColor(ThemeColors.TELEGRAM_COLOR); // It's logo color, it should not be colored by the theme
-+                paint.setColor(0xFFF20C3C); // LumineGram brand color, it should not be colored by the theme
++                paint.setColor(0xFFFA456C); // LumineGram brand color, it should not be colored by the theme
                  int size = dp(ICON_HEIGHT_DP);
                  Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                  Canvas c = new Canvas(bm);
