@@ -63,6 +63,18 @@ class InuSettingsActivity : SettingsPageActivity() {
         }
     }
 
+    private var authorCard: AuthorCardCell? = null
+
+    private fun getOrCreateAuthorCard(): AuthorCardCell {
+        authorCard?.let { return it }
+        val ctx = context!!
+        val card = AuthorCardCell(ctx, resourceProvider, AUTHOR_USERNAME) {
+            Browser.openUrl(ctx, "https://t.me/$AUTHOR_USERNAME")
+        }
+        authorCard = card
+        return card
+    }
+
     private fun createHeaderView(): View {
         val context = context ?: return View(org.telegram.messenger.ApplicationLoader.applicationContext)
         return InuSettingsHeader(context).apply {
@@ -123,14 +135,7 @@ class InuSettingsActivity : SettingsPageActivity() {
         }
         items.add(UItem.asShadow(null))
 
-        items.add(
-            UItem.asButton(
-                BUTTON_AUTHOR,
-                R.drawable.inu_tabler_brand_telegram,
-                LocaleController.getString(R.string.InuAboutAuthor),
-                "@chainonyourdoor"
-            )
-        )
+        items.add(UItem.asCustom(BUTTON_AUTHOR, getOrCreateAuthorCard()))
     }
 
     override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
@@ -142,7 +147,7 @@ class InuSettingsActivity : SettingsPageActivity() {
             }
             return
         }
-        val ctx = context ?: return
+        if (context == null) return
         when (item.id) {
             CAT_APPEARANCE -> presentFragment(AppearanceSettingsActivity())
             CAT_CHATS -> presentFragment(CategoryChatsSettingsActivity())
@@ -155,7 +160,6 @@ class InuSettingsActivity : SettingsPageActivity() {
             BUTTON_TOS -> presentFragment(TosSettingsActivity())
             CAT_SYSTEM -> presentFragment(AdditionalSettingsActivity())
             CAT_NICHE -> presentFragment(NicheSettingsActivity())
-            BUTTON_AUTHOR -> Browser.openUrl(ctx, "https://t.me/chainonyourdoor")
         }
     }
 
@@ -171,6 +175,7 @@ class InuSettingsActivity : SettingsPageActivity() {
         private val BUTTON_TOS = InuUtils.generateId()
         private val CAT_SYSTEM = InuUtils.generateId()
         private val CAT_NICHE = InuUtils.generateId()
+        private const val AUTHOR_USERNAME = "chainonyourdoor"
         private const val HEADER_TAP_COUNT = 5
         private const val HEADER_TAP_WINDOW_MS = 2000L
         private val BUTTON_AUTHOR = InuUtils.generateId()
