@@ -201,4 +201,4 @@ jobs:
           APK_DIR: out
           VER_NAME: ${{ steps.info.outputs.ver-name }}
           BUILD_DATE: ${{ steps.info.outputs.date }}
-        run: bun run tsx scripts/ci/upload.ts
+        run: bash scripts/ci/upload.sh
