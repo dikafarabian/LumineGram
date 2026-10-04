@@ -44,17 +44,21 @@ if [ "$ready" != "1" ]; then
 fi
 
 send_apk() {
-    local apk="$1" name abi attempt=1 http_code
+    local apk="$1" name abi ver sha caption attempt=1 http_code
     name="$(basename "$apk")"
     abi="arm64-v8a"
     case "$name" in *armeabi-v7a*) abi="armeabi-v7a" ;; esac
+    ver="${VER_NAME%-*}"
+    sha="${VER_NAME##*-}"
+    caption="$(printf '<pre>LumineGram\n%s\n%s\n%s</pre>' "$ver" "$sha" "$abi")"
 
     while [ "$attempt" -le "$MAX_RETRIES" ]; do
         http_code=$(curl -s -o "$RESPONSE_FILE" -w "%{http_code}" \
             --max-time "$API_TIMEOUT" --retry 0 \
             -X POST "$API_BASE/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F "chat_id=${TELEGRAM_DM_CHAT}" \
-            -F "caption=LumineGram v${VER_NAME} (build ${BUILD_DATE}) ${abi}" \
+            --form-string "caption=${caption}" \
+            --form-string "parse_mode=HTML" \
             -F "document=@${apk};filename=${name}") || http_code="000"
 
         if [ "$http_code" = "200" ] && grep -q '"ok":true' "$RESPONSE_FILE"; then
