@@ -2,6 +2,7 @@ package desu.inugram.ui.settings
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.text.TextUtils
 import android.util.TypedValue
@@ -82,15 +83,15 @@ class AuthorCardCell(
         text = username
     }
 
-    private fun mkLinkChip(iconRes: Int, label: String, description: String, onClick: () -> Unit): LinearLayout {
+    private fun mkLinkChip(iconRes: Int, label: String, description: String, color: Int, onClick: () -> Unit): LinearLayout {
         val radius = AndroidUtilities.dp(17f)
         return LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             background = Theme.createSimpleSelectorRoundRectDrawable(
                 radius,
-                ColorUtils.setAlphaComponent(brand, 0x24),
-                ColorUtils.setAlphaComponent(brand, 0x4D),
+                color,
+                ColorUtils.blendARGB(color, Color.WHITE, 0.18f),
             )
             setPadding(AndroidUtilities.dp(10f), 0, AndroidUtilities.dp(12f), 0)
             isClickable = true
@@ -101,7 +102,7 @@ class AuthorCardCell(
                 ImageView(context).apply {
                     scaleType = ImageView.ScaleType.CENTER_INSIDE
                     setImageResource(iconRes)
-                    setColorFilter(brand)
+                    setColorFilter(Color.WHITE)
                 },
                 LayoutHelper.createLinear(18, 18),
             )
@@ -109,7 +110,7 @@ class AuthorCardCell(
                 TextView(context).apply {
                     setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
                     setTypeface(AndroidUtilities.bold())
-                    setTextColor(brand)
+                    setTextColor(Color.WHITE)
                     maxLines = 1
                     ellipsize = TextUtils.TruncateAt.END
                     text = label
@@ -121,31 +122,23 @@ class AuthorCardCell(
 
     private val telegramChip = mkLinkChip(
         R.drawable.inu_tabler_brand_telegram,
-        "@$username",
+        "Telegram",
         "Telegram @$username",
+        0xFF229ED9.toInt(),
         onOpenTelegram,
     )
 
     private val githubChip = mkLinkChip(
         R.drawable.inu_tabler_brand_github,
-        "@$githubUsername",
+        "GitHub",
         "GitHub @$githubUsername",
+        0xFF0D1117.toInt(),
         onOpenGithub,
     )
 
     private val card = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
-        background = GradientDrawable(
-            GradientDrawable.Orientation.TL_BR,
-            intArrayOf(
-                ColorUtils.setAlphaComponent(brand, 0x2E),
-                ColorUtils.setAlphaComponent(brand, 0x0D),
-            ),
-        ).apply {
-            cornerRadius = AndroidUtilities.dp(20f).toFloat()
-            setStroke(AndroidUtilities.dp(1f), ColorUtils.setAlphaComponent(brand, 0x40))
-        }
-        setPadding(AndroidUtilities.dp(14f), AndroidUtilities.dp(14f), AndroidUtilities.dp(14f), AndroidUtilities.dp(14f))
+        setPadding(AndroidUtilities.dp(18f), AndroidUtilities.dp(14f), AndroidUtilities.dp(18f), AndroidUtilities.dp(14f))
 
         val top = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -175,7 +168,7 @@ class AuthorCardCell(
     }
 
     init {
-        addView(card, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 140f, Gravity.CENTER, 16f, 0f, 16f, 0f))
+        addView(card, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER))
         showPlaceholder()
     }
 
@@ -216,7 +209,7 @@ class AuthorCardCell(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(
             widthMeasureSpec,
-            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(156f), MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(142f), MeasureSpec.EXACTLY),
         )
     }
 
