@@ -469,3 +469,4 @@ lumine/round-recorder-remember-exposure.patch
 lumine/folder-tags-local-premium.patch
 lumine/rtl-checkbox-text.patch
 lumine/logs-respect-toggle.patch
+lumine/hide-chat-avatar.patch
