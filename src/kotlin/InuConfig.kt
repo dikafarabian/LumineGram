@@ -32,6 +32,7 @@ object InuConfig {
         migrateGhostAutoOffline()
         migrateSelfDestructCategories()
         migrateFeedEnabled(context)
+        desu.inugram.helpers.vibration.HapticFeedbackConstants.sync()
     }
 
     // lumine: the feed became opt-in; anyone who ever touched it keeps it on
@@ -823,6 +824,9 @@ object InuConfig {
     val DISABLE_QUICK_SHARE = BoolItem("disable_quick_share", true)
 
     @JvmField
+    val MEMORY_TRIM = BoolItem("memory_trim", true)
+
+    @JvmField
     val HIDE_CHANNEL_SHARE_BUTTON = BoolItem("hide_channel_share_button", false)
 
     @JvmField
@@ -1401,6 +1405,9 @@ object InuConfig {
     val DIALOG_AVATAR_OPENS_PROFILE = BoolItem("dialog_avatar_opens_profile", false)
 
     @JvmField
+    val ALWAYS_SHOW_DOWNLOADS = BoolItem("always_show_downloads", false)
+
+    @JvmField
     val IOS_CHAT_HEADER = BoolItem("ios_chat_header", false)
 
     @JvmField
@@ -1414,6 +1421,15 @@ object InuConfig {
 
     @JvmField
     val CHAT_HEADER_NO_PILL = BoolItem("chat_header_no_pill", false)
+
+    @JvmField
+    val CLOWN_AVATAR_BLOCKED = BoolItem("clown_avatar_blocked", false)
+
+    @JvmField
+    val CLOWN_AVATAR_BLOCKED_ME = BoolItem("clown_avatar_blocked_me", false)
+
+    @JvmField
+    val CLOWN_AVATAR_EMOJI = IntItem("clown_avatar_emoji", 0)
 
     @JvmField
     val CHAT_TITLE_MARQUEE = BoolItem("chat_title_marquee", false)
@@ -1474,6 +1490,14 @@ object InuConfig {
 
     @JvmField
     val ALLOW_SCREENSHOTS = BoolItem("allow_screenshots", false)
+    val FORCE_NO_VIBRATION = object : BoolItem("force_no_vibration", false) {
+        override var value: Boolean
+            get() = super.value
+            set(v) {
+                super.value = v
+                desu.inugram.helpers.vibration.HapticFeedbackConstants.sync()
+            }
+    }
 
     @JvmField
     val SUPPRESS_SCREENSHOT_NOTIFICATION = BoolItem("suppress_screenshot_notification", false)

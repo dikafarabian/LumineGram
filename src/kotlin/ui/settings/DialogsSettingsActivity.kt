@@ -91,6 +91,15 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
         )
 
         items.add(
+            mkTwoLineCheckItem(
+                TOGGLE_REMEMBER_SELECTED_FOLDER,
+                R.string.InuRememberSelectedFolder,
+                R.string.InuRememberSelectedFolderInfo,
+                InuConfig.REMEMBER_SELECTED_FOLDER.value
+            )
+        )
+
+        items.add(
             UItem.asCheck(
                 TOGGLE_FOLDERS_AT_BOTTOM,
                 LocaleController.getString(R.string.InuFoldersAtBottom),
@@ -173,6 +182,14 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 R.string.InuDialogAvatarOpensProfile,
                 R.string.InuDialogAvatarOpensProfileInfo,
                 InuConfig.DIALOG_AVATAR_OPENS_PROFILE.value
+            )
+        )
+        items.add(
+            mkTwoLineCheckItem(
+                TOGGLE_ALWAYS_SHOW_DOWNLOADS,
+                R.string.InuAlwaysShowDownloads,
+                R.string.InuAlwaysShowDownloadsInfo,
+                InuConfig.ALWAYS_SHOW_DOWNLOADS.value
             )
         )
         items.add(UItem.asShadow(null))
@@ -335,6 +352,11 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 softRebuild()
             }
 
+            TOGGLE_REMEMBER_SELECTED_FOLDER -> {
+                val new = InuConfig.REMEMBER_SELECTED_FOLDER.toggle()
+                (view as? NotificationsCheckCell)?.isChecked = new
+            }
+
             TOGGLE_HIDE_ALL_CHATS_TAB -> {
                 val new = InuConfig.HIDE_ALL_CHATS_TAB.toggle()
                 (view as? NotificationsCheckCell)?.isChecked = new
@@ -386,6 +408,11 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
 
             TOGGLE_DIALOG_AVATAR_OPENS_PROFILE -> {
                 val new = InuConfig.DIALOG_AVATAR_OPENS_PROFILE.toggle()
+                (view as? NotificationsCheckCell)?.isChecked = new
+            }
+
+            TOGGLE_ALWAYS_SHOW_DOWNLOADS -> {
+                val new = InuConfig.ALWAYS_SHOW_DOWNLOADS.toggle()
                 (view as? NotificationsCheckCell)?.isChecked = new
             }
 
@@ -658,7 +685,9 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
         private val TOGGLE_FAB_LEFT_SIDE = InuUtils.generateId()
         private val TOGGLE_INTERACTIVE_CHAT_PREVIEW = InuUtils.generateId()
         private val TOGGLE_DIALOG_AVATAR_OPENS_PROFILE = InuUtils.generateId()
+        private val TOGGLE_ALWAYS_SHOW_DOWNLOADS = InuUtils.generateId()
         private val TOGGLE_HIDE_ALL_CHATS_TAB = InuUtils.generateId()
+        private val TOGGLE_REMEMBER_SELECTED_FOLDER = InuUtils.generateId()
         private val BUTTON_COMMUNITY_DISPLAY_MODE = InuUtils.generateId()
         private val BUTTON_TITLE_TEXT = InuUtils.generateId()
         private val TOGGLE_TITLE_TEXT_OVERRIDE_ARCHIVE = InuUtils.generateId()
@@ -704,6 +733,7 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 SearchRegistry.Entry("tab-indicator-stroke", R.string.InuTabIndicatorStroke, TOGGLE_TAB_INDICATOR_STROKE),
                 SearchRegistry.Entry("folders-unread-counter", R.string.InuFoldersUnreadCounter, BUTTON_FOLDERS_UNREAD_COUNTER_MODE),
                 SearchRegistry.Entry("hide-all-chats-tab", R.string.InuHideAllChatsTab, TOGGLE_HIDE_ALL_CHATS_TAB),
+                SearchRegistry.Entry("remember-selected-folder", R.string.InuRememberSelectedFolder, TOGGLE_REMEMBER_SELECTED_FOLDER),
                 SearchRegistry.Entry("folders-at-bottom", R.string.InuFoldersAtBottom, TOGGLE_FOLDERS_AT_BOTTOM),
                 SearchRegistry.Entry("hide-archive", R.string.InuHideArchive, TOGGLE_HIDE_ARCHIVE),
                 SearchRegistry.Entry("title-text", R.string.InuTitleText, BUTTON_TITLE_TEXT),
@@ -715,6 +745,7 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 SearchRegistry.Entry("hide-bot-webview-dialogs", R.string.InuHideBotWebView, TOGGLE_BOT_WEBVIEW_BUTTON),
                 SearchRegistry.Entry("disable-chat-preview-expand", R.string.InuDisableChatPreviewExpand, TOGGLE_INTERACTIVE_CHAT_PREVIEW),
                 SearchRegistry.Entry("dialog-avatar-opens-profile", R.string.InuDialogAvatarOpensProfile, TOGGLE_DIALOG_AVATAR_OPENS_PROFILE),
+                SearchRegistry.Entry("always-show-downloads", R.string.InuAlwaysShowDownloads, TOGGLE_ALWAYS_SHOW_DOWNLOADS),
                 SearchRegistry.Entry("community-display-mode", R.string.InuCommunityDisplayMode, BUTTON_COMMUNITY_DISPLAY_MODE),
                 SearchRegistry.Entry("bottom-tabs-hide", R.string.InuBottomTabsHide, TOGGLE_BOTTOM_TABS_HIDE),
                 SearchRegistry.Entry("compact-mode", R.string.InuCompactMode, TOGGLE_COMPACT_MODE),

@@ -18,7 +18,7 @@ import android.text.StaticLayout
 import android.text.style.ForegroundColorSpan
 import android.text.TextUtils
 import android.view.Gravity
-import android.view.HapticFeedbackConstants
+import desu.inugram.helpers.vibration.HapticFeedbackConstants
 import android.view.View
 import android.view.View.MeasureSpec
 import android.widget.FrameLayout
@@ -135,6 +135,7 @@ object ChatHelper {
     const val OPTION_SHARE_ONE_TIME = 529
     const val OPTION_FORWARD_ONE_TIME = 530
     const val OPTION_SET_REMINDER = 531
+    const val OPTION_HIDE_MESSAGE = 532
 
     private fun getForwardsCount(msg: MessageObject?): Int {
         if (msg == null || !InuConfig.SHOW_FORWARDS_COUNT.value) return 0
@@ -183,7 +184,7 @@ object ChatHelper {
         val isDeleted = isDeletedOrPreserved(msg)
         if (isDeleted) {
             if (InuConfig.DELETED_MARK_STYLE.value != InuConfig.DeletedMarkStyleItem.NOTHING) {
-                width += AndroidUtilities.dp(13f)
+                width += AndroidUtilities.dp(deletedMarkSizeDp()) + ceil(Theme.chat_timePaint.measureText(" ")).toInt()
             }
         } else if (edited && InuConfig.COMPACT_EDITED.value) {
             width += AndroidUtilities.dp(11f)
@@ -208,7 +209,7 @@ object ChatHelper {
         if (isDeleted) {
             if (InuConfig.DELETED_MARK_STYLE.value != InuConfig.DeletedMarkStyleItem.NOTHING) {
                 val markColor = InuConfig.DELETED_MARK_COLOR.value
-                appendTimeIcon(sb, deletedMarkIconRes(), sizeDp = 11f, translateYDp = 1f, overrideColor = markColor)
+                appendTimeIcon(sb, deletedMarkIconRes(), sizeDp = deletedMarkSizeDp(), overrideColor = markColor)
                 sb.append(" ")
             } else {
                 appendDeletedMarkText(sb)
@@ -226,8 +227,12 @@ object ChatHelper {
         InuConfig.DeletedMarkStyleItem.TRASH_BIN_OUTLINE -> R.drawable.inu_tabler_trash
         InuConfig.DeletedMarkStyleItem.CROSS -> R.drawable.ic_deleted_mark_cross
         InuConfig.DeletedMarkStyleItem.EYE_CROSSED -> R.drawable.ic_deleted_mark_eye_off
-        else -> R.drawable.inu_tabler_trash_filled
+        else -> R.drawable.ic_deleted_mark_trash
     }
+
+    @JvmStatic
+    fun deletedMarkSizeDp(): Float =
+        if (InuConfig.DELETED_MARK_STYLE.value == InuConfig.DeletedMarkStyleItem.TRASH_BIN_OUTLINE) 18f else 14f
 
     @JvmStatic
     fun appendDeletedMarkText(sb: SpannableStringBuilder) {
@@ -444,6 +449,12 @@ object ChatHelper {
             items.add(LocaleController.getString(R.string.InuSetReminder))
             options.add(OPTION_SET_REMINDER)
             icons.add(R.drawable.msg_notifications)
+        }
+
+        if (isMenuItemEnabled(MessageMenuConfig.Item.HIDE_MESSAGE)) {
+            items.add(LocaleController.getString(R.string.InuHideMessage))
+            options.add(OPTION_HIDE_MESSAGE)
+            icons.add(R.drawable.inu_tabler_eye_off)
         }
 
         if (options.contains(ChatActivity.OPTION_FORWARD)) {
@@ -765,6 +776,11 @@ object ChatHelper {
                 val messages = ArrayList<MessageObject>()
                 if (selectedObjectGroup != null) messages.addAll(selectedObjectGroup.messages) else messages.add(selectedObject)
                 setReminder(activity, messages)
+            }
+
+            OPTION_HIDE_MESSAGE -> {
+                val messages = selectedObjectGroup?.messages ?: listOf(selectedObject)
+                BlockedMessagesHelper.hideManually(activity.chatAdapter, messages)
             }
 
             OPTION_FORWARD_PRO -> {
@@ -1424,7 +1440,10 @@ object ChatHelper {
         hideCaption: Boolean,
         payStars: Long,
     ) {
-        val batch = ArrayList(messages)
+        val limit = if (UserConfig.getInstance(account).isPremium) FileLoader.DEFAULT_MAX_FILE_SIZE_PREMIUM else FileLoader.DEFAULT_MAX_FILE_SIZE
+        val (tooBig, fits) = messages.partition { (it.document?.size ?: 0L) > limit }
+        if (tooBig.isNotEmpty()) showForwardToast(LocaleController.formatString(R.string.InuForwardTooLarge, AndroidUtilities.formatFileSize(limit)))
+        val batch = ArrayList(fits)
         if (batch.isEmpty()) return
         restrictedForwardQueue.postRunnable {
             val temporaryFiles = ArrayList<File>()
@@ -1474,7 +1493,7 @@ object ChatHelper {
             val album = if (end - index > 1) {
                 messages.subList(index, end).mapNotNull { msg ->
                     // lumine: exclude stickers and voice from albums to prevent replacing shared group DelayedMessage
-                    if (msg.isAnyKindOfSticker || msg.isVoice) null
+                    if (msg.isAnyKindOfSticker || msg.isVoice || (needsMediaReupload(msg) && files[msg] == null)) null
                     else buildResendParams(
                         account, msg, did, null, threadMsg, notify, scheduleDate,
                         scheduleRepeatPeriod, hideCaption, files[msg], isCloudViewOnce(msg),
@@ -1500,6 +1519,7 @@ object ChatHelper {
             } else {
                 for (i in index until end) {
                     val msg = messages[i]
+                    if (needsMediaReupload(msg) && files[msg] == null) continue
                     buildResendAction(
                         helper, account, msg, did, null, threadMsg, null, notify, scheduleDate,
                         scheduleRepeatPeriod, mono, suggest, null, hideCaption, payStars, files[msg],
@@ -1533,6 +1553,8 @@ object ChatHelper {
         }
         if (pending.isEmpty()) return resolved
 
+        val totalBytes = pending.values.sumOf { it.document?.size ?: 0L }
+        showForwardToast(LocaleController.formatString(R.string.InuForwardDownloading, AndroidUtilities.formatFileSize(totalBytes)))
         val waiter = MediaDownloadWaiter(account, pending.keys)
         // lumine: subscribe NotificationCenter observer on main thread before starting downloads to close race
         AndroidUtilities.runOnUIThread {
@@ -1548,10 +1570,17 @@ object ChatHelper {
 
         for (msg in messages) {
             if (!needsMediaReupload(msg) || resolved.containsKey(msg)) continue
-            localMediaFile(loader, msg)?.let { forwardableMediaFile(it, temporaryFiles) }
-                ?.let { resolved[msg] = it }
+            val loaded = localMediaFile(loader, msg) ?: downloadKey(msg)?.let { waiter.loadedFile(it) }
+            loaded?.let { forwardableMediaFile(it, temporaryFiles) }?.let { resolved[msg] = it }
         }
+        if (pending.values.any { !resolved.containsKey(it) }) showForwardToast(LocaleController.getString(R.string.InuForwardDownloadFailed))
         return resolved
+    }
+
+    private fun showForwardToast(text: String) {
+        AndroidUtilities.runOnUIThread {
+            android.widget.Toast.makeText(ApplicationLoader.applicationContext, text, android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun forwardableMediaFile(source: File, temporaryFiles: MutableList<File>): File? {
@@ -1647,6 +1676,9 @@ object ChatHelper {
     ) : NotificationCenter.NotificationCenterDelegate {
         private val pending = HashSet(keys)
         private val latch = CountDownLatch(1)
+        private val loaded = java.util.concurrent.ConcurrentHashMap<String, File>()
+
+        fun loadedFile(key: String): File? = loaded[key]?.takeIf { it.exists() && it.length() > 0L }
 
         fun subscribe() {
             val center = NotificationCenter.getInstance(account)
@@ -1678,6 +1710,7 @@ object ChatHelper {
         // lumine: treat load failure like completion so caller falls back to by-reference send instead of stalling
         override fun didReceivedNotification(id: Int, account: Int, vararg args: Any?) {
             val key = args.getOrNull(0) as? String ?: return
+            (args.getOrNull(1) as? File)?.let { loaded[key] = it }
             if (!pending.remove(key)) return
             settle()
         }
@@ -2205,6 +2238,7 @@ object ChatHelper {
         desu.inugram.helpers.translate.engine.LumineTranslate.resetDialog(activity.dialogId)
         TranslateHelper.resetForDialog(activity.dialogId)
         TypingSpoofHelper.stop(activity.dialogId)
+        BlockedMessagesHelper.forgetManual(activity.currentAccount, activity.dialogId)
     }
 
     @JvmField

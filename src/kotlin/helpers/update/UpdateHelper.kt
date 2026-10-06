@@ -110,6 +110,11 @@ object UpdateHelper {
 
     @JvmStatic
     fun revealPendingUpdate() {
+        val pendingVer = SharedConfig.pendingAppUpdate?.version?.toIntOrNull()
+        if (pendingVer != null && pendingVer <= currentVersionCode()) {
+            clearPending()
+            return
+        }
         NotificationCenter.getGlobalInstance()
             .postNotificationName(NotificationCenter.appUpdateAvailable, true)
     }

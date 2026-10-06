@@ -696,6 +696,10 @@ object SavedMessagesHelper {
         return LocaleController.getString(res)
     }
 
+    private fun findShadowDialog(account: Int, msgId: Int): Long? = synchronized(cacheLock) {
+        shadowMessageCache.get(account.toLong())?.keys?.lastOrNull { it.second == msgId && it.first > 0 }?.first
+    }
+
     // lumine: a deletion is only worth archiving when we actually hold something to preserve
     private fun hasPreservableData(text: String?, message: TLRPC.Message?): Boolean {
         if (!text.isNullOrBlank()) return true
@@ -732,9 +736,19 @@ object SavedMessagesHelper {
 
     @JvmStatic
     @JvmOverloads
-    fun markMessageDeleted(account: Int, dialogId: Long, msgId: Int, fromId: Long, text: String?, date: Int, message: TLRPC.Message? = null, forceSave: Boolean = false) {
+    fun markMessageDeleted(account: Int, dialogId: Long, msgIdIn: Int, fromId: Long, textIn: String?, date: Int, message: TLRPC.Message? = null, forceSave: Boolean = false) {
+        var dialogId = dialogId
+        var text = textIn
+        val msgId = msgIdIn
+        if (dialogId == 0L && message == null && msgId > 0) {
+            findShadowDialog(account, msgId)?.let { dialogId = it }
+        }
+        if (text.isNullOrEmpty() && message == null && dialogId != 0L) {
+            text = synchronized(cacheLock) { shadowMessageCache.get(account.toLong())?.get(dialogId to msgId)?.text }
+        }
         // lumine: reject dialog id 0 to prevent marking matching IDs in unrelated chats as deleted
         if (dialogId == 0L) return
+        if (msgId <= 0 || (message != null && message.send_state != 0)) return
         // lumine: a message already archived (timer path) keeps getting its real text from the storage delete even when the chat type is off
         val alreadyRecorded = isMessageDeleted(account, dialogId, msgId)
         if (!forceSave && !alreadyRecorded && !shouldSaveForDialog(account, dialogId)) return
@@ -840,7 +854,7 @@ object SavedMessagesHelper {
 
     @JvmStatic
     fun isMessageDeleted(account: Int, dialogId: Long, msgId: Int): Boolean {
-        if (!isSaveDeletedEnabled()) return false
+        if (!isSaveDeletedEnabled() && !InuConfig.SAVE_TIMED_MESSAGES.value && !InuConfig.SAVE_SELF_DESTRUCT_TEXT.value) return false
         ensureAccountLoaded(account)
         return synchronized(cacheLock) {
             val accMap = deletedMessageIds.get(account.toLong()) ?: return@synchronized false
