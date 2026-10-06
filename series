@@ -14,7 +14,7 @@ debloat/hide-ai-features.patch
 feature/stickers.patch
 debloat/disable-sensitive.patch
 debloat/disable-swipe-to-unarchive.patch
-feature/multi-account.patch
+lumine/multi-account.patch
 feature/autofill-hints.patch
 bugfix/keyboard-image-paste.patch
 feature/default-delete-for-both.patch
@@ -470,3 +470,13 @@ lumine/folder-tags-local-premium.patch
 lumine/rtl-checkbox-text.patch
 lumine/logs-respect-toggle.patch
 lumine/hide-chat-avatar.patch
+lumine/always-show-downloads.patch
+lumine/clown-avatar-blocked.patch
+lumine/hide-message.patch
+lumine/inapp-notification-vibration.patch
+lumine/agp-9.patch
+lumine/forum-search-back.patch
+lumine/topic-icon-inset.patch
+lumine/no-vibration.patch
+lumine/restricted-message-flag.patch
+lumine/many-accounts-warning.patch
