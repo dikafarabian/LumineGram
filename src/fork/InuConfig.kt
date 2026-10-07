@@ -14,6 +14,9 @@ import desu.inugram.helpers.menu.MessageMenuConfig
 import desu.inugram.helpers.menu.ProfileInfoMenuConfig
 import desu.inugram.helpers.menu.ProfileMenuConfig
 import desu.inugram.helpers.pillstack.PillStackMenuConfig
+// #if PLUGINS
+import desu.inugram.helpers.plugins.ui.PluginActionSettingsConfig
+// #endif
 import desu.inugram.ui.FormattingPopupConfig
 
 object InuConfig {
@@ -243,6 +246,9 @@ object InuConfig {
     val MATERIAL3_SWITCHES = BoolItem("material3_switches", false)
 
     @JvmField
+    val MATERIAL3_SLIDERS = BoolItem("material3_sliders", false)
+
+    @JvmField
     val MATERIAL3_FABS = BoolItem("material3_fabs", true)
 
     @JvmField
@@ -266,7 +272,29 @@ object InuConfig {
     @JvmField
     val M3_BOTTOM_TABS = BoolItem("m3_bottom_tabs", false)
 
-    // lumine: monet_prev stores theme state snapshot before monet enabled ("day"|"night"|"autoNightType")
+    @JvmField
+    val PLUGINS_ENABLED = BoolItem("plugins_enabled", false)
+
+    // json: ordered [{id, file, enabled}] — install id + source file + middleware order + per-plugin
+    // enabled. the install ids live here and nowhere else, so losing it wipes every plugin's storage.
+    // device-local, not exported
+    @JvmField
+    val PLUGINS_STATE = StringItem("plugins_state", "", exportable = false)
+
+    @JvmField
+    val PLUGINS_COMPACT_LIST = BoolItem("plugins_compact_list", false)
+
+    // the "only install plugins you trust" warning was read and accepted: consent, not a
+    // preference, so it is never carried over by an import
+    @JvmField
+    val PLUGINS_TRUSTED = BoolItem("plugins_trusted", false, exportable = false)
+
+    // the dev server warning was read and accepted, and the receiver is up: consent again, and one
+    // that grants anything with adb access an unreviewed install, so it is never carried over
+    @JvmField
+    val PLUGINS_DEV_MODE = BoolItem("plugins_dev_mode", false, exportable = false)
+
+    // snapshot of theme state before Monet was enabled, "day|night|autoNightType"; empty = none
     @JvmField
     val MONET_PREV = StringItem("monet_prev", "", exportable = false)
 
@@ -404,6 +432,9 @@ object InuConfig {
     val BYPASS_GIF_RESTRICTIONS = BoolItem("bypass_gif_restrictions", false)
 
     @JvmField
+    val KEEP_CHATS_IN_STACK = BoolItem("keep_chats_in_stack", false)
+
+    @JvmField
     val SORT_ALBUMS_BY_SIZE = BoolItem("sort_albums_by_size", true)
 
     @JvmField
@@ -416,10 +447,13 @@ object InuConfig {
     val AUTO_DISABLE_PROXY_ON_VPN = BoolItem("auto_disable_proxy_on_vpn", false)
 
     @JvmField
+    val EXTRA_DEBUG_LOGS = BoolItem("extra_debug_logs", false, exportable = false)
+
+    @JvmField
     val PROXY_SUPPRESSED_BY_VPN = BoolItem("proxy_suppressed_by_vpn", false, exportable = false)
 
     @JvmField
-    val ANTICENSOR_WS_TUNNEL = BoolItem("anticensor_ws_tunnel", false)
+    val ANTICENSOR_WS_TUNNEL = BoolItem("anticensor_ws_tunnel", false, exportable = false)
 
     @JvmField
     val ANTICENSOR_WS_SECRET = StringItem("anticensor_ws_secret", "", exportable = false)
@@ -1508,6 +1542,11 @@ object InuConfig {
     @JvmField
     val SAVE_EDITED_MESSAGES = BoolItem("save_edited_messages", false)
 
+    // #if PLUGINS
+    @JvmField
+    val MESSAGE_PLUGIN_ACTIONS = PluginActionSettingsConfig("message_plugin_actions")
+    // #endif
+
     @JvmField
     val SAVE_USER_INFO = BoolItem("save_user_info", false)
 
@@ -1519,6 +1558,10 @@ object InuConfig {
 
     @JvmField
     val SHOW_MUTUAL_CONTACT_IN_CHATS = BoolItem("show_mutual_contact_in_chats", true)
+    // #if PLUGINS
+    @JvmField
+    val CHAT_PLUGIN_ACTIONS = PluginActionSettingsConfig("chat_plugin_actions")
+    // #endif
 
     @JvmField
     val MASK_SERVER_APP_NAME = BoolItem("mask_server_app_name", true)
@@ -1740,6 +1783,9 @@ object InuConfig {
 
     @JvmField
     val TRANSLATE_LLM_TEMPERATURE = FloatItem("translate_llm_temperature", 0.3f)
+
+    @JvmField
+    val TRANSLATION_PROVIDER = StringItem("translation_provider", "", exportable = false)
 
     @JvmField
     val ACCOUNT_ORDER = StringItem("account_order", "", exportable = false)

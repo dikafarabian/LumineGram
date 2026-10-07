@@ -134,6 +134,9 @@ class InuSettingsActivity : SettingsPageActivity() {
         items.add(UItem.asShadow(null))
 
         items.add(UItem.asHeader(LocaleController.getString(R.string.InuRootSystem)))
+        // #if PLUGINS
+        items.add(mkSubPageButton(BUTTON_PLUGINS, R.drawable.inu_tabler_code, addExperimentalSpan(LocaleController.getString(R.string.InuPlugins))))
+        // #endif
         items.add(mkSubPageButton(CAT_SYSTEM, R.drawable.inu_tabler_device_floppy, LocaleController.getString(R.string.InuCategoryBackup)))
         if (InuConfig.NICHE_SETTINGS_UNLOCKED.value) {
             items.add(mkSubPageButton(CAT_NICHE, R.drawable.inu_tabler_skull, LocaleController.getString(R.string.InuNicheSettings)))
@@ -163,6 +166,9 @@ class InuSettingsActivity : SettingsPageActivity() {
             CAT_PRIVACY -> presentFragment(PrivacySecurityActivity())
             CAT_ANNOYANCES -> presentFragment(AnnoyancesSettingsActivity())
             BUTTON_TOS -> presentFragment(TosSettingsActivity())
+            // #if PLUGINS
+            BUTTON_PLUGINS -> presentFragment(PluginsActivity())
+            // #endif
             CAT_SYSTEM -> presentFragment(AdditionalSettingsActivity())
             CAT_NICHE -> presentFragment(NicheSettingsActivity())
         }
@@ -178,6 +184,7 @@ class InuSettingsActivity : SettingsPageActivity() {
         private val CAT_PRIVACY = InuUtils.generateId()
         private val CAT_ANNOYANCES = InuUtils.generateId()
         private val BUTTON_TOS = InuUtils.generateId()
+        private val BUTTON_PLUGINS = InuUtils.generateId()
         private val CAT_SYSTEM = InuUtils.generateId()
         private val CAT_NICHE = InuUtils.generateId()
         private const val AUTHOR_USERNAME = "chainonyourdoor"

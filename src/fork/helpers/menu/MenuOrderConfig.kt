@@ -103,6 +103,34 @@ inline fun <Row, I : MenuOrderItem> reorderByMenu(
     return ordered
 }
 
+inline fun <Row> reorderByKeys(
+    rows: List<Row>,
+    order: List<String>,
+    classify: (Row) -> String?,
+): ArrayList<Row> {
+    val byKey = HashMap<String, ArrayList<Row>>()
+    val unknownAfter = HashMap<String?, ArrayList<Row>>()
+    var lastKnown: String? = null
+    for (row in rows) {
+        val key = classify(row)
+        if (key == null) {
+            unknownAfter.getOrPut(lastKnown) { ArrayList() }.add(row)
+        } else {
+            byKey.getOrPut(key) { ArrayList() }.add(row)
+            lastKnown = key
+        }
+    }
+    val ordered = ArrayList<Row>(rows.size)
+    unknownAfter.remove(null)?.let(ordered::addAll)
+    for (key in order) {
+        byKey.remove(key)?.let(ordered::addAll)
+        unknownAfter.remove(key)?.let(ordered::addAll)
+    }
+    for ((_, rowsForKey) in byKey) ordered.addAll(rowsForKey)
+    for ((_, unknown) in unknownAfter) ordered.addAll(unknown)
+    return ordered
+}
+
 class ChatMenuConfig(key: String) : MenuOrderConfig<ChatMenuConfig.Item>(key, Item.entries, OFF_BY_DEFAULT) {
     enum class Item(
         override val key: String,
@@ -144,7 +172,8 @@ class ChatMenuConfig(key: String) : MenuOrderConfig<ChatMenuConfig.Item>(key, It
         STATISTICS("statistics", listOf(ChatActionsHelper.ACTION_STATISTICS), R.string.Statistics, R.drawable.msg_stats),
         ADMINISTRATORS("administrators", listOf(ChatActionsHelper.ACTION_ADMINISTRATORS), R.string.ChannelAdministrators, R.drawable.msg_admins),
         PERMISSIONS("permissions", listOf(ChatActionsHelper.ACTION_PERMISSIONS), R.string.ChannelPermissions, R.drawable.msg_permissions),
-        INVITE_LINKS("invite_links", listOf(ChatActionsHelper.ACTION_INVITE_LINKS), R.string.InviteLinks, R.drawable.msg_link2);
+        INVITE_LINKS("invite_links", listOf(ChatActionsHelper.ACTION_INVITE_LINKS), R.string.InviteLinks, R.drawable.msg_link2),
+        ACTIONS("actions", listOf(ChatActionsHelper.ACTION_PLUGIN_ACTIONS), R.string.InuActions, R.drawable.msg_settings_old);
 
         companion object {
             private val byId: Map<Int, Item> by lazy {
@@ -367,6 +396,7 @@ class MessageMenuConfig(key: String) : MenuOrderConfig<MessageMenuConfig.Item>(k
         ADD_FILTER("add_filter", listOf(ChatHelper.OPTION_ADD_FILTER), R.string.InuRegexFilterAddFromMessage, R.drawable.inu_tabler_filter),
         SET_REMINDER("set_reminder", listOf(ChatHelper.OPTION_SET_REMINDER), R.string.InuSetReminder, R.drawable.msg_notifications),
         HIDE_MESSAGE("hide_message", listOf(ChatHelper.OPTION_HIDE_MESSAGE), R.string.InuHideMessage, R.drawable.inu_tabler_eye_off),
+        ACTIONS("actions", listOf(ChatHelper.OPTION_PLUGIN_ACTIONS), R.string.InuActions, R.drawable.msg_settings_old),
 
         SLOT_REPLY("slot_reply", emptyList(), R.string.Reply, R.drawable.menu_reply, true),
         SLOT_COPY("slot_copy", emptyList(), R.string.Copy, R.drawable.msg_copy, true),

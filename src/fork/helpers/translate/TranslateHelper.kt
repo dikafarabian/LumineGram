@@ -23,6 +23,9 @@ import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLRPC
 import org.telegram.ui.Cells.TextSelectionHelper
+// #if PLUGINS
+import desu.inugram.helpers.plugins.ui.PluginChatHistory
+// #endif
 import org.telegram.ui.ChatActivity
 import org.telegram.ui.Components.BulletinFactory
 import org.telegram.ui.Components.ColoredImageSpan
@@ -108,7 +111,7 @@ object TranslateHelper {
     @JvmStatic
     fun hasTranslatableWebPage(msg: MessageObject?): Boolean {
         if (!InuConfig.IN_PLACE_TRANSLATION.value || !InuConfig.TRANSLATE_WEB_PREVIEWS.value) return false
-        val wp = webPageOf(msg) ?: return false
+        val wp = getWebPage(msg) ?: return false
         return !wp.title.isNullOrBlank() || !wp.description.isNullOrBlank() ||
             !wp.site_name.isNullOrBlank() || !wp.author.isNullOrBlank()
     }
@@ -124,7 +127,7 @@ object TranslateHelper {
     fun viewWebPage(msg: MessageObject?, original: TLRPC.TL_webPage): TLRPC.TL_webPage =
         translatedWebPageClone(msg) ?: original
 
-    private fun webPageOf(msg: MessageObject?): TLRPC.TL_webPage? {
+    private fun getWebPage(msg: MessageObject?): TLRPC.TL_webPage? {
         val media = msg?.messageOwner?.media as? TLRPC.TL_messageMediaWebPage ?: return null
         return media.webpage as? TLRPC.TL_webPage
     }
@@ -152,6 +155,9 @@ object TranslateHelper {
         toLang: String?,
     ): Boolean {
         if (!InuConfig.IN_PLACE_TRANSLATION.value) return false
+        // #if PLUGINS
+        if (activity.chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY) return false
+        // #endif
         if (selected == null || toLang == null) return false
         if (selected.isPoll) return false
 
@@ -159,7 +165,7 @@ object TranslateHelper {
         val owner = target.messageOwner ?: return false
 
         val hasBody = !owner.message.isNullOrEmpty()
-        val webPage = if (InuConfig.TRANSLATE_WEB_PREVIEWS.value) webPageOf(target) else null
+        val webPage = if (InuConfig.TRANSLATE_WEB_PREVIEWS.value) getWebPage(target) else null
         val hasWebPage = webPage != null && (
             !webPage.title.isNullOrBlank() || !webPage.description.isNullOrBlank() ||
                 !webPage.site_name.isNullOrBlank() || !webPage.author.isNullOrBlank()
@@ -187,12 +193,24 @@ object TranslateHelper {
         val toLangDefault = LocaleController.getInstance().currentLocale.language
         val messageIdToTranslate = intArrayOf(selected.id)
 
+        // #if PLUGINS
+        val pluginHistory = activity.chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY
+        // #else
+        val pluginHistory = false
+        // #endif
         val inputPeer = if (selected.isPoll || selected.isVoiceTranscriptionOpen || selected.isSponsored ||
             selected.scheduled || activity.chatMode == ChatActivity.MODE_QUICK_REPLIES
+            // #if PLUGINS
+            || pluginHistory && !PluginChatHistory.showsInChat(activity, selected)
+            // #endif
         ) {
             null
         } else {
-            MessagesController.getInstance(account).getInputPeer(activity.dialogId)
+            MessagesController.getInstance(account).getInputPeer(if (pluginHistory) selected.dialogId else activity.dialogId)
+        }
+        if (pluginHistory) {
+            val source = group?.messages?.firstOrNull { it.id == messageIdToTranslate[0] } ?: selected
+            messageIdToTranslate[0] = source.realId
         }
         val noforwards = activity.isPeerNoForwards ||
             selected.messageOwner?.noforwards == true ||

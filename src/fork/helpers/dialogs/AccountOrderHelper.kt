@@ -1,6 +1,9 @@
 package desu.inugram.helpers.dialogs
 
 import desu.inugram.InuConfig
+// #if PLUGINS
+import desu.inugram.helpers.plugins.telegram.PluginAccounts
+// #endif
 import org.telegram.messenger.UserConfig
 
 object AccountOrderHelper {
@@ -19,6 +22,9 @@ object AccountOrderHelper {
     @JvmStatic
     fun setOrder(accounts: List<Int>) {
         InuConfig.ACCOUNT_ORDER.value = accounts.joinToString(",")
+        // #if PLUGINS
+        PluginAccounts.onOrderChanged()
+        // #endif
     }
 
     // lumine: anchor hidden accounts after their preceding visible account so drawer reorder does not scramble locked accounts

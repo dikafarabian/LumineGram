@@ -38,7 +38,7 @@ object UpdateHelper {
     @Volatile
     private var resolvedChannelId: Long? = null
 
-    private val pInfo by lazy {
+    val packageInfo by lazy {
         ApplicationLoader.applicationContext.packageManager.getPackageInfo(
             ApplicationLoader.applicationContext.packageName, 0
         )
@@ -46,17 +46,16 @@ object UpdateHelper {
 
     @JvmStatic
     val stockVersionName by lazy {
-        pInfo.versionName?.replace(Regex("-[0-9a-f]{7}$"), "") ?: ""
+        packageInfo.versionName?.replace(Regex("-[0-9a-f]{7}$"), "") ?: ""
     }
 
     @JvmStatic
     val commitSha: String? by lazy {
-        Regex("-([0-9a-f]{7})$").find(pInfo.versionName ?: "")?.groupValues?.get(1)
+        Regex("-([0-9a-f]{7})$").find(packageInfo.versionName ?: "")?.groupValues?.get(1)
     }
 
     fun getVersionInfoString(): String {
-        // lumine: STOCK_VERSION_CODE is upstream Telegram's build number, not ours -- releases are tagged by pInfo.versionCode
-        val base = LocaleController.formatString(R.string.InuVersion, stockVersionName, pInfo.versionCode)
+        val base = LocaleController.formatString(R.string.InuVersion, stockVersionName, packageInfo.versionCode)
         val withBeta = if (BuildVars.isBetaApp()) "$base ${LocaleController.getString(R.string.InuVersionBetaSuffix)}" else base
         val commitSuffix = commitSha?.let { " @$it" } ?: ""
         return "$withBeta$commitSuffix [${BuildConfig.INU_BUILD_TYPE}]"
@@ -442,7 +441,7 @@ object UpdateHelper {
     }
 
     @Suppress("DEPRECATION")
-    private fun currentVersionCode(): Int = pInfo.versionCode
+    private fun currentVersionCode(): Int = packageInfo.versionCode
 
     private fun extractApkInfo(msg: TLRPC.Message): ApkInfo? {
         val media = msg.media as? TLRPC.TL_messageMediaDocument ?: return null

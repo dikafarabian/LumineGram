@@ -15,6 +15,12 @@ import android.widget.Toast
 import androidx.collection.LongSparseArray
 import androidx.core.graphics.ColorUtils
 import desu.inugram.InuConfig
+// #if PLUGINS
+import desu.inugram.helpers.plugins.ui.ActionKey
+import desu.inugram.helpers.plugins.ui.ActionRow
+import desu.inugram.helpers.plugins.ui.ActionSurface
+import desu.inugram.helpers.plugins.ui.PluginActions
+// #endif
 import desu.inugram.helpers.WebAppHelper
 import desu.inugram.helpers.chat.BlockedMessagesHelper
 import desu.inugram.helpers.chat.ChatExportHelper
@@ -22,6 +28,7 @@ import desu.inugram.helpers.chat.ChatHelper
 import desu.inugram.helpers.chat.ForumDisplayHelper
 import desu.inugram.helpers.security.GhostHelper
 import desu.inugram.ui.profile.DeleteProfilePhotosSheet
+import java.util.WeakHashMap
 import org.json.JSONArray
 import org.telegram.messenger.AccountInstance
 import org.telegram.messenger.AndroidUtilities
@@ -40,6 +47,7 @@ import org.telegram.messenger.support.LongSparseLongArray
 import org.telegram.tgnet.TLObject
 import org.telegram.tgnet.TLRPC
 import org.telegram.ui.ActionBar.ActionBarMenuItem
+import org.telegram.ui.ActionBar.ActionBarMenuSubItem
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
 import org.telegram.ui.ActionBar.Theme
@@ -311,7 +319,88 @@ object ProfileHelper {
                 LocaleController.getString(R.string.InuDeleteMyMessages),
             )
         }
+        // #if PLUGINS
+        addPluginItems(otherItem, currentAccount, dialogId)
+        // #endif
     }
+
+    // #if PLUGINS
+    // --- plugin rows (inu.registerProfileAction) ---
+
+    /**
+     * keyed by the menu the rows were drawn into, since a profile is rebuilt rather than reused.
+     * The state never holds that menu back: it is this map's key, and a weak one.
+     */
+    private class ProfilePluginMenu(val surface: ActionSurface) {
+        var rows = emptyList<ActionRow>()
+        var shownKeys = emptyList<ActionKey>()
+        var generation = 0
+    }
+
+    private val pluginMenus = WeakHashMap<ActionBarMenuItem, ProfilePluginMenu>()
+    private var watchingActions = false
+
+    /**
+     * The rows land one globalQueue hop later (an engine cannot be entered from the ui thread), so
+     * they are rendered when the menu is *built* - which for a profile is when it opens, well
+     * before the user taps the overflow.
+     */
+    private fun addPluginItems(otherItem: ActionBarMenuItem, currentAccount: Int, dialogId: Long) {
+        val state = ProfilePluginMenu(ActionSurface.profile(currentAccount, dialogId))
+        pluginMenus[otherItem] = state
+        watchPluginActions()
+        if (!PluginActions.hasRows(PluginActions.KIND_PROFILE)) return
+        refreshPluginItems(otherItem, state)
+    }
+
+    /**
+     * a profile's menu is built when it opens and lives as long as it, so a plugin that registers
+     * or drops a row while it is on screen - a reload, which dev mode does on every push - would
+     * otherwise be answered by rows drawn for an engine that is gone.
+     */
+    private fun watchPluginActions() {
+        if (watchingActions) return
+        watchingActions = true
+        PluginActions.watchCounts {
+            for ((otherItem, state) in pluginMenus.entries.toList()) refreshPluginItems(otherItem, state)
+        }
+    }
+
+    private fun refreshPluginItems(otherItem: ActionBarMenuItem, state: ProfilePluginMenu) {
+        // a render with no dynamic rows answers without leaving the ui thread, so two refreshes can
+        // land out of order
+        state.generation++
+        val generation = state.generation
+        PluginActions.render(PluginActions.KIND_PROFILE, state.surface) { rows ->
+            if (pluginMenus[otherItem] !== state || state.generation != generation) return@render
+            state.rows = rows
+            val keys = rows.map { it.key }
+            for (key in state.shownKeys) {
+                if (key !in keys) otherItem.hideSubItem(PluginActions.optionIdFor(key))
+            }
+            for (row in rows) {
+                val id = PluginActions.optionIdFor(row.key)
+                if (otherItem.hasSubItem(id)) {
+                    // the cell outlives the engine that drew it, so a reload may have renamed it
+                    (otherItem.getSubItem(id) as? ActionBarMenuSubItem)
+                        ?.setTextAndIcon(row.text, R.drawable.msg_settings_old)
+                    otherItem.showSubItem(id)
+                } else {
+                    otherItem.addSubItem(id, R.drawable.msg_settings_old, row.text)
+                }
+            }
+            state.shownKeys = keys
+        }
+    }
+
+    private fun dispatchPluginItem(id: Int, otherItem: ActionBarMenuItem?, currentAccount: Int, dialogId: Long): Boolean {
+        val state = pluginMenus[otherItem] ?: return false
+        val row = PluginActions.rowAt(state.rows, id) ?: return false
+        PluginActions.dispatch(row, state.surface)
+        return true
+    }
+
+    // #endif
 
     private fun canHideMessagesFrom(currentAccount: Int, dialogId: Long): Boolean {
         if (dialogId > 0) return dialogId != UserConfig.getInstance(currentAccount).clientUserId
@@ -326,7 +415,10 @@ object ProfileHelper {
     }
 
     @JvmStatic
-    fun handleMenuClick(id: Int, currentAccount: Int, dialogId: Long): Boolean {
+    fun handleMenuClick(id: Int, otherItem: ActionBarMenuItem?, currentAccount: Int, dialogId: Long): Boolean {
+        // #if PLUGINS
+        if (id >= PluginActions.OPTION_BASE) return dispatchPluginItem(id, otherItem, currentAccount, dialogId)
+        // #endif
         when (id) {
             ACTION_TOGGLE_HIDE_WALLPAPER -> ChatHelper.toggleRemoveWallpaper(currentAccount, dialogId)
             ACTION_TOGGLE_HIDE_THEME -> ChatHelper.toggleRemoveTheme(currentAccount, dialogId)

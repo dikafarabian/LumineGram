@@ -14,6 +14,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import desu.inugram.InuConfig
+// #if PLUGINS
+import desu.inugram.helpers.plugins.ui.ActionRow
+import desu.inugram.helpers.plugins.ui.ActionSurface
+import desu.inugram.helpers.plugins.ui.PluginActions
+// #endif
 import desu.inugram.helpers.dialogs.DrawerHelper.setupMainFragment
 import desu.inugram.helpers.menu.DialogsMenuConfig
 import desu.inugram.helpers.menu.DialogsMenuHelper
@@ -37,14 +42,14 @@ import org.telegram.messenger.DialogObject
 import org.telegram.messenger.FileLoader
 import org.telegram.messenger.ImageLoader
 import org.telegram.messenger.LocaleController.getString
-import org.telegram.tgnet.ConnectionsManager
-import org.telegram.tgnet.TLRPC
-import org.telegram.tgnet.tl.TL_stars
 import org.telegram.messenger.MessagesController
 import org.telegram.messenger.NotificationCenter
 import org.telegram.messenger.R
 import org.telegram.messenger.SharedConfig
 import org.telegram.messenger.UserConfig
+import org.telegram.tgnet.ConnectionsManager
+import org.telegram.tgnet.TLRPC
+import org.telegram.tgnet.tl.TL_stars
 import org.telegram.ui.AccountFrozenAlert
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BaseFragment
@@ -138,6 +143,9 @@ object DrawerHelper {
         drawerLayoutContainer: DrawerLayoutContainer,
         actionBarLayout: INavigationLayout,
     ) {
+        // #if PLUGINS
+        watchGlobalActions()
+        // #endif
         val sm = object : RecyclerListView(context) {
             override fun findChildViewUnder(x: Float, y: Float): View? {
                 for (i in 0 until childCount) {
@@ -393,12 +401,9 @@ object DrawerHelper {
             .putBoolean("proxy_enabled", enabled && proxy != null)
             .apply()
         if (proxy != null) {
-            ConnectionsManager.setProxySettings(
-                true, proxy.settings.address, proxy.settings.port,
-                proxy.settings.user, proxy.settings.password, proxy.settings.secret
-            )
+            ConnectionsManager.setProxySettings(true, proxy.settings)
         } else {
-            ConnectionsManager.setProxySettings(false, "", 0, "", "", "")
+            ConnectionsManager.setProxySettings(false, null)
         }
         NotificationCenter.getGlobalInstance()
             .postNotificationName(NotificationCenter.proxySettingsChanged)
@@ -572,7 +577,18 @@ object DrawerHelper {
             return
         }
 
-        when (adapter.getId(position)) {
+        val itemId = adapter.getId(position)
+        // #if PLUGINS
+        if (itemId >= PluginActions.OPTION_BASE) {
+            PluginActions.rowAt(globalActionRows, itemId)?.let {
+                PluginActions.dispatch(it, ActionSurface.global(account))
+            }
+            close()
+            return
+        }
+        // #endif
+
+        when (itemId) {
             ITEM_MY_PROFILE -> {
                 openMyProfile(drawerLayoutContainer)
             }
@@ -684,8 +700,46 @@ object DrawerHelper {
     @JvmStatic
     fun notifyDataChanged() {
         adapter?.notifyDataSetChanged()
+        // #if PLUGINS
+        refreshGlobalActionRows()
+        // #endif
     }
 
+    // #if PLUGINS
+    private var watchingActions = false
+
+    private fun watchGlobalActions() {
+        if (watchingActions) return
+        watchingActions = true
+        PluginActions.watchCounts { refreshGlobalActionRows() }
+    }
+
+    internal var globalActionRows: List<ActionRow> = emptyList()
+        private set
+
+    /**
+     * a global action's row depends on nothing but the account, so the drawer renders on the same
+     * signals it already rebuilds on rather than on being opened, and redraws only when the answer
+     * differs from what is on screen. Re-entrancy is bounded by that: the redraw goes straight to
+     * the adapter, and the render it does not schedule is what ends the cycle.
+     *
+     * Registering, unregistering or reloading is the other signal, and the only one that is not the
+     * drawer's own: unlike every other menu this one is built once and outlives the gesture, so a
+     * row a plugin adds while it is on screen would otherwise wait for an account switch.
+     */
+    private fun refreshGlobalActionRows() {
+        if (globalActionRows.isEmpty() && !PluginActions.hasRows(PluginActions.KIND_GLOBAL)) return
+        val surface = ActionSurface.global(UserConfig.selectedAccount)
+        PluginActions.render(PluginActions.KIND_GLOBAL, surface) { rows ->
+            if (rows == globalActionRows) return@render
+            globalActionRows = rows
+            adapter?.notifyDataSetChanged()
+        }
+    }
+
+    // #endif
+
+    /** Old Layout back-button hook: toggles the side drawer. Returns false if unavailable. */
     @JvmStatic
     fun toggleDrawer(parentLayout: INavigationLayout?): Boolean {
         val controller = parentLayout?.drawerLayoutContainer?.inu_drawer ?: return false

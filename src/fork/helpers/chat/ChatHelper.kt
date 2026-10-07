@@ -28,6 +28,18 @@ import android.widget.ScrollView
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import desu.inugram.InuConfig
+// #if PLUGINS
+import desu.inugram.helpers.plugins.ui.ActionKey
+import desu.inugram.helpers.plugins.ui.ActionRow
+import desu.inugram.helpers.plugins.PluginImportHelper
+import desu.inugram.helpers.plugins.PluginManager
+import desu.inugram.helpers.plugins.ui.MessageActionSource
+import desu.inugram.helpers.plugins.ui.ActionSurface
+import desu.inugram.helpers.plugins.ui.PluginActions
+import desu.inugram.helpers.plugins.ui.PluginChatHistory
+import desu.inugram.helpers.plugins.ui.PluginIcons
+import desu.inugram.helpers.plugins.ui.RegisteredActionRow
+// #endif
 import desu.inugram.helpers.InuUtils
 import desu.inugram.helpers.StickerDownloadHelper
 import desu.inugram.helpers.ai.AiComposeHelper
@@ -39,8 +51,12 @@ import desu.inugram.helpers.menu.MessageMenuConfig
 import desu.inugram.helpers.menu.reorderByMenu
 import desu.inugram.helpers.security.GhostHelper
 import desu.inugram.helpers.security.SelfDestructHelper
+import desu.inugram.helpers.menu.reorderByKeys
 import desu.inugram.helpers.translate.TranslateHelper
 import desu.inugram.ui.showInputDialog
+import java.io.File
+import java.util.Calendar
+import kotlin.math.roundToInt
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.BuildVars
@@ -69,6 +85,7 @@ import org.telegram.messenger.utils.tlutils.TLKeyboardHelper
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLRPC
 import org.telegram.tgnet.tl.TL_keyboard
+import org.telegram.ui.ActionBar.ActionBarMenuSubItem
 import org.telegram.ui.ActionBar.ActionBarPopupWindow
 import org.telegram.ui.ActionBar.AlertDialog
 import org.telegram.ui.ActionBar.BottomSheet
@@ -92,13 +109,10 @@ import org.telegram.ui.Components.ShareAlert
 import org.telegram.ui.Components.URLSpanUserMention
 import org.telegram.ui.DialogsActivity
 import org.telegram.ui.LaunchActivity
-import java.io.File
-import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 object ChatHelper {
     private var skipNextReactionConfirm = false
@@ -110,6 +124,7 @@ object ChatHelper {
 
     private val restrictedForwardQueue by lazy { DispatchQueue("inuRestrictedForward") }
 
+    // NOTE: update PluginChatHistory's LOCAL_MESSAGE_OPTIONS and REAL_MESSAGE_OPTIONS as needed.
     const val OPTION_SAVE = 501
     const val OPTION_DETAILS = 502
     const val OPTION_REPLY_IN = 503
@@ -136,6 +151,7 @@ object ChatHelper {
     const val OPTION_FORWARD_ONE_TIME = 530
     const val OPTION_SET_REMINDER = 531
     const val OPTION_HIDE_MESSAGE = 532
+    const val OPTION_PLUGIN_ACTIONS = 533
 
     private fun getForwardsCount(msg: MessageObject?): Int {
         if (msg == null || !InuConfig.SHOW_FORWARDS_COUNT.value) return 0
@@ -404,7 +420,11 @@ object ChatHelper {
         noforwards: Boolean,
         allowSendActions: Boolean
     ) {
-        if (allowSendActions && !noforwards && activity.currentChat != null && !ChatObject.isChannelAndNotMegaGroup(activity.currentChat)) {
+        if (allowSendActions && !noforwards && activity.currentChat != null && !ChatObject.isChannelAndNotMegaGroup(activity.currentChat)
+            // #if PLUGINS
+            || PluginChatHistory.showsInChat(activity, selectedObject)
+            // #endif
+        ) {
             items.add(LocaleController.getString(R.string.InuReplyIn))
             options.add(OPTION_REPLY_IN)
             icons.add(R.drawable.menu_reply)
@@ -483,7 +503,11 @@ object ChatHelper {
             icons.add(R.drawable.msg_stats)
         }
 
-        if (activity.isFiltered) {
+        if (activity.isFiltered
+            // #if PLUGINS
+            || PluginChatHistory.showsInChat(activity, selectedObject)
+            // #endif
+        ) {
             items.add(LocaleController.getString(R.string.InuShowInChat))
             options.add(OPTION_SHOW_IN_CHAT)
             icons.add(R.drawable.msg_openin)
@@ -594,9 +618,164 @@ object ChatHelper {
         options.add(OPTION_DETAILS)
         icons.add(R.drawable.msg_info)
 
+        // #if PLUGINS
+        if (activity.chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY) {
+            PluginChatHistory.filterMessageMenu(activity, selectedObject, selectedObjectGroup, items, options, icons)
+        }
+
+        reservePluginItems(items, options, icons, activity, selectedObject, selectedObjectGroup)
+        // #endif
         applyMessageMenuOrder(items, options, icons)
     }
 
+    // #if PLUGINS
+    /**
+     * one message menu's plugin rows, from the gesture that reserved them to the tap that
+     * dispatches one.
+     *
+     * A value rather than fields on this object because the two things that can end the wait - the
+     * render landing and [PluginActions.RENDER_BUDGET_MS] expiring - both settle it, and whichever
+     * loses has to be able to tell that it lost. [done] is that answer, and it is per menu because
+     * the ui thread can be building the next menu while the render for the previous one is still
+     * on its way back.
+     */
+    private class MessageMenu(
+        val surface: ActionSurface,
+        val registered: Map<ActionKey, RegisteredActionRow>,
+    ) {
+        var rows: List<ActionRow> = emptyList()
+        val cells = HashMap<Int, ActionBarMenuSubItem>()
+        var actionsCell: ActionBarMenuSubItem? = null
+        var done = false
+        var pending: Runnable? = null
+    }
+
+    private var messageMenu: MessageMenu? = null
+
+    private fun reservePluginItems(
+        items: ArrayList<CharSequence>,
+        options: ArrayList<Int>,
+        icons: ArrayList<Int>,
+        activity: ChatActivity,
+        selectedObject: MessageObject,
+        selectedObjectGroup: MessageObject.GroupedMessages?,
+    ) {
+        messageMenu = null
+
+        if (!InuConfig.PLUGINS_ENABLED.value) return
+        val registeredRows = PluginActions.registeredRows(PluginActions.KIND_MESSAGE)
+            .filter { PluginActions.isEnabled(it.key) }
+        val registered = registeredRows.map { it.key }
+        if (registered.isEmpty()) return
+
+        val messages = (selectedObjectGroup?.messages ?: listOf(selectedObject))
+            .sortedWith(compareBy<MessageObject> { it.messageOwner.date }.thenBy { it.dialogId }.thenBy { it.id })
+            .map { it.messageOwner }
+        val menu = MessageMenu(
+            ActionSurface.message(
+                activity.currentAccount,
+                activity.dialogId,
+                activity.topicId,
+                MessageActionSource.BUBBLE,
+                messages,
+            ),
+            registeredRows.associateBy { it.key },
+        )
+        messageMenu = menu
+        for (key in registered.filter(PluginActions::isPinned)) {
+            items.add(menu.registered[key]?.text ?: "…")
+            options.add(PluginActions.optionIdFor(key))
+            icons.add(R.drawable.msg_settings_old)
+        }
+        if (registered.any { !PluginActions.isPinned(it) }) {
+            items.add(LocaleController.getString(R.string.InuActions))
+            options.add(OPTION_PLUGIN_ACTIONS)
+            icons.add(R.drawable.msg_settings_old)
+        }
+        PluginActions.render(PluginActions.KIND_MESSAGE, menu.surface) { rows ->
+            if (messageMenu !== menu || menu.done) return@render
+            menu.rows = rows
+            finishPluginItems(menu)
+        }
+    }
+
+    @JvmStatic
+    fun bindMenuCell(cell: ActionBarMenuSubItem, option: Int) {
+        if (option == OPTION_PLUGIN_ACTIONS) {
+            val menu = messageMenu ?: return
+            menu.actionsCell = cell
+            cell.setRightIcon(R.drawable.msg_arrowright)
+            if (menu.done && menu.rows.none { PluginActions.isEnabled(it.key) && !PluginActions.isPinned(it.key) }) {
+                cell.visibility = View.GONE
+            }
+            return
+        }
+        if (option < PluginActions.OPTION_BASE) return
+        val menu = messageMenu ?: return
+        val key = PluginActions.keyForOption(option)
+        val cached = key?.let(menu.registered::get)
+        if (cached != null) {
+            PluginIcons.setIcon(cell, cached.text ?: "…", cached.icon, cached.owner, R.drawable.msg_settings_old)
+        }
+        // a menu the budget already gave up on is built *after* it settled, so its cells have
+        // nobody left to fill them in and would sit there reading "…"
+        if (menu.done) bindRow(menu, option, cell) else menu.cells[option] = cell
+    }
+
+    /**
+     * the menu is built by the same gesture that opens it and a row's label can only be had from
+     * globalQueue, so the rows are reserved at their measured size and the show is parked until they
+     * are filled in. Stock already parks it for language detection ([onLangDetectionDone]), and past
+     * [PluginActions.RENDER_BUDGET_MS] the reserved rows are dropped rather than shown blank.
+     */
+    @JvmStatic
+    fun gateMessageMenu(showMenu: Runnable): Runnable = Runnable {
+        val menu = messageMenu
+        if (menu == null || menu.done) {
+            showMenu.run()
+            return@Runnable
+        }
+        menu.pending = showMenu
+        AndroidUtilities.runOnUIThread({
+            if (menu.pending !== showMenu || menu.done) return@runOnUIThread
+            finishPluginItems(menu)
+        }, PluginActions.RENDER_BUDGET_MS)
+    }
+
+    private fun bindRow(menu: MessageMenu, option: Int, cell: ActionBarMenuSubItem) {
+        val row = PluginActions.rowAt(menu.rows, option)
+        if (row == null || !PluginActions.isEnabled(row.key) || !PluginActions.isPinned(row.key)) {
+            cell.visibility = View.GONE
+            return
+        }
+        PluginIcons.setIcon(cell, row.text, row.icon, row.owner, R.drawable.msg_settings_old)
+    }
+
+    private fun finishPluginItems(menu: MessageMenu) {
+        menu.done = true
+        for ((option, cell) in menu.cells) bindRow(menu, option, cell)
+        if (menu.rows.none { PluginActions.isEnabled(it.key) && !PluginActions.isPinned(it.key) }) {
+            menu.actionsCell?.visibility = View.GONE
+        }
+        menu.actionsCell = null
+        // the cells are the popup's views and this is the last thing that binds them: a menu is
+        // built in one turn and filled in the next, so holding them past here keeps the closed
+        // popup's view tree - and the ChatActivity behind it - reachable until the next menu opens
+        menu.cells.clear()
+        val pending = menu.pending ?: return
+        menu.pending = null
+        pending.run()
+    }
+
+    private fun dispatchPluginItem(option: Int): Boolean {
+        val menu = messageMenu ?: return true
+        val row = PluginActions.rowAt(menu.rows, option) ?: return true
+        PluginActions.dispatch(row, menu.surface)
+        return true
+    }
+
+
+    // #endif
 
     private fun applyMessageMenuOrder(
         items: ArrayList<CharSequence>,
@@ -606,9 +785,24 @@ object ChatHelper {
         data class Row(val label: CharSequence, val option: Int, val icon: Int)
 
         val rows = options.indices.map { Row(items[it], options[it], icons[it]) }
-        val ordered = reorderByMenu(rows, InuConfig.MESSAGE_MENU_ITEMS.value) {
+        val entries = InuConfig.MESSAGE_MENU_ITEMS.value
+        val enabledRows = reorderByMenu(rows, entries) {
             MessageMenuConfig.Item.forOption(it.option)
         }
+        // #if PLUGINS
+        val pluginKeys = enabledRows.mapNotNull { PluginActions.keyForOption(it.option) }
+        val mainOrder = PluginActions.mainOrder(
+            PluginActions.KIND_MESSAGE,
+            entries.filter { !it.bottom && it.enabled }.map { it.item.key },
+            pluginKeys,
+        ) + entries.filter { it.bottom && it.enabled }.map { PluginActions.builtInOrderKey(it.item.key) }
+        val ordered = reorderByKeys(enabledRows, mainOrder) { row ->
+            MessageMenuConfig.Item.forOption(row.option)?.let { PluginActions.builtInOrderKey(it.key) }
+                ?: PluginActions.keyForOption(row.option)?.let(PluginActions::pluginOrderKey)
+        }
+        // #else
+        val ordered = enabledRows
+        // #endif
 
         items.clear(); options.clear(); icons.clear()
         for (row in ordered) {
@@ -761,6 +955,9 @@ object ChatHelper {
         selectedObject: MessageObject,
         selectedObjectGroup: MessageObject.GroupedMessages?
     ): Boolean {
+        // #if PLUGINS
+        if (option >= PluginActions.OPTION_BASE) return dispatchPluginItem(option)
+        // #endif
         when (option) {
             OPTION_SAVE -> {
                 val messages = ArrayList<MessageObject>()
@@ -769,6 +966,11 @@ object ChatHelper {
                 } else {
                     messages.add(selectedObject)
                 }
+                // #if PLUGINS
+                if (activity.chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY) {
+                    PluginChatHistory.realMessages(messages)
+                }
+                // #endif
                 forwardToSavedMessages(activity, messages)
             }
 
@@ -795,6 +997,11 @@ object ChatHelper {
                         replyMsg = group.captionMessage ?: replyMsg
                     }
                 }
+                // #if PLUGINS
+                if (activity.chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY) {
+                    replyMsg = PluginChatHistory.realMessage(replyMsg)
+                }
+                // #endif
                 val args = Bundle().apply {
                     putBoolean("onlySelect", true)
                     putInt("dialogsType", DialogsActivity.DIALOGS_TYPE_FORWARD)
@@ -885,7 +1092,13 @@ object ChatHelper {
                 clearMessageCaches(activity, targets)
             }
 
-            OPTION_SHOW_IN_CHAT -> openInNewChat(activity, activity.dialogId, selectedObject.id)
+            OPTION_SHOW_IN_CHAT ->
+                // #if PLUGINS
+                if (activity.chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY) {
+                    openInNewChat(activity, selectedObject.dialogId, selectedObject.realId)
+                } else
+                // #endif
+                openInNewChat(activity, activity.dialogId, selectedObject.id)
 
             OPTION_REPEAT -> {
                 val available = availableRepeatModes(activity, selectedObject, selectedObjectGroup)
@@ -1838,6 +2051,9 @@ object ChatHelper {
         if (activity.isReport) return false
         val chatMode = activity.chatMode
         if (chatMode == ChatActivity.MODE_PINNED) return InuConfig.HIDE_BOTTOM_BAR_PINNED.value
+        // #if PLUGINS
+        if (chatMode == ChatActivity.inu_MODE_PLUGIN_HISTORY) return PluginChatHistory.buttonText(activity) == null
+        // #endif
 
         val user = activity.currentUser
         if (user != null && UserObject.isReplyUser(user) && InuConfig.HIDE_BOTTOM_BAR_REPLIES.value) return true
@@ -1949,6 +2165,9 @@ object ChatHelper {
         val name = message.documentName ?: return false
         val kind = when {
             name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) -> FileKind.SETTINGS
+            // #if PLUGINS
+            PluginManager.isEngineEnabled() && PluginImportHelper.isPluginFileName(name) -> FileKind.PLUGIN
+            // #endif
             FontImportHelper.isFontFileName(name) -> FileKind.FONT
             else -> return false
         }
@@ -1982,11 +2201,16 @@ object ChatHelper {
     ) {
         when (kind) {
             FileKind.SETTINGS -> SettingsBackupHelper.startImportFromFile(activity, file)
+            // #if PLUGINS
+            FileKind.PLUGIN -> PluginImportHelper.startImportFromFile(activity, file)
+            // #else
+            FileKind.PLUGIN -> Unit
+            // #endif
             FileKind.FONT -> FontImportHelper.startImportFromFile(activity, message, file, name)
         }
     }
 
-    private enum class FileKind { SETTINGS, FONT }
+    private enum class FileKind { SETTINGS, PLUGIN, FONT }
 
     private fun pollFileDownload(
         activity: ChatActivity,
@@ -2236,6 +2460,9 @@ object ChatHelper {
         // lumine: also clears the engine's per-dialog failedAt/bulletinsShown cooldown entries -
         // without this they only ever grew, one per dialog ever touched, for the app's lifetime
         desu.inugram.helpers.translate.engine.LumineTranslate.resetDialog(activity.dialogId)
+        // #if PLUGINS
+        ChatActionsHelper.onFragmentDestroy(activity)
+        // #endif
         TranslateHelper.resetForDialog(activity.dialogId)
         TypingSpoofHelper.stop(activity.dialogId)
         BlockedMessagesHelper.forgetManual(activity.currentAccount, activity.dialogId)
@@ -2319,6 +2546,31 @@ object ChatHelper {
         if (option == OPTION_DETAILS) {
             return MessageDetailsHelper.openDetailsSubmenu(activity, popupLayout, cell, message, group)
         }
+        // #if PLUGINS
+        if (option == OPTION_PLUGIN_ACTIONS) {
+            val menu = messageMenu ?: return true
+            val rows = PluginActions.orderRows(
+                PluginActions.KIND_MESSAGE,
+                menu.rows.filter { PluginActions.isEnabled(it.key) },
+                false,
+            )
+            if (rows.isEmpty()) return true
+            return openLongTapSubmenu(activity, popupLayout, cell) { submenu ->
+                for (row in rows) {
+                    PluginIcons.addMenuItem(
+                        submenu,
+                        row.text,
+                        row.icon,
+                        row.owner,
+                        R.drawable.msg_settings_old,
+                    ) {
+                        PluginActions.dispatch(row, menu.surface)
+                        activity.closeMenu()
+                    }
+                }
+            }
+        }
+        // #endif
         if (option != OPTION_REPEAT) return false
         if (InuConfig.REPEAT_MODE.value != InuConfig.RepeatModeItem.ASK) return false
         if (availableRepeatModes(activity, message, group).size < 2) return false

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -11,16 +12,26 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import desu.inugram.InuConfig
 import desu.inugram.helpers.InuUtils
 import desu.inugram.helpers.menu.MenuOrderConfig
 import desu.inugram.helpers.menu.MenuOrderEntry
 import desu.inugram.helpers.menu.MenuOrderItem
+// #if PLUGINS
+import desu.inugram.helpers.plugins.QuickJs
+import desu.inugram.helpers.plugins.ui.ActionKey
+import desu.inugram.helpers.plugins.ui.ActionRow
+import desu.inugram.helpers.plugins.ui.PluginActions
+import desu.inugram.helpers.plugins.ui.PluginIcons
+// #endif
 import org.telegram.messenger.AndroidUtilities
+import org.telegram.messenger.BuildConfig
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import org.telegram.ui.ActionBar.Theme
 import org.telegram.ui.Cells.TextCell
 import org.telegram.ui.Components.LayoutHelper
+import org.telegram.ui.Components.RLottieImageView
 import org.telegram.ui.Components.Switch
 import org.telegram.ui.Components.UItem
 import org.telegram.ui.Components.UniversalAdapter
@@ -28,12 +39,19 @@ import org.telegram.ui.Components.UniversalAdapter
 abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
     protected var entries = config.value.toMutableList()
     protected val rows = HashMap<I, MenuOrderRow>()
+    // #if PLUGINS
+    private val pluginRows = HashMap<ActionKey, MenuOrderRow>()
+    private var renderedPluginRows = emptyList<ActionRow>()
+    // #endif
     private val reorderHandlers = HashMap<Int, (List<UItem>) -> Unit>()
 
     protected abstract val config: MenuOrderConfig<I>
     protected abstract val infoStringRes: Int
     protected abstract val headerStringRes: Int
     protected abstract val resetStringRes: Int
+    // #if PLUGINS
+    protected open val pluginActionKind: Int? = null
+    // #endif
 
     protected open fun buildPreviewCell(context: Context): View? = null
     protected var previewCell: View? = null
@@ -46,6 +64,9 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
         val onClick: (MenuOrderRow) -> Unit,
     )
 
+    protected fun isAvailable(item: I): Boolean = !BuildConfig.INU_PLUGINLESS || item.key != "actions"
+
+    /** override to attach a long-tap sub-cell to a row (e.g. Reply / Forward long-tap pickers) */
     protected open fun subCell(item: I): SubCell? = null
 
     protected open fun rowVisible(entry: MenuOrderEntry<I>): Boolean = true
@@ -65,11 +86,24 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
         listView.setReorderLongPressEnabled(false)
         listView.listenReorder { id, items -> reorderHandlers[id]?.invoke(items) }
         listView.allowReorder(true)
+        // #if PLUGINS
+        if (InuConfig.PLUGINS_ENABLED.value) {
+            pluginActionKind?.let { kind ->
+                PluginActions.renderSettings(kind) { actionRows ->
+                    renderedPluginRows = actionRows
+                    listView.adapter.update(true)
+                }
+            }
+        }
+        // #endif
         return view
     }
 
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         fillMainSection(items, adapter)
+        // #if PLUGINS
+        fillPluginSection(items, adapter)
+        // #endif
         fillResetSection(items, adapter)
     }
 
@@ -81,12 +115,59 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
         }
         items.add(UItem.asShadow(LocaleController.getString(infoStringRes)))
         items.add(UItem.asHeader(LocaleController.getString(headerStringRes)))
-        openReorderSection(adapter, toBottom = false)
-        for (entry in entries.filter { !it.bottom && rowVisible(it) }) {
-            items.add(buildRow(entry))
+        // #if PLUGINS
+        val kind = pluginActionKind
+        val showActions = kind == null || InuConfig.PLUGINS_ENABLED.value &&
+            renderedPluginRows.any { !PluginActions.isPinned(it.key) }
+        // #else
+        val showActions = false
+        // #endif
+        val builtIns = entries.filter {
+            !it.bottom && rowVisible(it) && (it.item.key != "actions" || showActions)
         }
+        // #if PLUGINS
+        val pinned = if (kind == null || !InuConfig.PLUGINS_ENABLED.value) {
+            emptyList()
+        } else {
+            PluginActions.orderRows(kind, renderedPluginRows, true)
+        }
+        // #endif
+        openReorderSection(adapter, toBottom = false) { applyMainReorder(it) }
+        // #if PLUGINS
+        if (kind == null) {
+            for (entry in builtIns) items.add(buildRow(entry))
+        } else {
+            val order = PluginActions.mainOrder(kind, builtIns.map { it.item.key }, pinned.map { it.key })
+            for (key in order) {
+                if (key.startsWith("b:")) {
+                    builtIns.firstOrNull { PluginActions.builtInOrderKey(it.item.key) == key }?.let { items.add(buildRow(it)) }
+                } else {
+                    pinned.firstOrNull { PluginActions.pluginOrderKey(it.key) == key }?.let { items.add(buildPluginRow(it)) }
+                }
+            }
+        }
+        // #else
+        for (entry in builtIns) items.add(buildRow(entry))
+        // #endif
         adapter.reorderSectionEnd()
     }
+
+    // #if PLUGINS
+    protected fun fillPluginSection(items: ArrayList<UItem>, adapter: UniversalAdapter) {
+        val kind = pluginActionKind ?: return
+        if (!InuConfig.PLUGINS_ENABLED.value) return
+        val actionRows = PluginActions.orderRows(kind, renderedPluginRows, false)
+        if (actionRows.isEmpty()) return
+        items.add(UItem.asShadow(SHADOW_PLUGIN, null))
+        items.add(UItem.asHeader(LocaleController.getString(R.string.InuPluginActions)))
+        openReorderSection(adapter, toBottom = false) { reordered ->
+            PluginActions.setPluginOrder(kind, reordered.mapNotNull { it.`object` as? ActionKey })
+        }
+        for (row in actionRows) items.add(buildPluginRow(row))
+        adapter.reorderSectionEnd()
+    }
+
+    // #endif
 
     protected fun fillResetSection(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         items.add(UItem.asShadow(SHADOW_END, null))
@@ -99,10 +180,15 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
         )
     }
 
-    protected fun openReorderSection(adapter: UniversalAdapter, toBottom: Boolean): Int {
+    /** opens a reorder section AND registers its drag dispatch (so the base listener routes it) */
+    protected fun openReorderSection(
+        adapter: UniversalAdapter,
+        toBottom: Boolean,
+        handler: ((List<UItem>) -> Unit)? = null,
+    ): Int {
         val id = adapter.reorderSectionStart()
         if (id == 0) reorderHandlers.clear()
-        reorderHandlers[id] = { applyReorder(it, toBottom) }
+        reorderHandlers[id] = handler ?: { applyReorder(it, toBottom) }
         return id
     }
 
@@ -110,11 +196,43 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
     protected fun applyReorder(items: List<UItem>, toBottom: Boolean) {
         val byItem = entries.associateBy { it.item }
         val reordered = items.mapNotNull { byItem[it.`object` as? I] }
-        if (reordered.size != entries.count { it.bottom == toBottom && rowVisible(it) }) return
-        val others = entries.filter { it.bottom != toBottom }
-        entries = (if (toBottom) others + reordered else reordered + others).toMutableList()
+        val visible = entries.filter { it.bottom == toBottom && rowVisible(it) && isAvailable(it.item) }
+        if (reordered.size != visible.size) return
+        val next = reordered.iterator()
+        entries = entries.map { if (it in visible) next.next() else it }.toMutableList()
         config.value = entries
         previewCell?.let { refreshPreviewCell(it) }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun applyMainReorder(items: List<UItem>) {
+        val reordered = items.mapNotNull { it.`object` as? I }
+        // #if PLUGINS
+        val showActions = pluginActionKind == null || InuConfig.PLUGINS_ENABLED.value &&
+            renderedPluginRows.any { !PluginActions.isPinned(it.key) }
+        // #else
+        val showActions = false
+        // #endif
+        val visible = entries.filter {
+            !it.bottom && (it.item.key != "actions" || showActions)
+        }
+        if (reordered.size != visible.size) return
+        val byItem = entries.associateBy { it.item }
+        val reorderedEntries = reordered.mapNotNull(byItem::get).iterator()
+        entries = entries.map {
+            if (!it.bottom && it in visible) reorderedEntries.next() else it
+        }.toMutableList()
+        config.value = entries
+        // #if PLUGINS
+        val kind = pluginActionKind ?: return
+        PluginActions.setMainOrder(kind, items.mapNotNull {
+            when (val value = it.`object`) {
+                is MenuOrderItem -> PluginActions.builtInOrderKey(value.key)
+                is ActionKey -> PluginActions.pluginOrderKey(value)
+                else -> null
+            }
+        })
+        // #endif
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -149,15 +267,66 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
         return uitem
     }
 
+    // #if PLUGINS
+    protected fun buildPluginRow(action: ActionRow): UItem {
+        val row = pluginRows.getOrPut(action.key) {
+            MenuOrderRow(context, PLUGIN_ROW_HEIGHT_DP).apply {
+                setOnReorderTouchListener { _, event ->
+                    if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                        val holder = listView.findContainingViewHolder(this) ?: return@setOnReorderTouchListener false
+                        listView.itemTouchHelper.startDrag(holder)
+                    }
+                    false
+                }
+            }
+        }
+        row.bind(
+            action.text,
+            action.pluginName,
+            action.icon,
+            action.owner,
+            R.drawable.msg_settings_old,
+        )
+        row.setSwitchVisible(true)
+        row.setChecked(PluginActions.isEnabled(action.key))
+        val pinned = PluginActions.isPinned(action.key)
+        row.setActionButton(
+            if (pinned) R.drawable.msg_unpin else R.drawable.msg_pin,
+            LocaleController.getString(if (pinned) R.string.InuUnpinAction else R.string.InuPinAction),
+        ) {
+            PluginActions.setPinned(action.key, !pinned)
+            listView.adapter.update(true)
+        }
+        row.clearSubCell()
+        return UItem.asCustom(row, row.mainHeightDp).also {
+            it.id = PluginActions.optionIdFor(action.key)
+            it.`object` = action.key
+        }
+    }
+
+    // #endif
+
     override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
         if (item.id == BUTTON_RESET) {
             config.resetToDefault()
+            // #if PLUGINS
+            pluginActionKind?.let(PluginActions::resetSettings)
+            // #endif
             entries = config.default.toMutableList()
             previewCell?.let { refreshPreviewCell(it) }
             listView.adapter.update(true)
             return
         }
+        // #if PLUGINS
         @Suppress("UNCHECKED_CAST")
+        val actionKey = item.`object` as? ActionKey
+        if (actionKey != null) {
+            if (pluginRows[actionKey]?.isInActionButton(x) == true) return
+            PluginActions.setEnabled(actionKey, !PluginActions.isEnabled(actionKey))
+            pluginRows[actionKey]?.setChecked(PluginActions.isEnabled(actionKey))
+            return
+        }
+        // #endif
         val key = item.`object` as? I ?: return
         val row = rows[key]
         if (row != null && row.isInSubCell(y)) {
@@ -172,22 +341,24 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
         private val BUTTON_RESET = InuUtils.generateId()
         // lumine: distinct from null-text shadow because DiffUtil aliases identical shadows and crashes animated diff
         private val SHADOW_END = InuUtils.generateId()
+        private val SHADOW_PLUGIN = InuUtils.generateId()
         private const val ITEM_BASE = 10000
+        private const val PLUGIN_ROW_HEIGHT_DP = 64
     }
 }
 
 @SuppressLint("ViewConstructor")
-class MenuOrderRow(context: Context) : LinearLayout(context) {
+class MenuOrderRow(context: Context, val mainHeightDp: Int = 50) : LinearLayout(context) {
     private val handle: ImageView
-    private val icon: ImageView
+    private val icon: RLottieImageView
     private val text: TextView
+    private val subtitle: TextView
     private val switch: Switch
     private val moveBackButton: ImageView
     private val main: FrameLayout
     private var sub: TextCell? = null
     private var subWrapper: FrameLayout? = null
 
-    val mainHeightDp = 50
     val subHeightDp = 50
 
     init {
@@ -206,27 +377,42 @@ class MenuOrderRow(context: Context) : LinearLayout(context) {
         }
         main.addView(handle, LayoutHelper.createFrame(48, 48f, (if (rtl) Gravity.RIGHT else Gravity.LEFT) or Gravity.CENTER_VERTICAL, 4f, 0f, 4f, 0f))
 
-        icon = ImageView(context).apply {
+        icon = RLottieImageView(context).apply {
             scaleType = ImageView.ScaleType.CENTER
             colorFilter = PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon), PorterDuff.Mode.MULTIPLY)
         }
         main.addView(icon, LayoutHelper.createFrame(24, 24f, (if (rtl) Gravity.RIGHT else Gravity.LEFT) or Gravity.CENTER_VERTICAL, 60f, 0f, 60f, 0f))
 
+        val textBlock = LinearLayout(context).apply {
+            orientation = VERTICAL
+            gravity = if (rtl) Gravity.RIGHT else Gravity.LEFT
+        }
         text = TextView(context).apply {
             setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText))
             textSize = 16f
             setSingleLine(true)
-            gravity = (if (rtl) Gravity.RIGHT else Gravity.LEFT) or Gravity.CENTER_VERTICAL
+            ellipsize = TextUtils.TruncateAt.END
+            gravity = if (rtl) Gravity.RIGHT else Gravity.LEFT
         }
+        subtitle = TextView(context).apply {
+            setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText))
+            textSize = 13f
+            setSingleLine(true)
+            ellipsize = TextUtils.TruncateAt.END
+            gravity = if (rtl) Gravity.RIGHT else Gravity.LEFT
+            visibility = View.GONE
+        }
+        textBlock.addView(text, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT))
+        textBlock.addView(subtitle, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT))
         main.addView(
-            text,
+            textBlock,
             LayoutHelper.createFrame(
                 LayoutHelper.MATCH_PARENT,
-                LayoutHelper.MATCH_PARENT.toFloat(),
+                LayoutHelper.WRAP_CONTENT.toFloat(),
                 (if (rtl) Gravity.RIGHT else Gravity.LEFT) or Gravity.CENTER_VERTICAL,
-                if (rtl) 70f else 96f,
+                if (rtl) 116f else 96f,
                 0f,
-                if (rtl) 96f else 70f,
+                if (rtl) 96f else 116f,
                 0f
             )
         )
@@ -255,9 +441,23 @@ class MenuOrderRow(context: Context) : LinearLayout(context) {
     }
 
     fun bind(item: MenuOrderItem) {
+        // #if PLUGINS
+        PluginIcons.clearIcon(icon)
+        // #endif
         icon.setImageResource(item.iconRes)
         text.text = LocaleController.getString(item.labelRes)
+        subtitle.visibility = View.GONE
     }
+
+    // #if PLUGINS
+    fun bind(label: CharSequence, subtitle: CharSequence, iconSpec: String?, owner: QuickJs, fallbackIcon: Int) {
+        if (!PluginIcons.setIcon(icon, iconSpec, owner)) icon.setImageResource(fallbackIcon)
+        text.text = label
+        this.subtitle.text = subtitle
+        this.subtitle.visibility = View.VISIBLE
+    }
+
+    // #endif
 
     fun setChecked(checked: Boolean) {
         switch.setChecked(checked, isAttachedToWindow)
@@ -272,10 +472,19 @@ class MenuOrderRow(context: Context) : LinearLayout(context) {
             moveBackButton.visibility = View.GONE
             moveBackButton.setOnClickListener(null)
             moveBackButton.isClickable = false
+            switch.translationX = 0f
         } else {
             moveBackButton.visibility = View.VISIBLE
             moveBackButton.setOnClickListener { onClick() }
         }
+    }
+
+    fun setActionButton(iconRes: Int, description: CharSequence, onClick: () -> Unit) {
+        moveBackButton.setImageResource(iconRes)
+        moveBackButton.contentDescription = description
+        moveBackButton.visibility = View.VISIBLE
+        moveBackButton.setOnClickListener { onClick() }
+        switch.translationX = AndroidUtilities.dpf2(if (LocaleController.isRTL) 44f else -44f)
     }
 
     fun setOnReorderTouchListener(listener: View.OnTouchListener) {
@@ -308,6 +517,10 @@ class MenuOrderRow(context: Context) : LinearLayout(context) {
     fun getSubAnchor(): View? = subWrapper
 
     fun isInSubCell(y: Float): Boolean = sub != null && y >= AndroidUtilities.dp(mainHeightDp.toFloat())
+
+    fun isInActionButton(x: Float): Boolean =
+        moveBackButton.visibility == View.VISIBLE &&
+            x >= moveBackButton.left && x <= moveBackButton.right
 
     companion object {
         private const val SUB_LEFT_OFFSET_DP = 40

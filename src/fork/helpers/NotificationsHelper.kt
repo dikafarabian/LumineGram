@@ -5,6 +5,9 @@ import androidx.collection.LongSparseArray
 import androidx.core.content.edit
 import desu.inugram.InuConfig
 import desu.inugram.helpers.chat.BlockedMessagesHelper
+// #if PLUGINS
+import desu.inugram.helpers.plugins.platform.PluginNotifications
+// #endif
 import desu.inugram.helpers.security.ParanoiaHelper
 import desu.inugram.helpers.security.PasscodeHelper
 import org.telegram.messenger.ApplicationLoader
@@ -28,7 +31,11 @@ object NotificationsHelper {
 
     @JvmStatic
     fun shouldSuppressNotifications(account: Int): Boolean =
-        PasscodeHelper.isAccountHidden(account) || ParanoiaHelper.shouldSuppressNotifications()
+        PasscodeHelper.isAccountHidden(account) ||
+            ParanoiaHelper.shouldSuppressNotifications()
+            // #if PLUGINS
+            || PluginNotifications.areNotificationsSuppressed(account)
+            // #endif
 
     @JvmStatic
     fun shouldSuppressMessageNotification(messageObject: MessageObject?): Boolean {
@@ -37,7 +44,9 @@ object NotificationsHelper {
             || ParanoiaHelper.isHidden(messageObject.currentAccount, messageObject.dialogId)
     }
 
-    // lumine: mirror in-memory wearNotificationsIds to disk so stock cancel paths survive process restart
+    // Stock's `NotificationsController.wearNotificationsIds` (dialogId -> notification id) is the only record of
+    // what is on screen, and every cancel path diffs against it вЂ” but it is in-memory only, while posted
+    // notifications outlive the process. Mirroring it to disk is what makes those cancel paths survive a restart.
     private fun getWearIdsKey(account: Int) = "wear_ids_$account"
 
     @JvmStatic
@@ -53,12 +62,11 @@ object NotificationsHelper {
         }
     }
 
-    // lumine: dedupe reposts because bridges like Mi Fitness re-alert on unchanged onNotificationPosted calls
-    private val postedSignatures = ConcurrentHashMap<Int, MutableMap<String, String>>()
-
-    @JvmStatic
-    fun signatureKey(dialogId: Long, topicId: Long, story: Boolean): String =
-        if (story) "story" else "$dialogId:$topicId"
+    // Every showOrUpdateNotification re-notify()s ALL per-chat notifications, and notification bridges
+    // (Mi Fitness etc.) re-forward every onNotificationPosted without deduping by key or respecting
+    // FLAG_ONLY_ALERT_ONCE вЂ” so unchanged reposts must be skipped on our side. Signatures are keyed by
+    // notification id; per-account maps are only touched from that account's notificationsQueue.
+    private val postedSignatures = ConcurrentHashMap<Int, MutableMap<Int, String>>()
 
     @JvmStatic
     fun computeNotificationSignature(
@@ -78,19 +86,17 @@ object NotificationsHelper {
     }
 
     @JvmStatic
-    fun shouldSkipNotify(account: Int, key: String, signature: String?): Boolean {
+    fun shouldSkipNotify(account: Int, notificationId: Int, signature: String?): Boolean {
         if (signature == null) return false
         val map = postedSignatures.getOrPut(account) { HashMap() }
-        if (map[key] == signature) return true
-        map[key] = signature
+        if (map[notificationId] == signature) return true
+        map[notificationId] = signature
         return false
     }
 
     @JvmStatic
-    fun removePostedSignatures(account: Int, dialogId: Long) {
-        val map = postedSignatures[account] ?: return
-        val prefix = "$dialogId:"
-        map.keys.removeAll { it.startsWith(prefix) }
+    fun removePostedSignature(account: Int, notificationId: Int) {
+        postedSignatures[account]?.remove(notificationId)
     }
 
     @JvmStatic
@@ -103,7 +109,7 @@ object NotificationsHelper {
         val key = getWearIdsKey(account)
         val stored = (0 until ids.size()).joinToString(",") { "${ids.keyAt(it)}:${ids.valueAt(it)}" }
         if (prefs.getString(key, "") == stored) return
-        // lumine: synchronous commit avoids losing wear id state if process dies right after posting
+        // commit: this races a process death that may come right after posting the notifications
         prefs.edit(commit = true) {
             if (stored.isEmpty()) remove(key) else putString(key, stored)
         }

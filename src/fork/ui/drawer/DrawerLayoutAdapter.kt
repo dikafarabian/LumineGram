@@ -8,21 +8,25 @@ import androidx.recyclerview.widget.RecyclerView
 import desu.inugram.helpers.dialogs.AccountOrderHelper
 import desu.inugram.helpers.dialogs.DialogsFabHelper
 import desu.inugram.helpers.dialogs.DrawerM3SectionsHelper
-import desu.inugram.helpers.dialogs.PullActionHelper
 import desu.inugram.helpers.feed.FeedHelper
 import desu.inugram.helpers.menu.DrawerMenuConfig
 import desu.inugram.helpers.security.GhostHelper
+import desu.inugram.helpers.dialogs.DrawerHelper
+import desu.inugram.helpers.dialogs.PullActionHelper
+// #if PLUGINS
+import desu.inugram.helpers.plugins.ui.PluginActions
+// #endif
 import desu.inugram.helpers.security.PasscodeHelper
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.MediaDataController
 import org.telegram.messenger.MessagesController
 import org.telegram.messenger.R
+import org.telegram.messenger.SharedConfig
 import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.TLRPC
 import org.telegram.ui.ActionBar.DrawerLayoutContainer
 import org.telegram.ui.ActionBar.Theme
-import org.telegram.messenger.SharedConfig
 import org.telegram.ui.Cells.DividerCell
 import org.telegram.ui.Cells.EmptyCell
 import org.telegram.ui.Components.RecyclerListView
@@ -297,6 +301,15 @@ class DrawerLayoutAdapter(
                     items.add(Item(ITEM_RESTART_APP, LocaleController.getString(R.string.InuRestartApp), R.drawable.msg_retry))
             }
         }
+        // #if PLUGINS
+        val pluginRows = DrawerHelper.globalActionRows
+        if (pluginRows.isNotEmpty()) {
+            items.add(null)
+            for (row in pluginRows) {
+                items.add(Item(PluginActions.optionIdFor(row.key), row.text, R.drawable.msg_settings))
+            }
+        }
+        // #endif
         while (items.isNotEmpty() && items[items.size - 1] == null) items.removeAt(items.size - 1)
     }
 

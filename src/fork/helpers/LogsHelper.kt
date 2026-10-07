@@ -22,6 +22,9 @@ object LogsHelper {
     private val handlerFromStartup = BuildVars.LOGS_ENABLED
     private var handlerInstalled = false
 
+    // FileLog names the session file "<dd_MM_yyyy_HH_mm_ss>.txt"; siblings carry _mtproto/_net/_tonlib suffixes
+    private val SESSION_LOG_NAME = Regex("""\d{2}_\d{2}_\d{4}_\d{2}_\d{2}_\d{2}\.txt""")
+
     fun isEnabled(): Boolean = BuildVars.LOGS_ENABLED
 
     fun setEnabled(enabled: Boolean) {
@@ -127,10 +130,11 @@ object LogsHelper {
         return dst
     }
 
+    /** Latest FileLog session file, or null. */
     fun currentLogFile(): File? {
         val dir = AndroidUtilities.getLogsDir() ?: return null
         return dir.listFiles { f ->
-            f.isFile && f.name.endsWith(".txt") && !f.name.endsWith("_mtproto.txt")
+            f.isFile && SESSION_LOG_NAME.matches(f.name)
         }?.maxByOrNull { it.lastModified() }
     }
 

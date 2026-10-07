@@ -30,18 +30,25 @@ object LocaleHelper {
     fun getLocalString(key: String?, res: Int): String? {
         if (!isLocalOnlyString(key)) return null
         disguiseName(key)?.let { return it }
-        if (res == 0) return getLocalString(key)
-        return resolve(res)
+        val ctx = ApplicationLoader.applicationContext ?: return null
+        val id = if (res != 0) res else ctx.resources.getIdentifier(key, "string", ctx.packageName)
+        if (id == 0) return null
+        return resolve(id) ?: getResourceString(id, null)
     }
 
     @JvmStatic
-    fun getLocalString(key: String?): String? {
-        if (!isLocalOnlyString(key)) return null
-        disguiseName(key)?.let { return it }
-        val ctx = ApplicationLoader.applicationContext ?: return null
-        val id = ctx.resources.getIdentifier(key, "string", ctx.packageName)
-        if (id == 0) return null
-        return resolve(id)
+    fun getLocalString(key: String?): String? = getLocalString(key, 0)
+
+    // stock asset packs only hold strings.xml, fork strings stay plain android resources
+    @JvmStatic
+    fun getResourceString(res: Int, fallback: String?): String? {
+        getLocalString(fallback)?.let { return it }
+        if (res == 0) return null
+        return try {
+            ApplicationLoader.applicationContext.getString(res)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     // lumine: disguised app name must read as stock Telegram regardless of locale

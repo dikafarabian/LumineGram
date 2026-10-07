@@ -78,7 +78,7 @@ abstract class SettingsPageActivity : UniversalFragment() {
             listView.clipToPadding = false
             // lumine: pre-scroll before first layout so target row is on-screen without post-transition jump
             if (highlightItemId != -1) {
-                val index = indexOfItem(listView, highlightItemId)
+                val index = findItemPosition(listView, highlightItemId)
                 if (index >= 0) {
                     listView.layoutManager.scrollToPositionWithOffset(index, AndroidUtilities.dp(60f))
                 }
@@ -89,12 +89,12 @@ abstract class SettingsPageActivity : UniversalFragment() {
     override fun onTransitionAnimationEnd(isOpen: Boolean, backward: Boolean) {
         super.onTransitionAnimationEnd(isOpen, backward)
         if (!isOpen || backward || highlightItemId == -1) return
-        val index = indexOfItem(listView, highlightItemId)
+        val index = findItemPosition(listView, highlightItemId)
         highlightItemId = -1
         if (index >= 0) listView.highlightRow { index }
     }
 
-    private fun indexOfItem(lv: UniversalRecyclerView, target: Int): Int {
+    private fun findItemPosition(lv: UniversalRecyclerView, target: Int): Int {
         var i = 0
         while (true) {
             val item = lv.adapter.getItem(i) ?: return -1
@@ -104,6 +104,7 @@ abstract class SettingsPageActivity : UniversalFragment() {
     }
 
     override fun onInsets(left: Int, top: Int, right: Int, bottom: Int) {
+        lastBottomInset = bottom
         val lv = listView ?: return
         val container = stickyButtonContainer
         if (container != null) {
@@ -120,11 +121,12 @@ abstract class SettingsPageActivity : UniversalFragment() {
     }
 
     private var stickyButtonContainer: FrameLayout? = null
+    private var lastBottomInset = 0
 
     protected fun attachStickyButton(rootView: View, button: View) {
         val container = FrameLayout(rootView.context).apply {
             setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite))
-            setPadding(dp(16), dp(8), dp(16), dp(8))
+            setPadding(dp(16), dp(8), dp(16), dp(8) + lastBottomInset)
             addView(button, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48f))
         }
         stickyButtonContainer = container
@@ -132,7 +134,7 @@ abstract class SettingsPageActivity : UniversalFragment() {
             container,
             LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM)
         )
-        listView.setPadding(0, 0, 0, dp(STICKY_BUTTON_HEIGHT))
+        listView.setPadding(0, 0, 0, lastBottomInset + dp(STICKY_BUTTON_HEIGHT))
         Bulletin.addDelegate(this, object : Bulletin.Delegate {
             override fun getBottomOffset(tag: Int): Int = stickyButtonContainer?.height ?: 0
         })
@@ -336,17 +338,42 @@ abstract class SettingsPageActivity : UniversalFragment() {
 
 
     protected fun addExperimentalSpan(string: CharSequence): CharSequence {
-        val span = ColoredImageSpan(R.drawable.ic_beta_badge, ColoredImageSpan.ALIGN_CENTER)
-        span.setSize(AndroidUtilities.dp(14f))
+        val pill = SpannableString(" ")
+        pill.setSpan(
+            BetaPillSpan(LocaleController.getString(R.string.InuBetaPill), Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader)),
+            0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+        )
+        return SpannableStringBuilder().append(pill).append("  ").append(string)
+    }
 
-        val tagText = SpannableString(" ")
-        tagText.setSpan(span, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    /** small tinted "beta" pill drawn before a title, same look as the value pills on settings rows */
+    private class BetaPillSpan(private val label: String, tint: Int) : ReplacementSpan() {
+        private val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            typeface = AndroidUtilities.bold()
+            textSize = AndroidUtilities.dp(11f).toFloat()
+            color = tint
+        }
+        private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = tint
+            alpha = 40
+        }
+        private val padX = AndroidUtilities.dp(6f)
+        private val padY = AndroidUtilities.dp(2.5f)
 
-        val text = SpannableStringBuilder()
-        text.append(tagText)
-        text.append(" ")
-        text.append(string)
-        return text
+        override fun getSize(paint: Paint, text: CharSequence?, start: Int, end: Int, fm: FontMetricsInt?): Int =
+            (textPaint.measureText(label) + padX * 2).toInt() + AndroidUtilities.dp(2f)
+
+        override fun draw(canvas: Canvas, text: CharSequence?, start: Int, end: Int, x: Float, top: Int, y: Int, bottom: Int, paint: Paint) {
+            val w = textPaint.measureText(label)
+            val fm = textPaint.fontMetrics
+            val cy = y + (paint.ascent() + paint.descent()) / 2f
+            val half = (fm.descent - fm.ascent) / 2f + padY
+            val left = x + AndroidUtilities.dp(1f)
+            val r = AndroidUtilities.dp(5f).toFloat()
+            AndroidUtilities.rectTmp.set(left, cy - half, left + w + padX * 2, cy + half)
+            canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, bgPaint)
+            canvas.drawText(label, left + padX, cy - (fm.ascent + fm.descent) / 2f, textPaint)
+        }
     }
 
     override fun onLongClick(item: UItem, view: View, position: Int, x: Float, y: Float): Boolean {
@@ -412,5 +439,15 @@ abstract class SettingsPageActivity : UniversalFragment() {
 
     companion object {
         private const val STICKY_BUTTON_HEIGHT = 64
+
+        /** [string] with a small pill of [tag] after it, the way settings badge an experiment */
+        fun appendTag(string: CharSequence, tag: CharSequence, color: Int): CharSequence {
+            val text = SpannableStringBuilder(string)
+            text.append("  ")
+            val start = text.length
+            text.append(tag)
+            text.setSpan(android.text.style.ForegroundColorSpan(color), start, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            return text
+        }
     }
 }

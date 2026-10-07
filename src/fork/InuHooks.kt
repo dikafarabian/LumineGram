@@ -12,6 +12,9 @@ import desu.inugram.helpers.cloud.CloudSettingsHelper
 import desu.inugram.helpers.dialogs.DrawerHelper
 import desu.inugram.helpers.font.FontHelper
 import desu.inugram.helpers.maps.MapsHelper
+// #if PLUGINS
+import desu.inugram.helpers.plugins.PluginManager
+// #endif
 import desu.inugram.helpers.security.PasscodeHelper
 import desu.inugram.helpers.theme.MonetHelper
 import desu.inugram.helpers.theme.NonIslandHelper
@@ -38,10 +41,18 @@ import org.telegram.ui.LauncherIconController
 
 object InuHooks {
     @JvmStatic
-    fun init(context: Context) {
+    fun preInit(context: Context) {
         CrashReporter.install()
         InuConfig.load(context)
         desu.inugram.helpers.network.CensorshipHelper.init()
+    }
+
+    /**
+     * Runs once `ApplicationLoader` has armed its main-thread handler: until it does,
+     * [AndroidUtilities.runOnUIThread] drops what it is given instead of posting it.
+     */
+    @JvmStatic
+    fun init(context: Context) {
         FontHelper.init(context)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             FontHelper.installGlobal()
@@ -65,6 +76,9 @@ object InuHooks {
             ProxyVpnHelper.init(context)
             UrlCleanerHelper.preload()
         }
+        // #if PLUGINS
+        PluginManager.init(context)
+        // #endif
     }
 
     @JvmStatic
@@ -91,6 +105,13 @@ object InuHooks {
             != org.telegram.tgnet.ConnectionsManager.ConnectionStateConnected
         ) return@NotificationCenterDelegate
         desu.inugram.helpers.security.GhostHelper.syncPresence(acc)
+    }
+
+    @JvmStatic
+    fun onAppBoot() {
+        // #if PLUGINS
+        PluginManager.onAppBoot()
+        // #endif
     }
 
     @JvmStatic
@@ -188,6 +209,9 @@ object InuHooks {
         ProxyVpnHelper.reconcile()
         DrawerHelper.refreshUpdateState()
         desu.inugram.helpers.security.GhostHelper.syncPresence(org.telegram.messenger.UserConfig.selectedAccount)
+        // #if PLUGINS
+        PluginManager.onAppInteractive()
+        // #endif
     }
 
     @JvmStatic
