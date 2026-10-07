@@ -1767,7 +1767,7 @@
     <string name="InuDonateWebsite">All methods on the website</string>
     <string name="InuDonateCopied">Copied</string>
     <string name="InuShowMediaSize">Show media size</string>
-    <string name="InuAboutAuthor">Author</string>
+    <string name="InuAboutAuthor">Kanged by</string>
 
     <string name="InuPlugins">Plugins</string>
     <string name="InuPluginsInfo">Plugins are user-made scripts that extend the app. Only install plugins from sources you trust.</string>
