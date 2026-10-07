@@ -10,7 +10,12 @@
     "rebase": "bun scripts/rebase.ts",
     "find-patches": "bun scripts/find-patches.ts",
     "lint-patches": "bun scripts/lint-patches.ts",
-    "luminechecker": "bun scripts/luminechecker.ts"
+    "luminechecker": "bun scripts/luminechecker.ts",
+    "build-debug": "bun scripts/generate-grants.ts && cd worktree && ./gradlew TMessagesProj_App:assembleDebug",
+    "run-debug": "cd worktree && ./gradlew TMessagesProj_App:installDebug && adb shell am start com.lumine.gram/org.telegram.ui.LaunchActivity",
+    "generate-tl": "bun scripts/generate-tl.ts",
+    "generate-grants": "bun scripts/generate-grants.ts",
+    "build-debug-pluginless": "cd worktree-pluginless && ./gradlew TMessagesProj_App:assembleDebug"
   },
   "dependencies": {
     "@antfu/eslint-config": "^8.1.0",
@@ -19,12 +24,16 @@
     "@mtcute/node": "^0.31.0",
     "eslint": "^10.2.0",
     "tinyglobby": "^0.2.16",
-    "zx": "^8.8.4"
+    "zx": "^8.8.4",
+    "@inugram/plugin-types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.6.1",
     "sharp": "^0.35.3",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
-  }
+  },
+  "workspaces": [
+    "sdk/*"
+  ]
 }

@@ -60,6 +60,9 @@ jobs:
     name: Build ${{ matrix.abi }}
     needs: prepare
     runs-on: ubuntu-24.04
+    env:
+      WT: ${{ matrix.abi == 'arm64-v8a' && 'worktree' || 'worktree-pluginless' }}
+      SETUP_FLAGS: ${{ matrix.abi == 'arm64-v8a' && '--no-stgit' || '--no-stgit --pluginless' }}
     timeout-minutes: 180
     strategy:
       fail-fast: false
@@ -110,14 +113,37 @@ jobs:
           save: true
 
       - name: Set up worktree
-        run: bun run setup -- --no-stgit
+        run: bun run setup -- $SETUP_FLAGS
+
+      - name: Set up Rust
+        if: matrix.abi == 'arm64-v8a'
+        run: |
+          rustup toolchain install stable --profile minimal --target aarch64-linux-android
+          rustup default stable
+
+      - name: Cache cargo
+        if: matrix.abi == 'arm64-v8a'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/bin/cargo-ndk
+            ~/.cargo/registry
+            ~/.cargo/git
+            src/native/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('src/native/Cargo.lock') }}
+          restore-keys: |
+            cargo-${{ runner.os }}-
+
+      - name: Install cargo-ndk
+        if: matrix.abi == 'arm64-v8a'
+        run: command -v cargo-ndk || cargo install cargo-ndk --locked
 
       - name: Write google-services.json
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          printf '%s' "$GOOGLE_SERVICES_JSON" > worktree/TMessagesProj/google-services.json
-          printf '%s' "$GOOGLE_SERVICES_JSON" > worktree/TMessagesProj_App/google-services.json
+          printf '%s' "$GOOGLE_SERVICES_JSON" > $WT/TMessagesProj/google-services.json
+          printf '%s' "$GOOGLE_SERVICES_JSON" > $WT/TMessagesProj_App/google-services.json
 
       - name: Compute build info
         id: info
@@ -153,7 +179,7 @@ jobs:
           echo 'kotlin.daemon.jvm.options=-Xmx2048m'                                    >> ~/.gradle/gradle.properties
 
       - name: Build ${{ matrix.abi }}
-        working-directory: worktree
+        working-directory: ${{ env.WT }}
         env:
           COMMIT_ID: ${{ github.sha }}
           INU_BUILD: ${{ steps.info.outputs.ver-code }}
@@ -162,7 +188,7 @@ jobs:
           APK_NAME: ${{ matrix.abi == 'arm64-v8a' && steps.info.outputs.apk-arm64 || steps.info.outputs.apk-arm7 }}
           CCACHE_COMPILERCHECK: content
           CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime,locale,system_headers
-          CCACHE_BASEDIR: ${{ github.workspace }}/worktree
+          CCACHE_BASEDIR: ${{ github.workspace }}/${{ env.WT }}
         run: |
           ./gradlew --no-daemon :TMessagesProj_App:assembleRelease
           mkdir -p "$GITHUB_WORKSPACE/out"
