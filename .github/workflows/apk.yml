@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       WT: ${{ matrix.abi == 'arm64-v8a' && 'worktree' || 'worktree-pluginless' }}
-      SETUP_FLAGS: ${{ matrix.abi == 'arm64-v8a' && '--no-stgit' || '--no-stgit --pluginless' }}
+      SETUP_FLAGS: ${{ matrix.abi == 'arm64-v8a' && '--ci' || '--ci --pluginless' }}
     timeout-minutes: 180
     strategy:
       fail-fast: false
