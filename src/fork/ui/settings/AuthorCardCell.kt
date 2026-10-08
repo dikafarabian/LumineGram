@@ -48,6 +48,7 @@ class AuthorCardCell(
     private var userId = 0L
     private var requested = false
     private var awaitingAvatar = false
+    private var pendingPhotoId = 0L
     private var cachedAvatar: Bitmap? = null
     private val cache = AuthorCardCache(context.applicationContext, username)
 
@@ -187,7 +188,7 @@ class AuthorCardCell(
             val bitmap = receiver.bitmap ?: return@setDelegate
             if (bitmap.isRecycled) return@setDelegate
             awaitingAvatar = false
-            cache.saveAvatar(bitmap)
+            cache.saveAvatar(bitmap, pendingPhotoId)
         }
     }
 
@@ -210,19 +211,22 @@ class AuthorCardCell(
     private fun bind() {
         if (account < 0 || userId == 0L) return
         val user = MessagesController.getInstance(account).getUser(userId) ?: return
-        avatarView.imageReceiver.currentAccount = account
-        val thumb: Drawable = cachedAvatar?.let { BitmapDrawable(resources, it) } ?: AvatarDrawable().apply { setInfo(user) }
-        awaitingAvatar = true
-        avatarView.setForUserOrChat(user, thumb)
         val name = UserObject.getUserName(user)
-        if (name.isNotBlank()) {
+        if (name.isNotBlank() && name != cache.name) {
             nameView.text = name
             cache.saveName(name)
         }
+        val photoId = user.photo?.photo_id ?: 0L
+        if (photoId == cache.photoId && cache.hasAvatar()) return
+        avatarView.imageReceiver.currentAccount = account
+        val thumb: Drawable = cachedAvatar?.let { BitmapDrawable(resources, it) } ?: AvatarDrawable().apply { setInfo(user) }
+        pendingPhotoId = photoId
+        awaitingAvatar = true
+        avatarView.setForUserOrChat(user, thumb)
     }
 
     private fun load() {
-        if (requested || cache.isFresh()) return
+        if (requested) return
         val acc = UserConfig.selectedAccount
         if (!UserConfig.getInstance(acc).isClientActivated) return
         requested = true
@@ -276,13 +280,13 @@ private class AuthorCardCache(context: Context, username: String) {
     private val prefs = context.getSharedPreferences("lumine_author_card", Context.MODE_PRIVATE)
     private val avatarFile = File(File(context.filesDir, "author_card").apply { mkdirs() }, "$username.png")
     private val nameKey = "$username.name"
-    private val stampKey = "$username.stamp"
+    private val photoKey = "$username.photo"
 
     val name: String? get() = prefs.getString(nameKey, null)
 
-    fun isFresh(): Boolean =
-        name != null && avatarFile.exists() &&
-            System.currentTimeMillis() - prefs.getLong(stampKey, 0L) < REFRESH_INTERVAL_MS
+    val photoId: Long get() = prefs.getLong(photoKey, 0L)
+
+    fun hasAvatar(): Boolean = avatarFile.exists()
 
     fun loadAvatar(): Bitmap? {
         if (!avatarFile.exists()) return null
@@ -293,7 +297,7 @@ private class AuthorCardCache(context: Context, username: String) {
         prefs.edit().putString(nameKey, value).apply()
     }
 
-    fun saveAvatar(bitmap: Bitmap) {
+    fun saveAvatar(bitmap: Bitmap, photoId: Long) {
         val copy = runCatching { bitmap.copy(Bitmap.Config.ARGB_8888, false) }.getOrNull() ?: return
         Utilities.globalQueue.postRunnable {
             val saved = runCatching {
@@ -301,12 +305,8 @@ private class AuthorCardCache(context: Context, username: String) {
                 FileOutputStream(tmp).use { copy.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 tmp.renameTo(avatarFile)
             }.getOrDefault(false)
-            if (saved) prefs.edit().putLong(stampKey, System.currentTimeMillis()).apply()
+            if (saved) prefs.edit().putLong(photoKey, photoId).apply()
             copy.recycle()
         }
-    }
-
-    private companion object {
-        const val REFRESH_INTERVAL_MS = 12L * 60 * 60 * 1000
     }
 }
