@@ -2,7 +2,11 @@ package desu.inugram.ui.settings
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.text.TextUtils
 import android.util.TypedValue
@@ -19,10 +23,13 @@ import org.telegram.messenger.NotificationCenter
 import org.telegram.messenger.R
 import org.telegram.messenger.UserConfig
 import org.telegram.messenger.UserObject
+import org.telegram.messenger.Utilities
 import org.telegram.ui.ActionBar.Theme
 import org.telegram.ui.Components.AvatarDrawable
 import org.telegram.ui.Components.BackupImageView
 import org.telegram.ui.Components.LayoutHelper
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Locale
 
 @SuppressLint("ViewConstructor")
@@ -40,6 +47,9 @@ class AuthorCardCell(
     private var account = -1
     private var userId = 0L
     private var requested = false
+    private var awaitingAvatar = false
+    private var cachedAvatar: Bitmap? = null
+    private val cache = AuthorCardCache(context.applicationContext, username)
 
     private val avatarView = BackupImageView(context).apply {
         setRoundRadius(AndroidUtilities.dp(30f))
@@ -171,6 +181,21 @@ class AuthorCardCell(
     init {
         addView(card, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.CENTER))
         showPlaceholder()
+        restoreFromCache()
+        avatarView.imageReceiver.setDelegate { receiver, set, thumb, _ ->
+            if (!awaitingAvatar || !set || thumb) return@setDelegate
+            val bitmap = receiver.bitmap ?: return@setDelegate
+            if (bitmap.isRecycled) return@setDelegate
+            awaitingAvatar = false
+            cache.saveAvatar(bitmap)
+        }
+    }
+
+    private fun restoreFromCache() {
+        cache.name?.takeIf { it.isNotBlank() }?.let { nameView.text = it }
+        val bitmap = cache.loadAvatar() ?: return
+        cachedAvatar = bitmap
+        avatarView.setImageBitmap(bitmap)
     }
 
     private fun showPlaceholder() {
@@ -186,13 +211,18 @@ class AuthorCardCell(
         if (account < 0 || userId == 0L) return
         val user = MessagesController.getInstance(account).getUser(userId) ?: return
         avatarView.imageReceiver.currentAccount = account
-        avatarView.setForUserOrChat(user, AvatarDrawable().apply { setInfo(user) })
+        val thumb: Drawable = cachedAvatar?.let { BitmapDrawable(resources, it) } ?: AvatarDrawable().apply { setInfo(user) }
+        awaitingAvatar = true
+        avatarView.setForUserOrChat(user, thumb)
         val name = UserObject.getUserName(user)
-        if (name.isNotBlank()) nameView.text = name
+        if (name.isNotBlank()) {
+            nameView.text = name
+            cache.saveName(name)
+        }
     }
 
     private fun load() {
-        if (requested) return
+        if (requested || cache.isFresh()) return
         val acc = UserConfig.selectedAccount
         if (!UserConfig.getInstance(acc).isClientActivated) return
         requested = true
@@ -239,5 +269,44 @@ class AuthorCardCell(
         if (mask and (MessagesController.UPDATE_MASK_AVATAR or MessagesController.UPDATE_MASK_NAME) != 0) {
             bind()
         }
+    }
+}
+
+private class AuthorCardCache(context: Context, username: String) {
+    private val prefs = context.getSharedPreferences("lumine_author_card", Context.MODE_PRIVATE)
+    private val avatarFile = File(File(context.filesDir, "author_card").apply { mkdirs() }, "$username.png")
+    private val nameKey = "$username.name"
+    private val stampKey = "$username.stamp"
+
+    val name: String? get() = prefs.getString(nameKey, null)
+
+    fun isFresh(): Boolean =
+        name != null && avatarFile.exists() &&
+            System.currentTimeMillis() - prefs.getLong(stampKey, 0L) < REFRESH_INTERVAL_MS
+
+    fun loadAvatar(): Bitmap? {
+        if (!avatarFile.exists()) return null
+        return runCatching { BitmapFactory.decodeFile(avatarFile.path) }.getOrNull()
+    }
+
+    fun saveName(value: String) {
+        prefs.edit().putString(nameKey, value).apply()
+    }
+
+    fun saveAvatar(bitmap: Bitmap) {
+        val copy = runCatching { bitmap.copy(Bitmap.Config.ARGB_8888, false) }.getOrNull() ?: return
+        Utilities.globalQueue.postRunnable {
+            val saved = runCatching {
+                val tmp = File(avatarFile.parentFile, avatarFile.name + ".tmp")
+                FileOutputStream(tmp).use { copy.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                tmp.renameTo(avatarFile)
+            }.getOrDefault(false)
+            if (saved) prefs.edit().putLong(stampKey, System.currentTimeMillis()).apply()
+            copy.recycle()
+        }
+    }
+
+    private companion object {
+        const val REFRESH_INTERVAL_MS = 12L * 60 * 60 * 1000
     }
 }
