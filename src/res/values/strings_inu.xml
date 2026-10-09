@@ -1929,4 +1929,6 @@
     <string name="InuSystemFolderUnread">Unread</string>
     <string name="InuSystemFolderGroups">Groups</string>
     <string name="InuSystemFolderChannels">Channels</string>
+    <string name="InuCopyAllProxies">Copy all</string>
+    <string name="InuShareAllProxies">Share all</string>
 </resources>
