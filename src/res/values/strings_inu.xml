@@ -892,6 +892,10 @@
     <string name="InuForwardHeaderModeCompact">Compact</string>
     <string name="InuShowForwardsCount">Show forward count</string>
     <string name="InuCompactEdited">Compact edit indicator</string>
+    <string name="InuEditedMessageDateMode">Edited message timestamp</string>
+    <string name="InuEditedMessageDateModeTelegram">Default</string>
+    <string name="InuEditedMessageDateModeEdit">Edit date</string>
+    <string name="InuEditedMessageDateModeSend">Send date</string>
 
     <string name="InuAddToStickersGifs">Add to Stickers/GIFs</string>
     <string name="InuLongTapAction">Long-tap action</string>

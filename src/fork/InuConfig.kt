@@ -1507,6 +1507,17 @@ object InuConfig {
     @JvmField
     val SAVE_DELETED_PRIVATE = BoolItem("save_deleted_private", false)
 
+    class EditedMessageDateModeItem : IntItem("edited_message_date_mode", TELEGRAM) {
+        companion object {
+            const val TELEGRAM = 0
+            const val EDIT_DATE = 1
+            const val SEND_DATE = 2
+        }
+    }
+
+    @JvmField
+    val EDITED_MESSAGE_DATE_MODE = EditedMessageDateModeItem()
+
     @JvmField
     val SAVE_DELETED_GROUPS = BoolItem("save_deleted_groups", false)
 
