@@ -1554,6 +1554,9 @@ object InuConfig {
     val SAVE_READ_TIME = BoolItem("save_read_time", false)
 
     @JvmField
+    val SAVE_LAST_SEEN = BoolItem("save_last_seen", false)
+
+    @JvmField
     val SHOW_EDIT_HISTORY_DIFF = BoolItem("show_edit_history_diff", false)
 
     @JvmField

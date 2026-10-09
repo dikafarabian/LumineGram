@@ -506,3 +506,4 @@ bugfix/sent-message-server-entities.patch
 bugfix/sticker-mask-alpha.patch
 feature/share-intent-lag.patch
 feature/read-time.patch
+feature/last-seen.patch
