@@ -514,3 +514,6 @@ feature/edited-message-date.patch
 feature/keyboard-scroll-typing.patch
 feature/drawer-keep-options-menu.patch
 feature/keep-screen-on-recording.patch
+feature/explicit-biometric-confirmation.patch
+feature/premium-badge-dialogs.patch
+feature/feed-media-channel-name.patch
