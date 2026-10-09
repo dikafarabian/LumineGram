@@ -497,3 +497,11 @@ lumine/no-vibration.patch
 lumine/restricted-message-flag.patch
 lumine/many-accounts-warning.patch
 lumine/plugins-gradle-fixes.patch
+bugfix/background-pending-requests.patch
+bugfix/tgnet-session-reset.patch
+bugfix/case-insensitive-settings-search.patch
+bugfix/emoji-status-tabs.patch
+bugfix/photo-viewer-selection-crash.patch
+bugfix/sent-message-server-entities.patch
+bugfix/sticker-mask-alpha.patch
+feature/share-intent-lag.patch
