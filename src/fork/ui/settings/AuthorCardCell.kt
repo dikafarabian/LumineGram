@@ -222,7 +222,7 @@ class AuthorCardCell(
         val thumb: Drawable = cachedAvatar?.let { BitmapDrawable(resources, it) } ?: AvatarDrawable().apply { setInfo(user) }
         pendingPhotoId = photoId
         awaitingAvatar = true
-        avatarView.setForUserOrChat(user, thumb)
+        avatarView.imageReceiver.setForUserOrChat(user, thumb)
     }
 
     private fun load() {
