@@ -511,3 +511,6 @@ feature/contact-changes.patch
 feature/system-folders.patch
 feature/proxy-menu.patch
 feature/edited-message-date.patch
+feature/keyboard-scroll-typing.patch
+feature/drawer-keep-options-menu.patch
+feature/keep-screen-on-recording.patch
