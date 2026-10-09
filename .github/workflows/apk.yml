@@ -113,7 +113,13 @@ jobs:
           save: true
 
       - name: Set up worktree
-        run: bun run setup -- $SETUP_FLAGS
+        run: |
+          for attempt in 1 2 3; do
+            bun run setup -- $SETUP_FLAGS && exit 0
+            rm -rf worktree worktree-pluginless
+            sleep $((attempt * 20))
+          done
+          exit 1
 
       - name: Set up Rust
         if: matrix.abi == 'arm64-v8a'
