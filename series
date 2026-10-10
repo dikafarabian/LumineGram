@@ -518,3 +518,4 @@ feature/explicit-biometric-confirmation.patch
 feature/premium-badge-dialogs.patch
 feature/feed-media-channel-name.patch
 bugfix/forum-cache-race.patch
+feature/md3-player.patch
