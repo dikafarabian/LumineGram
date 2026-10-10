@@ -503,7 +503,6 @@ bugfix/case-insensitive-settings-search.patch
 bugfix/emoji-status-tabs.patch
 bugfix/photo-viewer-selection-crash.patch
 bugfix/sent-message-server-entities.patch
-bugfix/sticker-mask-alpha.patch
 feature/share-intent-lag.patch
 feature/read-time.patch
 feature/last-seen.patch
@@ -519,3 +518,9 @@ feature/premium-badge-dialogs.patch
 feature/feed-media-channel-name.patch
 bugfix/forum-cache-race.patch
 feature/md3-player.patch
+misc/debug-webm-stickers.patch
+feature/attachment-preview-resolution.patch
+feature/optimized-attachment-menu.patch
+bugfix/sticker-mask-alpha.patch
+misc/debug-photo-crop.patch
+misc/debug-folder-slots.patch

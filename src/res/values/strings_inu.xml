@@ -1976,4 +1976,6 @@
     <string name="InuMd3PlayerSourcePlain">Lyrics · %1$s</string>
     <string name="InuMd3PlayerSourceSyncedFile">Synced lyrics from the file</string>
     <string name="InuMd3PlayerSourcePlainFile">Lyrics from the file</string>
+    <string name="InuOptimizedAttachmentMenu">Optimized attachment menu</string>
+    <string name="InuOptimizedAttachmentMenuInfo">Improves animation smoothness when opening photos and videos</string>
 </resources>
