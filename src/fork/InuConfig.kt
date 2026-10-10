@@ -253,6 +253,7 @@ object InuConfig {
 
     @JvmField
     val M3_SECTIONS_STYLE = BoolItem("m3_sections_style", false)
+    val M3_ACCENT_ICONS = BoolItem("m3_accent_icons", false)
 
     @JvmField
     val MATERIAL3_AVATARS = BoolItem("material3_avatars", false)
@@ -326,7 +327,6 @@ object InuConfig {
 
     @JvmField
     val PREDICTIVE_BACK_MODE = PredictiveBackModeItem()
-
     class CalendarSystemItem : IntItem("calendar_system", GREGORIAN) {
         companion object {
             const val GREGORIAN = 0
@@ -337,6 +337,7 @@ object InuConfig {
 
     @JvmField
     val CALENDAR_SYSTEM = CalendarSystemItem()
+
 
     class ClockFormatItem : IntItem("clock_format", SYSTEM) {
         companion object {
@@ -1329,6 +1330,17 @@ object InuConfig {
     @JvmField
     val COMPACT_EDITED = BoolItem("compact_edited", false)
 
+    class EditedMessageDateModeItem : IntItem("edited_message_date_mode", TELEGRAM) {
+        companion object {
+            const val TELEGRAM = 0
+            const val EDIT_DATE = 1
+            const val SEND_DATE = 2
+        }
+    }
+
+    @JvmField
+    val EDITED_MESSAGE_DATE_MODE = EditedMessageDateModeItem()
+
     @JvmField
     val SHOW_FORWARDS_COUNT = BoolItem("show_forwards_count", false)
 
@@ -1337,6 +1349,10 @@ object InuConfig {
 
     @JvmField
     val FORWARD_PRO = BoolItem("forward_pro", false)
+
+    val FORWARD_PRO_SILENT = BoolItem("forward_pro_silent", false)
+    val FORWARD_PRO_HIDE_CAPTION = BoolItem("forward_pro_hide_caption", false)
+    val FORWARD_PRO_SHOW_SENDER = BoolItem("forward_pro_show_sender", true)
 
     @JvmField
     val BUBBLE_TAILS = BoolItem("bubble_tails", true)
@@ -1525,17 +1541,6 @@ object InuConfig {
     @JvmField
     val SAVE_DELETED_PRIVATE = BoolItem("save_deleted_private", false)
 
-    class EditedMessageDateModeItem : IntItem("edited_message_date_mode", TELEGRAM) {
-        companion object {
-            const val TELEGRAM = 0
-            const val EDIT_DATE = 1
-            const val SEND_DATE = 2
-        }
-    }
-
-    @JvmField
-    val EDITED_MESSAGE_DATE_MODE = EditedMessageDateModeItem()
-
     @JvmField
     val SAVE_DELETED_GROUPS = BoolItem("save_deleted_groups", false)
 
@@ -1650,6 +1655,7 @@ object InuConfig {
             const val INUGRAM = 1
         }
     }
+            const val YANDEX = 3
 
     @JvmField
     val NOTIFICATION_ICON = NotificationIconItem()
@@ -1669,7 +1675,6 @@ object InuConfig {
             const val DEFAULT = 0
             const val TELEGRAM = 1
             const val GOOGLE = 2
-            const val YANDEX = 3
             const val DISABLED = 4
         }
     }
@@ -1766,6 +1771,9 @@ object InuConfig {
     // language" the moment the user ever translates a single message anywhere
     @JvmField
     val TRANSLATE_TARGET_LANGUAGE_MIGRATED = BoolItem("translate_target_language_migrated", false)
+    @JvmField
+    val TRANSLATE_YANDEX_KEY = StringItem("translate_yandex_key", "", exportable = false)
+
 
     @JvmField
     val FORCE_TRANSLATE = BoolItem("force_translate", false)
@@ -1796,9 +1804,6 @@ object InuConfig {
     val TRANSLATE_DEEPL_KEY = StringItem("translate_deepl_key", "", exportable = false)
 
     @JvmField
-    val TRANSLATE_YANDEX_KEY = StringItem("translate_yandex_key", "", exportable = false)
-
-    @JvmField
     val TRANSLATE_MICROSOFT_KEY = StringItem("translate_microsoft_key", "", exportable = false)
 
     @JvmField
@@ -1824,6 +1829,7 @@ object InuConfig {
 
     @JvmField
     val TRANSLATION_PROVIDER = StringItem("translation_provider", "", exportable = false)
+
 
     @JvmField
     val ACCOUNT_ORDER = StringItem("account_order", "", exportable = false)

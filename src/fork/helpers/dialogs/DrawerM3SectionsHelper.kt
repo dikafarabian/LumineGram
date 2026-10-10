@@ -16,7 +16,6 @@ object DrawerM3SectionsHelper {
         InuConfig.NAVIGATION_DRAWER.value && InuConfig.DRAWER_M3_SECTIONS.value
 
     private val outerR get() = AndroidUtilities.dp(16f).toFloat()
-    private val innerR get() = AndroidUtilities.dp(4f).toFloat()
 
     fun styleMenuRow(view: View, posInGroup: Int, groupSize: Int) {
         view.setStateListAnimator(null)
@@ -24,9 +23,9 @@ object DrawerM3SectionsHelper {
         val last = posInGroup == groupSize - 1
         val radii = when {
             first && last -> FloatArray(8) { outerR }
-            first -> floatArrayOf(outerR, outerR, outerR, outerR, innerR, innerR, innerR, innerR)
-            last -> floatArrayOf(innerR, innerR, innerR, innerR, outerR, outerR, outerR, outerR)
-            else -> FloatArray(8) { innerR }
+            first -> floatArrayOf(outerR, outerR, outerR, outerR, 0f, 0f, 0f, 0f)
+            last -> floatArrayOf(0f, 0f, 0f, 0f, outerR, outerR, outerR, outerR)
+            else -> FloatArray(8)
         }
         val card = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -41,9 +40,9 @@ object DrawerM3SectionsHelper {
         val lp = view.layoutParams as RecyclerView.LayoutParams
         lp.setMargins(
             AndroidUtilities.dp(12f),
-            if (first) AndroidUtilities.dp(4f) else AndroidUtilities.dp(1f),
+            if (first) AndroidUtilities.dp(6f) else 0,
             AndroidUtilities.dp(12f),
-            if (last) AndroidUtilities.dp(4f) else AndroidUtilities.dp(1f),
+            if (last) AndroidUtilities.dp(6f) else 0,
         )
         view.layoutParams = lp
     }

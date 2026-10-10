@@ -96,6 +96,11 @@ object ForwardProHelper {
         return states.getOrPut(alert) {
             AlertState().also {
                 it.active = pendingOverride ?: InuConfig.FORWARD_PRO.value
+                if (it.active) {
+                    it.silentSend = InuConfig.FORWARD_PRO_SILENT.value
+                    it.hideCaption = InuConfig.FORWARD_PRO_HIDE_CAPTION.value
+                    alert.showSendersName = InuConfig.FORWARD_PRO_SHOW_SENDER.value
+                }
                 it.editedText = pendingInitialEditedText
                 pendingOverride = null
                 pendingInitialEditedText = null
@@ -163,10 +168,12 @@ object ForwardProHelper {
 
         authorIcon.setOnClickListener {
             alert.showSendersName = !alert.showSendersName
+            InuConfig.FORWARD_PRO_SHOW_SENDER.value = alert.showSendersName
             updateQuickToggleIcons(alert)
         }
         silentIcon.setOnClickListener {
             state.silentSend = !state.silentSend
+            InuConfig.FORWARD_PRO_SILENT.value = state.silentSend
             updateQuickToggleIcons(alert)
         }
         scheduleIcon.setOnClickListener {
@@ -186,6 +193,7 @@ object ForwardProHelper {
         }
         captionIcon.setOnClickListener {
             state.hideCaption = !state.hideCaption
+            InuConfig.FORWARD_PRO_HIDE_CAPTION.value = state.hideCaption
             updateQuickToggleIcons(alert)
         }
 

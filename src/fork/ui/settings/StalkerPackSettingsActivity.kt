@@ -38,6 +38,25 @@ class StalkerPackSettingsActivity : SettingsPageActivity() {
                 R.string.InuSaveUserInfo,
                 R.string.InuSaveUserInfoInfo,
                 InuConfig.SAVE_USER_INFO.value,
+                experimental = true,
+            )
+        )
+        items.add(
+            mkTwoLineCheckItem(
+                TOGGLE_SAVE_READ_TIME,
+                R.string.InuSaveReadTime,
+                R.string.InuSaveReadTimeInfo,
+                InuConfig.SAVE_READ_TIME.value,
+                experimental = true,
+            )
+        )
+        items.add(
+            mkTwoLineCheckItem(
+                TOGGLE_SAVE_LAST_SEEN,
+                R.string.InuSaveLastSeen,
+                R.string.InuSaveLastSeenInfo,
+                InuConfig.SAVE_LAST_SEEN.value,
+                experimental = true,
             )
         )
         items.add(

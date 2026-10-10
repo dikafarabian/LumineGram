@@ -267,21 +267,25 @@ object M3SectionsHelper {
             }
         }
 
-        if (!isCircleIconsEnabled()) {
+        if (!isCircleIconsEnabled() && !isAccentIcons()) {
             resizeSquare(iconLayout, 28)
             iconView.clearColorFilter()
             cellBackground.inu_monetColor = 0
             return
         }
 
-        resizeSquare(iconLayout, 36)
-        resizeSquare(iconView, 24)
+        resizeSquare(iconLayout, if (isCircleIconsEnabled()) 36 else 28)
+        resizeSquare(iconView, if (isAccentIcons() && isCircleIconsEnabled()) 28 else 24)
         iconView.setColorFilter(iconColor(topColor, bottomColor))
         cellBackground.inu_monetColor = circleColor(topColor, bottomColor)
     }
 
     @JvmStatic
+    fun isAccentIcons(): Boolean = InuConfig.M3_ACCENT_ICONS.value
+
+    @JvmStatic
     fun circleColor(topColor: Int, bottomColor: Int): Int {
+        if (isAccentIcons()) return accentColor()
         val flat = ColorUtils.blendARGB(topColor, bottomColor, 0.5f)
         val hsl = FloatArray(3)
         ColorUtils.colorToHSL(flat, hsl)
@@ -308,8 +312,11 @@ object M3SectionsHelper {
         return circleColor(topColor, bottomColor) to iconColor(topColor, bottomColor)
     }
 
+    private fun accentColor(): Int = Theme.getColor(Theme.key_featuredStickers_addButton)
+
     @JvmStatic
     fun iconColor(topColor: Int, bottomColor: Int): Int {
+        if (isAccentIcons()) return 0xFFFFFFFF.toInt()
         val flat = ColorUtils.blendARGB(topColor, bottomColor, 0.5f)
         val hsl = FloatArray(3)
         ColorUtils.colorToHSL(flat, hsl)
