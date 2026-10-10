@@ -89,7 +89,7 @@ Subject: [+] force disable vibration
  .../main/java/org/telegram/ui/FiltersSetupActivity.java  | 2 +-
  .../org/telegram/ui/Gifts/ProfileGiftsContainer.java     | 2 +-
  .../src/main/java/org/telegram/ui/GroupCallActivity.java | 2 +-
- .../src/main/java/org/telegram/ui/LaunchActivity.java    | 8 +++++++-
+ .../src/main/java/org/telegram/ui/LaunchActivity.java    | 2 +-
  .../java/org/telegram/ui/LiteModeSettingsActivity.java   | 2 +-
  .../src/main/java/org/telegram/ui/LoginActivity.java     | 2 +-
  .../main/java/org/telegram/ui/ManageLinksActivity.java   | 2 +-
@@ -136,7 +136,7 @@ Subject: [+] force disable vibration
  .../src/main/java/org/telegram/ui/iv/RichEditor.java     | 2 +-
  .../main/java/org/telegram/ui/iv/RichEditorListView.java | 6 +++---
  .../src/main/java/org/telegram/ui/web/WebActionBar.java  | 2 +-
- 132 files changed, 153 insertions(+), 133 deletions(-)
+ 132 files changed, 147 insertions(+), 133 deletions(-)
 
 diff --git a/TMessagesProj/src/main/java/androidx/recyclerview/widget/ItemTouchHelper.java b/TMessagesProj/src/main/java/androidx/recyclerview/widget/ItemTouchHelper.java
 index 0000000..0000000 100644
@@ -1303,19 +1303,6 @@ index 0000000..0000000 100644
  import android.view.KeyEvent;
  import android.view.Menu;
  import android.view.MotionEvent;
-@@ -257,6 +257,12 @@ import java.util.zip.ZipEntry;
- import java.util.zip.ZipInputStream;
- 
- public class LaunchActivity extends BasePermissionsActivity implements INavigationLayout.INavigationLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, IPipActivity {
-+
-+    @Override
-+    public Object getSystemService(String name) {
-+        return desu.inugram.helpers.vibration.VibrationHelper.service(name, super.getSystemService(name));
-+    }
-+
-     public final static String EXTRA_FORCE_NOT_INTERNAL_APPS = "force_not_internal_apps";
-     public final static String EXTRA_FORCE_REQUEST = "force_request";
-     public final static Pattern PREFIX_T_ME_PATTERN = Pattern.compile("^(?:http(?:s|)://|)([A-z0-9-]+?)\\.t\\.me");
 diff --git a/TMessagesProj/src/main/java/org/telegram/ui/LiteModeSettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/LiteModeSettingsActivity.java
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/LiteModeSettingsActivity.java
