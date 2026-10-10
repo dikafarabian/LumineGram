@@ -29,6 +29,7 @@ object LocaleHelper {
     @JvmStatic
     fun getLocalString(rawKey: String?, res: Int): String? {
         val ctx = ApplicationLoader.applicationContext ?: return null
+        // lumine: getString(@StringRes) arrives with no key, derive it so AppName/Inu* stay local
         val key = rawKey ?: if (res != 0) try { ctx.resources.getResourceEntryName(res) } catch (_: Exception) { null } else null
         if (!isLocalOnlyString(key)) return null
         disguiseName(key)?.let { return it }

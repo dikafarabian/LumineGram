@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.su>
 Date: Fri, 10 Apr 2026 01:21:49 +0300
 Subject: disable channel bottom bar (mute and join buttons)
 
@@ -138,7 +138,7 @@ index 0000000..0000000 100644
              showBottomOverlayProgress(false, false);
          } else if (currentUser != null && currentUser.id == UserObject.VERIFY) {
              if (!getMessagesController().isDialogMuted(dialog_id, getTopicId())) {
-@@ -46673,7 +46691,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -46602,7 +46620,7 @@ public class ChatActivity extends BaseFragment implements
              pollAddVisibility = animatorPollAddAnswerVisibility.getFloatValue();
          }
  

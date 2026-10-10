@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Thu, 23 Jul 2026 07:36:20 +0400
 Subject: fix dead zones in list rows from hidden clickable children.
 
@@ -12,7 +12,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/UserCell.java b/T
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/UserCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/UserCell.java
-@@ -318,6 +318,7 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
+@@ -320,6 +320,7 @@ public class UserCell extends FrameLayout implements NotificationCenter.Notifica
              adminTextView.setTranslationX(0);
              adminTextView.setBackground(null);
              adminTextView.setOnClickListener(onClick);

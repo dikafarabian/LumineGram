@@ -131,6 +131,7 @@ class IconPacksSettingsActivity : SettingsPageActivity() {
 
     private fun notificationIconLabel(): String = when (InuConfig.NOTIFICATION_ICON.value) {
         InuConfig.NotificationIconItem.INUGRAM -> LocaleController.getString(R.string.InuNotificationIconInugram)
+        InuConfig.NotificationIconItem.OLD_LUMINEGRAM -> LocaleController.getString(R.string.InuNotificationIconOldLuminegram)
         else -> LocaleController.getString(R.string.InuNotificationIconTelegram)
     }
 
@@ -142,6 +143,7 @@ class IconPacksSettingsActivity : SettingsPageActivity() {
                 listOf(
                     LocaleController.getString(R.string.InuNotificationIconTelegram),
                     LocaleController.getString(R.string.InuNotificationIconInugram),
+                    LocaleController.getString(R.string.InuNotificationIconOldLuminegram),
                 ),
                 InuConfig.NOTIFICATION_ICON.value,
             ) { which ->

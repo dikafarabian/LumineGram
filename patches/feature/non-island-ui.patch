@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Thu, 23 Jul 2026 12:29:15 +0400
 Subject: non-island ui in various parts of the app
 
@@ -705,7 +705,7 @@ index 0000000..0000000 100644
          } else {
              return lerp(defaultIslandHeight, enterViewIslandHeight, enterViewFactor) * visibility;
          }
-@@ -46621,10 +46648,15 @@ public class ChatActivity extends BaseFragment implements
+@@ -46550,10 +46577,15 @@ public class ChatActivity extends BaseFragment implements
              return;
          }
  

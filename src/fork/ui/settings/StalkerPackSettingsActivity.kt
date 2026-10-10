@@ -59,24 +59,6 @@ class StalkerPackSettingsActivity : SettingsPageActivity() {
                 experimental = true,
             )
         )
-        items.add(
-            mkTwoLineCheckItem(
-                TOGGLE_SAVE_READ_TIME,
-                R.string.InuSaveReadTime,
-                R.string.InuSaveReadTimeInfo,
-                InuConfig.SAVE_READ_TIME.value,
-                experimental = true,
-            )
-        )
-        items.add(
-            mkTwoLineCheckItem(
-                TOGGLE_SAVE_LAST_SEEN,
-                R.string.InuSaveLastSeen,
-                R.string.InuSaveLastSeenInfo,
-                InuConfig.SAVE_LAST_SEEN.value,
-                experimental = true,
-            )
-        )
         items.add(mkSubPageButton(BUTTON_WATCH_LIST, R.drawable.inu_tabler_user_search, LocaleController.getString(R.string.InuPresenceWatchList)))
         items.add(mkSubPageButton(BUTTON_TYPING_SPOOF_LIST, R.drawable.inu_tabler_keyboard, LocaleController.getString(R.string.InuTypingSpoof)))
     }

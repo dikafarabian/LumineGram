@@ -232,7 +232,6 @@ class MainTabsPreviewCell(
             label.visibility = GONE
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 0)
-            // lumine: accent FAB colors so Monet keeps the circle tinted instead of matching the bar
             background = Theme.createRoundRectDrawable(dp(SEARCH_BUTTON_SIZE_DP / 2f), Theme.getColor(Theme.key_chats_actionBackground))
             icon.colorFilter = PorterDuffColorFilter(Theme.getColor(Theme.key_chats_actionIcon), PorterDuff.Mode.MULTIPLY)
             icon.alpha = if (enabled) 1f else 0.5f

@@ -382,10 +382,6 @@
     <string name="InuPillStackWeather">Weather</string>
     <string name="InuPillStackProxy">Proxy</string>
     <string name="InuPillStackRam">RAM</string>
-    <string name="InuCalendarSystem">Calendar system</string>
-    <string name="InuCalendarSystemGregorian">Gregorian</string>
-    <string name="InuCalendarSystemHijri">Hijri Qamari (lunar)</string>
-    <string name="InuCalendarSystemPersian">Hijri Shamsi (Jalali)</string>
     <string name="InuPillStackNetSpeed">Network speed</string>
     <string name="InuPillStackDcPing">Data center ping</string>
     <string name="InuPillStackBattery">Battery</string>
@@ -573,7 +569,9 @@
     <string name="InuNotificationIcon">Notification icon</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotificationIconInugram">LumineGram</string>
+    <string name="InuNotificationIconOldLuminegram">Old LumineGram</string>
     <string name="InuNotificationIconInfo">On Xiaomi (MIUI/HyperOS) the system may replace this icon with the app icon, so the choice might not be visible there</string>
+    <string name="InuAppIconOldLuminegram">Old LumineGram</string>
     <string name="InuDisableChatBubbles">Disable Android notification bubbles</string>
     <string name="InuKeepChatsInStack">Keep previous chats open</string>
     <string name="InuKeepChatsInStackInfo">Opening another chat won\'t close the chats behind it</string>
@@ -582,12 +580,10 @@
     <string name="InuKeepOriginalAfterTranslation">Show original text</string>
     <string name="InuTranslateAutoDetectLang">Detect language for the message menu</string>
     <string name="InuTranslateAutoDetectLangInfo">On-device language detection for messages Telegram hasn\'t identified. May slow the menu slightly.</string>
-    <string name="InuTranslateProviderYandex">Yandex Translate</string>
     <string name="InuInstantTranslateBanner">Instant translate banner</string>
     <string name="InuInstantTranslateBannerInfo">Show the translate bar after a single foreign-language message.</string>
     <string name="InuIgnoreTranslationsDisabled">Ignore \"Translations disabled\"</string>
     <string name="InuIgnoreTranslationsDisabledInfo">Show the translate banner even if the channel or user disabled translations.</string>
-    <string name="InuTranslateYandexApiKey">Yandex API key</string>
     <string name="InuTranslateInstantView">Translate page</string>
     <string name="InuInstantViewShowOriginal">Show original</string>
     <string name="InuTranslating">Translating…</string>
@@ -699,7 +695,6 @@
     <string name="InuFontTagCustom">Custom</string>
     <string name="InuMonoFont">Monospace font</string>
     <string name="InuMonoFontInfo">Font used for monospace blocks — inline code and code blocks.</string>
-    <string name="InuMapPreviewProviderYandex">Yandex</string>
     <string name="InuAppFontStack">Font stack</string>
     <string name="InuAppFontStackInfo">Top font is primary; the rest are fallbacks for missing characters (CJK etc.). Drag to reorder.</string>
     <string name="InuFontStackAdd">Add font</string>
@@ -985,7 +980,6 @@
     <string name="InuCut">Cut</string>
     <string name="InuCodeLanguage">Code language</string>
     <string name="InuVersion">LumineGram %1$s (%2$s)</string>
-    <string name="InuVersionShort">LumineGram %1$s</string>
     <string name="InuCategories">Categories</string>
     <string name="InuDataBackup">Backup &amp; Sync</string>
     <string name="InuBuildFull">Full</string>
@@ -1030,6 +1024,7 @@
     <string name="InuAppIconJungle">Jungle</string>
     <string name="InuAppIconGold">Gold</string>
     <string name="InuAppIconDish">Dish</string>
+    <string name="InuAppIconLicenseConcept">Concept icon by **LumineGram**</string>
     <string name="InuAppIconLicenseInugram">Placeholder icon, feel free to contribute a better one</string>
     <string name="InuAppIconLicenseTelegram">Icon by **Telegram**. All rights reserved.</string>
     <string name="InuJumpToBeginning">Jump to the beginning</string>
@@ -1049,6 +1044,8 @@
 
     <string name="InuAdditional">Additional</string>
     <string name="InuAboutGitHub">GitHub</string>
+    <string name="InuAboutAuthor">Kanged by</string>
+    <string name="InuAboutChannel">Updates channel</string>
     <string name="InuUpdates">Updates</string>
     <string name="InuUpdateBetaWarning">This is a beta update and may be unstable.</string>
     <string name="InuUpdateInstalling">Installing update</string>
@@ -1365,7 +1362,7 @@
     <string name="InuSaveEditedMessages">Save edit history</string>
     <string name="InuSaveEditedMessagesInfo">Saves previous message versions and allows viewing edit history ✏️</string>
     <string name="InuSaveUserInfo">Save user info</string>
-    <string name="InuSaveUserInfoInfo">Keeps phone country, registration month, and a log of name, username, bio and photo changes after the server stops returning them (beta)</string>
+    <string name="InuSaveUserInfoInfo">Keeps phone country, registration month, and a log of name, username, bio and photo changes after the server stops returning them</string>
     <string name="InuContactChanges">Contact changes</string>
     <string name="InuContactChangesEmpty">No changes saved for this contact yet</string>
     <string name="InuContactChangeLine">%1$s: %2$s → %3$s</string>
@@ -1836,7 +1833,6 @@
     <string name="InuDonateWebsite">All methods on the website</string>
     <string name="InuDonateCopied">Copied</string>
     <string name="InuShowMediaSize">Show media size</string>
-    <string name="InuAboutAuthor">Kanged by</string>
 
     <string name="InuPlugins">Plugins</string>
     <string name="InuPluginsInfo">Plugins are user-made scripts that extend the app. Only install plugins from sources you trust.</string>
@@ -1981,7 +1977,45 @@
     <string name="InuPluginsFailedAtRuntime">Runtime error</string>
     <string name="InuPluginsFailedAtUnload">Unload error</string>
     <string name="InuPluginsFailedFormat">%1$s: %2$s</string>
+    <string name="InuMarketplace">Marketplace</string>
+    <string name="InuMarketplaceDownloadFailed">Could not get the plugin: %1$s</string>
+    <string name="InuMarketplaceChecksum">the file does not match its checksum</string>
     <string name="InuCopyAllProxies">Copy all</string>
     <string name="InuShareAllProxies">Share all</string>
-    <string name="InuDrawerMenuHidden">Hidden items</string>
+
+    <string name="InuAppIconsSelect">Apply icon</string>
+    <string name="InuAppIconsKeep">Keep current icon</string>
+
+    <string name="InuAppIconBlush">Blush</string>
+    <string name="InuAppIconNoxSky">Nox Sky</string>
+    <string name="InuAppIconInverse">Inverse</string>
+    <string name="InuAppIconOsu">osu!</string>
+    <string name="InuAppIconAmongUs">Among Us</string>
+
+    <string name="InuAppIconCrimson">Crimson</string>
+    <string name="InuAppIconBy">by %1$s</string>
+    <string name="InuAppIconDescDefault">The classic LumineGram dish</string>
+    <string name="InuAppIconDescOld">Where it all began</string>
+    <string name="InuAppIconDescInuTribute">A nod to the original inuGram</string>
+    <string name="InuAppIconDescRadar">Sweeping the airwaves</string>
+    <string name="InuAppIconDescConstellation">Stars linked by signal</string>
+    <string name="InuAppIconDescOrbit">A dish circled by a satellite</string>
+    <string name="InuAppIconDescAvatar">A crimson vortex around a cream dish</string>
+    <string name="InuAppIconDescNothing">Dot-matrix glow</string>
+    <string name="InuAppIconDescMono">Hollow outlines on a dark map</string>
+    <string name="InuAppIconDescSunset">Dusk sky with a warm rim light</string>
+    <string name="InuAppIconDescAmethyst">Violet glass and sparkles</string>
+    <string name="InuAppIconDescAurora">Pink ribbons of light</string>
+    <string name="InuAppIconDescGoogle26">Glossy blue on soft white</string>
+    <string name="InuAppIconDescLunar">A dish on the Moon, Earth in view</string>
+    <string name="InuAppIconDescMathBook">Graph paper and a ruler</string>
+    <string name="InuAppIconDescJungle">Leaves in the canopy</string>
+    <string name="InuAppIconDescGold">Solid gold plating</string>
+    <string name="InuAppIconDescDish">Just the dish, nothing else</string>
+    <string name="InuAppIconDescBlush">Soft pink fading to yellow</string>
+    <string name="InuAppIconDescNoxSky">A white dish under a night sky</string>
+    <string name="InuAppIconDescInverse">Black and white, split in two</string>
+    <string name="InuAppIconDescOsu">Low-poly hit-circle pink</string>
+    <string name="InuAppIconDescAmongUs">A crewmate on bright yellow</string>
+    <string name="InuAppIconDescCrimson">A blood moon over a sakura dusk</string>
 </resources>

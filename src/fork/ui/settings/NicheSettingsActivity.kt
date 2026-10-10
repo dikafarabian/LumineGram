@@ -38,6 +38,7 @@ class NicheSettingsActivity : SettingsPageActivity() {
     companion object {
         private val TOGGLE_FORCE_NO_VIBRATION = InuUtils.generateId()
 
+        // hidden until NICHE_SETTINGS_UNLOCKED; SearchRegistry skips it while locked
         @JvmField
         val PAGE = SearchRegistry.Page(
             slug = "niche",

@@ -8,6 +8,7 @@ worktree/
 .gradle/
 .gradle-local/
 build/
+!patches/lumine/build/
 .cxx/
 *.apk
 *.aab
@@ -20,7 +21,6 @@ CLAUDE.local.md
 .local_build_number
 .freebuff/
 desktop.ini
-# not sure if this is needed, but it seems to be
 lumineBot/
 lumineTodo/
 worktree-pluginless/
@@ -30,3 +30,4 @@ sdk/cli/dist
 src/core/src/main/resources/tl_tables.txt
 src/native/target
 out
+plugins/*/dist

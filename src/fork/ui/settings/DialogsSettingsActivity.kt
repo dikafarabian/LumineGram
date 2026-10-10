@@ -552,6 +552,7 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
         val byItem = mainTabsEntries.associateBy { it.item }
         val moved = newOrder.distinct().mapNotNull { byItem[it] }
         val movedItems = moved.mapTo(HashSet()) { it.item }
+        // lumine: emit moved entries once at the first moved slot so filtered-out entries keep their position
         val result = ArrayList<MenuOrderEntry<MainTabsMenuConfig.Item>>(mainTabsEntries.size)
         var movedEmitted = false
         for (entry in mainTabsEntries) {

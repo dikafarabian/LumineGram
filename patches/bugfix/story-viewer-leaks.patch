@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Wed, 26 Aug 2026 01:41:27 +0400
 Subject: destroy story input views on release
 
@@ -13,7 +13,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java
-@@ -4762,6 +4762,15 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
+@@ -4745,6 +4745,15 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
          NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.emojiLoaded);
      }
  

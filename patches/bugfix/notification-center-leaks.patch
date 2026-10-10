@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.su>
 Date: Thu, 2 Jul 2026 14:06:47 +0400
 Subject: various leaks related to NotificationCenter delegates not being unregistered
 
@@ -45,7 +45,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MessagesControll
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
-@@ -23112,7 +23112,11 @@ public class MessagesController extends BaseController implements NotificationCe
+@@ -23137,7 +23137,11 @@ public class MessagesController extends BaseController implements NotificationCe
              loadMessagesInternal(dialogId, 0, true, count, finalMessageId, 0, true, 0, classGuid, 2, 0, 0, 0, -1, 0, 0, 0, false, 0, true, false, false, null, 0L);
          }
  
@@ -86,7 +86,7 @@ index 0000000..0000000 100644
          ReactionsEffectOverlay.dismissByFragment(this);
          if (messageMetricsView != null) {
              messageMetricsView.finish();
-@@ -35867,6 +35871,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -35944,6 +35948,7 @@ public class ChatActivity extends BaseFragment implements
      private int commentMessagesRequestId;
      private int commentLoadingMessageId;
      private boolean hideCommentLoading;
@@ -94,7 +94,7 @@ index 0000000..0000000 100644
      private long commentLoadingStartedAt;
      private TLRPC.TL_messages_discussionMessage savedDiscussionMessage;
      private TLRPC.messages_Messages savedHistory;
-@@ -35964,9 +35969,11 @@ public class ChatActivity extends BaseFragment implements
+@@ -36041,9 +36046,11 @@ public class ChatActivity extends BaseFragment implements
                                      chatActivity.didReceivedNotification(id, account, args);
                                  }, 50);
                                  NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.messagesDidLoad);
@@ -171,7 +171,7 @@ index 0000000..0000000 100644
  
      private boolean isOnLogout;
  
-@@ -405,20 +406,22 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
+@@ -403,20 +404,22 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
              loaderDialog.setCanCancel(false);
              loaderDialog.showDelayed(1000);
  
@@ -196,7 +196,7 @@ index 0000000..0000000 100644
              LocaleController.getInstance().applyLanguage(localeInfo, true, false, currentAccount);
          });
  
-@@ -472,6 +475,10 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
+@@ -470,6 +473,10 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
          destroyed = true;
          NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.suggestedLangpack);
          NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.configLoaded);
@@ -211,7 +211,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/SelectAnimatedEmojiDial
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/SelectAnimatedEmojiDialog.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/SelectAnimatedEmojiDialog.java
-@@ -4976,7 +4976,7 @@ public class SelectAnimatedEmojiDialog extends FrameLayout implements Notificati
+@@ -4972,7 +4972,7 @@ public class SelectAnimatedEmojiDialog extends FrameLayout implements Notificati
          NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.groupStickersDidLoad);
          NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.emojiLoaded);
          if (type == TYPE_EMOJI_STATUS || type == TYPE_EMOJI_STATUS_TOP) {

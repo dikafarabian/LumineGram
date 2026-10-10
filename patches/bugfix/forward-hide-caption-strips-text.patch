@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Wed, 26 Aug 2026 07:37:37 +0400
 Subject: fix forwarding without captions blanking text-only messages sometimes
 
@@ -11,7 +11,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelp
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelper.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/SendMessagesHelper.java
-@@ -2348,7 +2348,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
+@@ -2358,7 +2358,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
  
                      newMsg.flags |= 8388608;
                  }

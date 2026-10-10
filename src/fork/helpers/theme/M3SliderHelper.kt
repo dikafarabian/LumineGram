@@ -210,6 +210,7 @@ object M3SliderHelper {
         val minActive = view.minIndex != Int.MIN_VALUE && view.minIndex >= 0
         val dimUntil = if (minActive) centerX(view.minIndex.toFloat()) else -Float.MAX_VALUE
         val dimFrom = if (view.dashedFrom != -1) centerX(view.dashedFrom.toFloat()) else Float.MAX_VALUE
+        // the caps extend past the edge stops further than the handle gap covers
         if (cx > centerX(0f) + 1f) {
             drawSpan(canvas, trackLeft, cx - hw - gap, cy, outerR, innerR, activeColor, dimUntil, dimFrom)
         }

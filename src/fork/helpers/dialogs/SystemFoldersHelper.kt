@@ -7,6 +7,7 @@ import org.telegram.messenger.MessagesController
 import org.telegram.messenger.NotificationCenter
 import org.telegram.messenger.R
 
+// lumine: virtual system folders are recomputed on every sync and never persisted, so they are not saved to the db or pushed to server
 object SystemFoldersHelper {
 
     const val SYSTEM_FILTER_ID_BASE = 200000

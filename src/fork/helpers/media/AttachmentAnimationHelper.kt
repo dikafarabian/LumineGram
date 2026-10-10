@@ -60,6 +60,7 @@ object AttachmentAnimationHelper {
             topControls: View,
             bottomControls: View,
         ) {
+            // Match stock's second-half backdrop fade.
             val opacity = ((alpha - 127) / 127f).coerceIn(0f, 1f)
             if (opacity == 0f) return
 
@@ -104,6 +105,7 @@ object AttachmentAnimationHelper {
             }
             state.detachListener = listener
             sheet.addOnAttachStateChangeListener(listener)
+            // Move allocation off the opening path; capture on tap to keep the snapshot current.
             Utilities.globalQueue.postRunnable {
                 var renderer: AttachmentBackdrop? = null
                 try {
@@ -146,6 +148,8 @@ object AttachmentAnimationHelper {
         decor.getLocationOnScreen(state.origin)
         val sheetOrigin = IntArray(2)
         sheet.getLocationOnScreen(sheetOrigin)
+        // Hide only the source cell while recording. Clipping its rectangle out of the whole
+        // sheet also removes the sheet background/overlapping toolbar and exposes the chat below.
         val visibility = cell.visibility
         cell.visibility = View.INVISIBLE
         try {
@@ -154,6 +158,7 @@ object AttachmentAnimationHelper {
                 decor.draw(canvas)
                 canvas.save()
                 canvas.translate((sheetOrigin[0] - state.origin[0]).toFloat(), (sheetOrigin[1] - state.origin[1]).toFloat())
+                // Stock uses SRC for a separate translucent window. In a combined snapshot it erases the chat.
                 val dim = alert.backDrawable
                 val dimAlpha = dim.alpha
                 val dimPaint = Paint().apply { color = Color.BLACK; alpha = dimAlpha }
@@ -216,6 +221,7 @@ object AttachmentAnimationHelper {
         attachmentBackdrop = null
         state.detachListener?.let { alert.window?.decorView?.removeOnAttachStateChangeListener(it) }
         state.renderer?.close()
+        // Recorded UI frames can retain the hardware bitmap. Let their references expire naturally.
         state.bitmap = null
     }
 
@@ -264,7 +270,9 @@ object AttachmentAnimationHelper {
         if (!isLightweightAttachmentPreview(viewer, selectionType)) return false
 
         val container: View = viewer.containerView
+        // Keep GPU drawing without a texture for the whole container.
         container.setLayerType(View.LAYER_TYPE_NONE, null)
+        // Show controls immediately: fading their parent can require an offscreen alpha layer.
         container.alpha = 1f
         return true
     }

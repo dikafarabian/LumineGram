@@ -9,6 +9,7 @@ import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.R
 
 object DownloadsHelper {
+    // lumine: stock draws only the progress line when idle, so the always-on button needs its own arrow
     @JvmStatic
     fun drawIdleIcon(canvas: Canvas, view: View, color: Int, lineTop: Float) {
         val icon = ContextCompat.getDrawable(view.context, R.drawable.msg_download)?.mutate() ?: return

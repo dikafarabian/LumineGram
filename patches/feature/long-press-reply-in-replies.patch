@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.su>
 Date: Wed, 22 Apr 2026 09:01:03 +0300
 Subject: Long-press reply panel in "Replies" chat opens discussion group instead of thread
 
@@ -11,7 +11,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java b/TMe
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
-@@ -41149,7 +41149,11 @@ public class ChatActivity extends BaseFragment implements
+@@ -41078,7 +41078,11 @@ public class ChatActivity extends BaseFragment implements
                  }
              }
              if (UserObject.isReplyUser(currentUser)) {

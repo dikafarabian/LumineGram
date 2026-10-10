@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.su>
 Date: Tue, 23 Jun 2026 17:19:08 +0400
 Subject: fix photo viewer dismissing keyboard (and also breaking close animation target), by essentially reverting to its pre-12.8 behavior
 
@@ -25,7 +25,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java b/T
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/LaunchActivity.java
-@@ -9183,14 +9183,18 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
+@@ -9181,14 +9181,18 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
      private int reasonsToHideMainContent = 0;
      private int reasonsToHideDecorView = 0;
  

@@ -29,6 +29,7 @@ import org.telegram.ui.ChatActivity
 import org.telegram.ui.DialogsActivity
 
 object RecentChatsSidebar {
+    // lumine: bars live only in the fragment's own view tree, a static map pinned every closed chat
     private inline fun <reified T : View> find(fragment: BaseFragment): T? {
         val root = fragment.fragmentView as? ViewGroup ?: return null
         for (i in 0 until root.childCount) (root.getChildAt(i) as? T)?.let { return it }

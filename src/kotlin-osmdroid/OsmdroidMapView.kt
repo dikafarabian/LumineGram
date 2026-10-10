@@ -34,6 +34,8 @@ internal class OsmIMapView(context: Context) : IMapsProvider.IMapView {
 
     val mapView = object : OsmMapView(context) {
         override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+            // lumine: osmdroid consumes the drag itself, so onInterceptTouchEvent only sees the DOWN and the sheet never learns the map was moved
+            if (ev.actionMasked == MotionEvent.ACTION_MOVE) interceptInterceptor?.onInterceptTouchEvent(ev) { false }
             val di = dispatchInterceptor ?: return super.dispatchTouchEvent(ev)
             return di.onInterceptTouchEvent(ev) { e -> super.dispatchTouchEvent(e) }
         }
@@ -74,7 +76,7 @@ internal class OsmIMapView(context: Context) : IMapsProvider.IMapView {
         setPadding(AndroidUtilities.dp(8f), AndroidUtilities.dp(3f), AndroidUtilities.dp(8f), AndroidUtilities.dp(3f))
         linksClickable = true
         movementMethod = LinkMovementMethod.getInstance()
-        text = Html.fromHtml(ATTRIBUTION_OSM, Html.FROM_HTML_MODE_LEGACY)
+        text = Html.fromHtml(normalAttribution(), Html.FROM_HTML_MODE_LEGACY)
     }
 
     // map container parallaxes when bottom sheet expands; cancel that translation on attribution so it stays put

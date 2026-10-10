@@ -89,6 +89,7 @@ class AyuMessageHistoryActivity(
                 } ?: InuDatabaseHelper.deletedMessagesInDialog(db, dialogId).map {
                     EditEntry(it.date.toLong(), it.text, it.mediaPath, originalMessageId = it.msgId, fromId = it.fromId, message = it.message)
                 }
+                // lumine: senders that are not in the in-memory cache have no avatar or name, load them from the users table first
                 val userIds = HashSet<Long>()
                 val chatIds = HashSet<Long>()
                 for (e in deleted) {
@@ -217,6 +218,7 @@ class AyuMessageHistoryActivity(
         frameLayout.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray))
         frameLayout.setBackgroundImage(Theme.getCachedWallpaper(), Theme.isWallpaperMotion())
 
+        // lumine: stock ChatActivity draws message avatars from its list's drawChild, the cell never draws them itself
         val recycler = object : RecyclerListView(context) {
             override fun drawChild(canvas: Canvas, child: View, drawingTime: Long): Boolean {
                 val result = super.drawChild(canvas, child, drawingTime)

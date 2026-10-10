@@ -1,6 +1,6 @@
 package desu.inugram.helpers.cloud
 
-import android.content.Context
+import desu.inugram.helpers.InuPrefs
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import desu.inugram.InuConfig
@@ -35,7 +35,7 @@ object SettingsBackupHelper {
     )
 
     internal fun stockPrefs() =
-        ApplicationLoader.applicationContext.getSharedPreferences(STOCK_PREF_NAME, Context.MODE_PRIVATE)
+        InuPrefs.of(STOCK_PREF_NAME)
 
     private fun typedKey(key: String, value: Any?): String = when (value) {
         is Long -> key + "_long"
@@ -139,9 +139,10 @@ object SettingsBackupHelper {
     fun apply(parsed: ParseResult.Ok, replace: Boolean = false): Int {
         CloudSettingsHelper.restoring = true
         try {
-            if (replace) resetToDefaults()
             val root = parsed.root
             val values = root.optJSONObject("values") ?: return 0
+            // replace: wipe to defaults first, so keys missing from the file end up default instead of kept
+            if (replace) resetToDefaults()
 
             val byKey = InuConfig.items.filter { it.exportable }.associateBy { it.key }
             var applied = 0

@@ -39,6 +39,7 @@ object BiometricHelper {
         return false
     }
 
+    // confirmationRequired only affects passive biometrics, and AndroidX ignores it before Android 10
     fun hasPassiveBiometricSensor(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false
         val pm = ApplicationLoader.applicationContext.packageManager

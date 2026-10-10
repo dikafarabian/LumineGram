@@ -275,6 +275,7 @@ object M3SectionsHelper {
         }
 
         resizeSquare(iconLayout, if (isCircleIconsEnabled()) 36 else 28)
+        // accent circles are solid, so the glyph is white and a bit larger to fill the plate
         resizeSquare(iconView, if (isAccentIcons() && isCircleIconsEnabled()) 28 else 24)
         iconView.setColorFilter(iconColor(topColor, bottomColor))
         cellBackground.inu_monetColor = circleColor(topColor, bottomColor)
@@ -312,6 +313,7 @@ object M3SectionsHelper {
         return circleColor(topColor, bottomColor) to iconColor(topColor, bottomColor)
     }
 
+    // lumine: "accent icons" option paints every row icon with the theme accent instead of its own color
     private fun accentColor(): Int = Theme.getColor(Theme.key_featuredStickers_addButton)
 
     @JvmStatic

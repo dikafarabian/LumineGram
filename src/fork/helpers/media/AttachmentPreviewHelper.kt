@@ -17,6 +17,7 @@ import org.telegram.ui.PhotoViewer
 object AttachmentPreviewHelper {
     private class AttachmentPreviewState(fullSize: Int) {
         val fullFilter = "${fullSize}_${fullSize}"
+        // Tracks requested quality, not completion; pending edits wait for ImageReceiver.
         val fullQualityRequested = HashMap<MediaController.PhotoEntry, Boolean>()
         var pendingEdit: PendingAttachmentEdit? = null
         var preserveZoomEntry: MediaController.PhotoEntry? = null
@@ -43,6 +44,8 @@ object AttachmentPreviewHelper {
     fun prepareAttachmentPreview(receiver: ImageReceiver, drawable: Drawable?) {
         if (!InuConfig.OPTIMIZED_ATTACHMENT_MENU.value || receiver.parentObject !== attachmentTextureRequest) return
         if (drawable !is BitmapDrawable || drawable is AnimatedFileDrawable) return
+        // Even a bitmap cache hit can need a GPU upload. On Android 7+, queue it before binding.
+        // Preparation is asynchronous and still occupies RenderThread.
         drawable.bitmap.prepareToDraw()
     }
 
@@ -75,7 +78,9 @@ object AttachmentPreviewHelper {
         state.fullQualityRequested[entry] = true
         val receiver = viewer.centerImage
         val preview = receiver.imageDrawable ?: receiver.staticThumb
+        // The placeholder also preserves the bitmap dimensions used by the zoom gesture.
         receiver.setCrossfadeWithOldImage(true)
+        // Keep the guard through later image callbacks until the photo changes.
         state.preserveZoomEntry = entry
         try {
             receiver.setImage(ImageLocation.getForPath(entry.path), state.fullFilter, null, null, preview, 0, null, attachmentTextureRequest, 1)
@@ -98,6 +103,7 @@ object AttachmentPreviewHelper {
         if (entry.isVideo || !state.fullQualityRequested.containsKey(entry) || isPreviewFullResolution(viewer, entry)) return false
         if (viewer.centerImage.imageFilter == state.fullFilter && viewer.centerImage.hasImageLoaded()) return false
 
+        // A memory-cache hit may call the receiver delegate inside setImage.
         state.pendingEdit = PendingAttachmentEdit(entry, viewer.currentIndex, mode)
         upgradeAttachmentPreview(viewer)
         return true

@@ -5,6 +5,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:pat
 import { execSync } from 'node:child_process'
 import { glob } from 'tinyglobby'
 import { $, chalk, quote } from 'zx'
+import { topicOf } from './patch-topics.js'
 import {
   forkSyncFiles,
   rootDir,
@@ -19,7 +20,11 @@ $.verbose = false
 if (process.platform === 'win32') {
   $.shell = 'cmd.exe'
   $.prefix = 'chcp 65001 >nul & '
-  $.quote = quote
+  // bash-style $'...' (backslash paths, pathspec magic) means nothing to cmd.exe; double-quote those instead
+  $.quote = (arg: string) => {
+    const q = quote(arg)
+    return q.startsWith("$'") ? `"${arg.replaceAll('"', '""')}"` : q
+  }
 }
 
 export function step(message: string) {
@@ -78,6 +83,7 @@ export async function configureGitLineEndings(repoDir: string) {
   const git = cd(repoDir)
   await git`git config core.autocrlf false`
   await git`git config core.eol lf`
+  await git`git config core.longpaths true`
 }
 
 export async function cloneUpstream(targetDir: string, commit: string, shallow = false) {
@@ -133,7 +139,14 @@ export async function syncSubmodules(repoDir: string, excludedSubmodules: string
   }
 
   const git = cd(repoDir)
-  const paths = ['.', ...excludedSubmodules.map(path => `:(exclude)${path}`)]
+  // explicit paths instead of :(exclude) pathspecs: zx quotes those as $'...', which Windows shells reject
+  const paths = (await git`git config -f .gitmodules --get-regexp path`).stdout
+    .split(/\r?\n/)
+    .map(line => line.split(' ')[1])
+    .filter(path => path && !excludedSubmodules.includes(path))
+  if (paths.length === 0) {
+    return false
+  }
   // status prefixes: ' ' in sync, '-' uninitialized, '+' sha mismatch, 'U' conflicted
   const stale = (await git`git submodule status -- ${paths}`)
     .stdout
@@ -145,7 +158,7 @@ export async function syncSubmodules(repoDir: string, excludedSubmodules: string
   }
 
   step(`Syncing ${stale.length} submodule(s), this will take a while`)
-  const skips = skippedSubmodules.flatMap(name => ['-c', `submodule.${name}.update=none`])
+  const skips = ['-c', 'core.longpaths=true', ...skippedSubmodules.flatMap(name => ['-c', `submodule.${name}.update=none`])]
   const depth = shallow ? ['--depth', '1'] : ['--filter=blob:none']
   await git`git ${skips} submodule update --init --recursive ${depth} -- ${paths}`
   return true
@@ -179,6 +192,14 @@ export async function hasStgitStack(repoDir: string, branch: string) {
   // resolve via git: the stack ref may be packed in .git/packed-refs
   const result = await $({ cwd: repoDir, nothrow: true })`git show-ref --verify --quiet refs/stacks/${branch}`
   return result.exitCode === 0
+}
+
+export async function getCurrentBranch(repoDir: string) {
+  const result = await $({ cwd: repoDir, nothrow: true })`git rev-parse --abbrev-ref HEAD`
+  if (result.exitCode !== 0) {
+    return null
+  }
+  return result.stdout.trim()
 }
 
 export async function hasLocalBranch(repoDir: string, branch: string) {
@@ -335,11 +356,28 @@ export async function getAllPatchNames(repoDir: string) {
 
 export function patchNameFromSeriesEntry(entry: string) {
   const normalized = entry.trim().replaceAll('\\', '/')
-  const match = normalized.match(/^([^/]+)\/(.+)\.patch$/)
+  const match = normalized.match(/^([^/]+)\/(?:[^/]+\/)?([^/]+)\.patch$/)
   if (!match) {
     throw new Error(`Invalid series entry: ${entry}`)
   }
   return `${match[1]}__${match[2]}`
+}
+
+export async function getTopPatch(repoDir: string) {
+  const result = await $({ cwd: repoDir, nothrow: true })`stg top`
+  if (result.exitCode !== 0) {
+    return null
+  }
+  return result.stdout.trim()
+}
+
+export async function getPatchCommitId(repoDir: string, patchName: string) {
+  return (await cd(repoDir)`stg id ${patchName}`).stdout.trim()
+}
+
+export async function getPatchSubject(repoDir: string, patchName: string) {
+  const commitId = await getPatchCommitId(repoDir, patchName)
+  return (await cd(repoDir)`git log -1 --format=%s ${commitId}`).stdout.trim()
 }
 
 export async function generateStablePatchFromCommit(repoDir: string, commitId: string) {
@@ -437,10 +475,12 @@ export function parsePatchName(patchName: string) {
     throw new Error(`Patch name must use "group__name": ${patchName}`)
   }
   const [group, name] = parts
+  const dir = group === 'lumine' ? `${group}/${topicOf(patchName)}` : group
   return {
     group,
     name,
-    seriesEntry: `${group}/${name}.patch`,
+    dir,
+    seriesEntry: `${dir}/${name}.patch`,
   }
 }
 
@@ -457,3 +497,20 @@ export async function readSeries() {
     .filter(Boolean)
 }
 
+export async function resolvePatchName(repoDir: string, identifier: string) {
+  const patchNames = await getAllPatchNames(repoDir)
+  const direct = patchNames.find(patchName => patchName === identifier)
+  if (direct) {
+    return direct
+  }
+
+  const fallback = identifier.includes('/')
+    ? patchNames.find(patchName => patchName === identifier.replace('/', '__'))
+    : null
+
+  if (fallback) {
+    return fallback
+  }
+
+  throw new Error(`Unknown patch identifier: ${identifier}`)
+}

@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Tue, 25 Aug 2026 01:27:44 +0300
 Subject: support patch for "switch account from launcher" feature
 
@@ -11,7 +11,7 @@ diff --git a/TMessagesProj/src/main/AndroidManifest.xml b/TMessagesProj/src/main
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/AndroidManifest.xml
 +++ b/TMessagesProj/src/main/AndroidManifest.xml
-@@ -412,6 +412,12 @@
+@@ -430,6 +430,12 @@
              android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
              android:exported="true">
          </activity>

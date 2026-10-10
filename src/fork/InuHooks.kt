@@ -213,6 +213,7 @@ object InuHooks {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MonetHelper.refreshMonetThemeIfChanged()
         }
+        desu.inugram.helpers.SplashThemeHelper.apply(launchActivity)
         val bg = Theme.getColor(Theme.key_windowBackgroundWhite)
         launchActivity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bg))
         CrashReporter.maybeShowReportSheet(launchActivity)
@@ -247,8 +248,9 @@ object InuHooks {
         val current = LauncherIconController.LauncherIcon.entries
             .firstOrNull { LauncherIconController.isEnabled(it) }
         val resId = when (current) {
-            LauncherIconController.LauncherIcon.DEFAULT -> R.string.InuAppIconLicenseInugram
-            else -> R.string.InuAppIconLicenseTelegram
+            LauncherIconController.LauncherIcon.DEFAULT,
+            LauncherIconController.LauncherIcon.OLD -> R.string.InuAppIconLicenseInugram
+            else -> if (current?.concept == true) R.string.InuAppIconLicenseConcept else R.string.InuAppIconLicenseTelegram
         }
         return AndroidUtilities.replaceTags(getString(resId))
     }

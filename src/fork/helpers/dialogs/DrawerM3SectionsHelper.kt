@@ -17,6 +17,7 @@ object DrawerM3SectionsHelper {
 
     private val outerR get() = AndroidUtilities.dp(16f).toFloat()
 
+    // one rounded card per group, no gaps and no dividers between rows
     fun styleMenuRow(view: View, posInGroup: Int, groupSize: Int) {
         view.setStateListAnimator(null)
         val first = posInGroup == 0

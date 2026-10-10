@@ -262,6 +262,7 @@ object ChatHelper {
         else -> R.drawable.ic_deleted_mark_trash
     }
 
+    // lumine: the trash/cross/eye marks are 14dp vectors (ported from NagramXF) whose glyph fills most of the box; the 24dp tabler outline needs a larger box to look as big
     @JvmStatic
     fun deletedMarkSizeDp(): Float =
         if (InuConfig.DELETED_MARK_STYLE.value == InuConfig.DeletedMarkStyleItem.TRASH_BIN_OUTLINE) 18f else 14f
@@ -1671,6 +1672,7 @@ object ChatHelper {
     ) {
         val limit = if (UserConfig.getInstance(account).isPremium) FileLoader.DEFAULT_MAX_FILE_SIZE_PREMIUM else FileLoader.DEFAULT_MAX_FILE_SIZE
         val (tooBig, fits) = messages.partition { (it.document?.size ?: 0L) > limit }
+        // lumine: re-upload hits the account upload limit, so skip oversized files up front instead of a silent "!"
         if (tooBig.isNotEmpty()) showForwardToast(LocaleController.formatString(R.string.InuForwardTooLarge, AndroidUtilities.formatFileSize(limit)))
         val batch = ArrayList(fits)
         if (batch.isEmpty()) return
@@ -1748,6 +1750,7 @@ object ChatHelper {
             } else {
                 for (i in index until end) {
                     val msg = messages[i]
+                    // lumine: by-reference send of protected media is always rejected by the server
                     if (needsMediaReupload(msg) && files[msg] == null) continue
                     buildResendAction(
                         helper, account, msg, did, null, threadMsg, null, notify, scheduleDate,
@@ -1799,6 +1802,7 @@ object ChatHelper {
 
         for (msg in messages) {
             if (!needsMediaReupload(msg) || resolved.containsKey(msg)) continue
+            // lumine: path DB lags behind fileLoaded, so fall back to the file the notification delivered
             val loaded = localMediaFile(loader, msg) ?: downloadKey(msg)?.let { waiter.loadedFile(it) }
             loaded?.let { forwardableMediaFile(it, temporaryFiles) }?.let { resolved[msg] = it }
         }

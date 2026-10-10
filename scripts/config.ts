@@ -10,7 +10,9 @@ export const worktreeDir = join(rootDir, 'worktree')
 export const patchesDir = join(rootDir, 'patches')
 export const seriesFile = join(rootDir, 'series')
 export const upstreamCommitFile = join(rootDir, 'upstream-commit')
+export const assetsDir = join(rootDir, 'src/res/assets')
 
+export const debugAppId = 'com.lumine.gram'
 // nested submodules we never build, skipped by the recursive update. lsplant's test deps are
 // private repos behind ssh urls
 export const skippedSubmodules = [
@@ -121,6 +123,38 @@ export const forkSyncFiles: ForkSyncFile[] = [
     target: 'TMessagesProj/src/main/res/values',
   },
   {
+    source: 'src/res/values/styles_inu.xml',
+    target: 'TMessagesProj/src/main/res/values',
+  },
+  {
+    source: 'src/res/values-ru/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-ru',
+  },
+  {
+    source: 'src/res/values-uk/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-uk',
+  },
+  {
+    source: 'src/res/values-ja/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-ja',
+  },
+  {
+    source: 'src/res/values-zh-rCN/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-zh-rCN',
+  },
+  {
+    source: 'src/res/values-tr/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-tr',
+  },
+  {
+    source: 'src/res/values-ar/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-ar',
+  },
+  {
+    source: 'src/res/values-fa/strings_inu.xml',
+    target: 'TMessagesProj/src/main/res/values-fa',
+  },
+  {
     source: 'src/res/values-night/styles.xml',
     target: 'TMessagesProj/src/main/res/values-night',
     replace: true,
@@ -169,6 +203,16 @@ export const forkSyncFiles: ForkSyncFile[] = [
   },
   {
     source: 'src/res/launcher/generated/mipmap/*',
+    target: 'TMessagesProj/src/main/res/mipmap-anydpi-v26',
+    replace: true,
+  },
+  // concept launcher icon backgrounds (432px webp, full-bleed)
+  {
+    source: 'src/res/launcher/concepts/webp/*',
+    target: 'TMessagesProj/src/main/res/drawable-nodpi',
+  },
+  {
+    source: 'src/res/launcher/concepts/generated/mipmap/*',
     target: 'TMessagesProj/src/main/res/mipmap-anydpi-v26',
     replace: true,
   },

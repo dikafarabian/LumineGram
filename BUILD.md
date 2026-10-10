@@ -1,7 +1,8 @@
 # Building the APK
 
-Assumes `bun install` and `bun run setup` are done, `worktree/` exists and
-`bun run lint-patches` is clean.
+Assumes you've already run through [Development](README.md#development) —
+`bun install`, `bun run setup`, `worktree/` exists and `bun run lint-patches` is clean.
+(Windows-specific environment setup: [WINDOWS_SETUP.md](WINDOWS_SETUP.md).)
 
 ## Requirements
 
@@ -56,6 +57,10 @@ cd worktree
 - **ABI:** defaults to `arm64-v8a` only (fast local builds). Set the `ABI_FILTERS` env
   var (comma-separated ABIs, or `all`) before running Gradle if you need other
   architectures, e.g. `ABI_FILTERS=all ./gradlew TMessagesProj_App:assembleDebug`.
+  For the x86 emulator, use `ABI_FILTERS=x86_64` on its own (unverified with a list).
+- **Pluginless vs plugins:** the default build is pluginless. Setup with
+  `bun run setup -- --pluginless` builds the pluginless variant; plugins are opt-in.
+  CI builds both.
 
 Only `:TMessagesProj_App` is a real, buildable app module — `TMessagesProj_AppHuawei`,
 `TMessagesProj_AppHockeyApp`, and `TMessagesProj_AppStandalone` still exist as
@@ -79,7 +84,8 @@ Output: `worktree/TMessagesProj_App/build/outputs/apk/release/app.apk`.
 `.github/workflows/apk.yml` runs the same two Gradle tasks (`--no-daemon`), but:
 
 - `INU_BUILD` (the real `versionCode`) is computed by `scripts/ci/version.ts` from the
-  UTC date and today's workflow run count — not the local `.local_build_number` counter.
+  `INU_DAY_STATE` GitHub variable — date-based, not the local `.local_build_number`
+  counter. See the "Release Bumping" rule in `CLAUDE.md` for the exact format.
 - `COMMIT_ID` is set from `github.sha` (locally it falls back to `git rev-parse --short
   HEAD` automatically, so `verName` still gets a commit suffix either way).
 - `ABI_FILTERS=arm64-v8a` is set explicitly (same as the local default).
@@ -88,6 +94,8 @@ Output: `worktree/TMessagesProj_App/build/outputs/apk/release/app.apk`.
 
 ## Troubleshooting
 
+- **`EPERM: operation not permitted, symlink`** during `bun run setup` — Windows
+  Developer Mode isn't on. See [WINDOWS_SETUP.md](WINDOWS_SETUP.md).
 - **Gradle daemon crashes on startup** — usually the Gradle JDK, see above.
 - **`stg`/`bun`/`java` "command not found" right after installing** — PATH changes only
   apply to new terminal sessions/processes, not ones already open.

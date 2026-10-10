@@ -1,7 +1,7 @@
 package desu.inugram.helpers.security
 
+import desu.inugram.helpers.InuPrefs
 import android.app.Activity
-import android.content.Context
 import androidx.core.content.edit
 import org.telegram.messenger.ApplicationLoader
 import org.telegram.messenger.DialogObject
@@ -17,7 +17,7 @@ import desu.inugram.helpers.InuUtils
 
 object ParanoiaHelper {
     private val prefs by lazy {
-        ApplicationLoader.applicationContext.getSharedPreferences("inugram_hidden", Context.MODE_PRIVATE)
+        InuPrefs.of("inugram_hidden")
     }
 
     @Volatile
@@ -157,6 +157,7 @@ object ParanoiaHelper {
         if (isDisguised()) {
             icons.remove(LauncherIcon.DEFAULT)
             icons.remove(LauncherIcon.STOCK)
+            icons.removeAll { it.concept }
             val disguiseIdx = icons.indexOf(LauncherIcon.DISGUISE)
             if (disguiseIdx != -1) {
                 icons.removeAt(disguiseIdx)

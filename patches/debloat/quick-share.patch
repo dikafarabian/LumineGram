@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.su>
 Date: Fri, 29 May 2026 00:05:33 +0400
 Subject: disable channels quick share on long tap
 
@@ -11,7 +11,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.j
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
-@@ -12371,7 +12371,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
+@@ -12366,7 +12366,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
              } else if (sideButtonPressed) {
                  if (pressedSideButton != SIDE_BUTTON_SPONSORED_CLOSE &&
                      pressedSideButton != SIDE_BUTTON_SPONSORED_MORE &&

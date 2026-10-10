@@ -97,6 +97,7 @@ object ForwardProHelper {
             AlertState().also {
                 it.active = pendingOverride ?: InuConfig.FORWARD_PRO.value
                 if (it.active) {
+                    // lumine: restore the quick toggles from the last forward
                     it.silentSend = InuConfig.FORWARD_PRO_SILENT.value
                     it.hideCaption = InuConfig.FORWARD_PRO_HIDE_CAPTION.value
                     alert.showSendersName = InuConfig.FORWARD_PRO_SHOW_SENDER.value

@@ -20,10 +20,6 @@ import org.telegram.messenger.UserConfig
 import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.TLRPC
 import java.io.File
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -33,7 +29,12 @@ object UpdateHelper {
     private const val INFLIGHT_TIMEOUT_MS = 60L * 1000
     private const val RESOLVE_BACKOFF_MS = 30L * 60 * 1000
 
-    private val APK_RE = Regex("^luminegram(?:-beta)?-arm64-(.+)-(\\d+)\\.apk$")
+    // pluginless is the default APK name; plugins builds are "-plugins-" so each variant only sees its own
+    private val APK_RE = if (BuildConfig.INU_PLUGINLESS) {
+        Regex("^luminegram(?:-beta)?-arm64-(.+)-(\\d+)\\.apk$")
+    } else {
+        Regex("^luminegram(?:-beta)?-plugins-arm64-(.+)-(\\d+)\\.apk$")
+    }
 
     @Volatile
     private var resolvedChannelId: Long? = null
@@ -55,6 +56,7 @@ object UpdateHelper {
     }
 
     fun getVersionInfoString(): String {
+        // lumine: STOCK_VERSION_CODE is upstream Telegram's build number, not ours -- releases are tagged by packageInfo.versionCode
         val base = LocaleController.formatString(R.string.InuVersion, stockVersionName, packageInfo.versionCode)
         val withBeta = if (BuildVars.isBetaApp()) "$base ${LocaleController.getString(R.string.InuVersionBetaSuffix)}" else base
         val commitSuffix = commitSha?.let { " @$it" } ?: ""
@@ -67,22 +69,7 @@ object UpdateHelper {
             val abis = Build.SUPPORTED_ABIS
             return "Telegram for Android v${stockVersionName} (${BuildConfig.STOCK_VERSION_CODE})\ndirect ${abis.getOrNull(0)} ${abis.getOrNull(1)}"
         }
-        return "${getDisplayVersionString()}\nBuilt on ${getDisplayBuildDate()}"
-    }
-
-    private fun getDisplayVersionString(): String {
-        val base = LocaleController.formatString(R.string.InuVersionShort, stockVersionName)
-        val withBeta = if (BuildVars.isBetaApp()) "$base ${LocaleController.getString(R.string.InuVersionBetaSuffix)}" else base
-        val commitSuffix = commitSha?.let { " @$it" } ?: ""
-        return "$withBeta$commitSuffix ${BuildConfig.INU_BUILD_TYPE}"
-    }
-
-    private fun getDisplayBuildDate(): String {
-        return try {
-            LocalDate.parse(BuildVars.BUILD_DATE).format(DateTimeFormatter.ofPattern("EEE MMM d yyyy", Locale.ENGLISH))
-        } catch (e: DateTimeParseException) {
-            BuildVars.BUILD_DATE
-        }
+        return "${getVersionInfoString()}\nBuilt on: ${BuildVars.BUILD_DATE}"
     }
 
     @Volatile
@@ -109,6 +96,7 @@ object UpdateHelper {
 
     @JvmStatic
     fun revealPendingUpdate() {
+        // lumine: a stale pending entry for the installed version must never pop up
         val pendingVer = SharedConfig.pendingAppUpdate?.version?.toIntOrNull()
         if (pendingVer != null && pendingVer <= currentVersionCode()) {
             clearPending()

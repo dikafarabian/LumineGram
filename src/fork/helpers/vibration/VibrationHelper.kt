@@ -9,6 +9,7 @@ object VibrationHelper {
     @JvmStatic
     fun blocked(): Boolean = InuConfig.FORCE_NO_VIBRATION.value
 
+    // lumine: stock vibrates only when it gets a Vibrator, and null-checks it almost everywhere
     @JvmStatic
     fun service(name: String?, service: Any?): Any? =
         if (name == Context.VIBRATOR_SERVICE && blocked()) null else service

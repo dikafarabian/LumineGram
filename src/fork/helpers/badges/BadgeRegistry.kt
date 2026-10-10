@@ -3,7 +3,6 @@ package desu.inugram.helpers.badges
 import android.text.TextUtils
 import desu.inugram.InuConfig
 import desu.inugram.helpers.InuDatabaseHelper
-import java.io.BufferedReader
 import org.json.JSONObject
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.ApplicationLoader
@@ -14,6 +13,9 @@ import org.telegram.messenger.NotificationCenter
 import org.telegram.messenger.UserConfig
 import org.telegram.messenger.Utilities
 import org.telegram.tgnet.TLRPC
+import java.io.BufferedReader
+import java.net.HttpURLConnection
+import java.net.URL
 
 object BadgeRegistry {
 
@@ -27,6 +29,8 @@ object BadgeRegistry {
         val emojiId: Long,
     )
 
+    private const val ENDPOINT = ""
+    private const val TTL_MS = 60L * 60 * 1000 // 1 hour, matches Vercel edge max-age=3600
 
     private const val KV_MANIFEST = "badges:manifest"
     private const val KV_ETAG = "badges:etag"
@@ -141,6 +145,49 @@ object BadgeRegistry {
             } else if (!owned.isNullOrEmpty()) {
                 ownedEmojiIds = parseOwned(owned)
             }
+
+            if (System.currentTimeMillis() - fetchedAt >= TTL_MS) {
+                Utilities.globalQueue.postRunnable { refresh(account, etag) }
+            }
+        }
+    }
+
+    private fun refresh(account: Int, etag: String?) {
+        if (ENDPOINT.isEmpty()) return
+        val (status, body, newEtag) = runCatching { fetch(etag) }.getOrElse {
+            return
+        }
+        if (status == 304) {
+            touchFetchedAt(account)
+            return
+        }
+        if (status != 200 || body.isNullOrEmpty()) return
+        val parsed = parse(body) ?: return
+
+        val storage = MessagesStorage.getInstance(account) ?: return
+        storage.storageQueue.postRunnable {
+            val db = storage.database ?: return@postRunnable
+            val owned = mergeOwned(
+                runCatching { InuDatabaseHelper.readKv(db, KV_OWNED_IDS) }.getOrNull(),
+                parsed.values.map { it.emojiId },
+            )
+            runCatching {
+                InuDatabaseHelper.writeKv(db, KV_MANIFEST, body)
+                InuDatabaseHelper.writeKv(db, KV_FETCHED_AT, System.currentTimeMillis().toString())
+                InuDatabaseHelper.writeKv(db, KV_OWNED_IDS, owned.joinToString(","))
+                if (!newEtag.isNullOrEmpty()) InuDatabaseHelper.writeKv(db, KV_ETAG, newEtag)
+            }
+            publish(parsed, owned.joinToString(","))
+        }
+    }
+
+    private fun touchFetchedAt(account: Int) {
+        val storage = MessagesStorage.getInstance(account) ?: return
+        storage.storageQueue.postRunnable {
+            val db = storage.database ?: return@postRunnable
+            runCatching {
+                InuDatabaseHelper.writeKv(db, KV_FETCHED_AT, System.currentTimeMillis().toString())
+            }
         }
     }
 
@@ -161,6 +208,26 @@ object BadgeRegistry {
     private fun parseOwned(stored: String?): Set<Long> {
         if (stored.isNullOrEmpty()) return emptySet()
         return stored.split(',').mapNotNull { it.trim().toLongOrNull() }.toSet()
+    }
+
+    private fun fetch(etag: String?): Triple<Int, String?, String?> {
+        val connection = URL(ENDPOINT).openConnection() as HttpURLConnection
+        try {
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 10_000
+            connection.setRequestProperty("Accept", "application/json")
+            if (!etag.isNullOrEmpty()) connection.setRequestProperty("If-None-Match", etag)
+
+            val status = connection.responseCode
+            if (status == 304) return Triple(status, null, etag)
+            if (status != 200) return Triple(status, null, null)
+
+            val body = connection.inputStream.bufferedReader().use(BufferedReader::readText)
+            return Triple(status, body, connection.getHeaderField("ETag"))
+        } finally {
+            connection.disconnect()
+        }
     }
 
     private fun parse(body: String): Map<Long, Badge>? = runCatching {

@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Wed, 26 Aug 2026 07:33:19 +0400
 Subject: default to "this channel" when tapping hashtag
 
@@ -11,7 +11,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java b/TMe
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
-@@ -35382,7 +35382,7 @@ public class ChatActivity extends BaseFragment implements
+@@ -35455,7 +35455,7 @@ public class ChatActivity extends BaseFragment implements
          if (searchUserButton != null) {
              searchUserButton.setVisibility(View.GONE);
          }

@@ -94,12 +94,13 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java b/TMes
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java
-@@ -2265,7 +2265,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -2265,7 +2265,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                  return;
              }
  
 -            if (animationInProgress != 0 && !AndroidUtilities.isTablet() && currentPlaceObject != null && currentPlaceObject.animatingImageView != null) {
 +            if (desu.inugram.helpers.media.AttachmentAnimationHelper.drawAttachmentBackdrop(PhotoViewer.this, canvas, getBounds())) {
++                // The frozen backdrop stays opaque while its black tint animates.
 +            } else if (animationInProgress != 0 && !AndroidUtilities.isTablet() && currentPlaceObject != null && currentPlaceObject.animatingImageView != null) {
                  animatingImageView.getClippedVisibleRect(visibleRect);
                  if (!visibleRect.isEmpty()) {
@@ -115,7 +116,7 @@ index 0000000..0000000 100644
                      return;
                  }
                  super.invalidate();
-@@ -6795,6 +6799,18 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -6795,6 +6799,21 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
          captionEdit = new CaptionPhotoViewer(containerView.getContext(), windowView, containerView, containerView, resourcesProvider, blurManager, this::applyCaption) {
              private final Path path = new Path();
  
@@ -123,6 +124,9 @@ index 0000000..0000000 100644
 +            protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
 +                if (child == editText && desu.inugram.helpers.media.AttachmentAnimationHelper.isLightweightAttachmentPreview(PhotoViewer.this, sendPhotoType)) {
 +                    int inu_save = canvas.save();
++                    // Stock creates a nearly viewer-sized alpha layer before clipping to the caption.
++                    // Clip first so the temporary layer only covers the visible caption, reducing
++                    // offscreen buffer size and rendering work during the opening animation.
 +                    canvas.clipRect(bounds);
 +                    boolean inu_result = super.drawChild(canvas, child, drawingTime);
 +                    canvas.restoreToCount(inu_save);
@@ -145,7 +149,7 @@ index 0000000..0000000 100644
                      return;
                  }
                  super.invalidate();
-@@ -6960,6 +6981,18 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -6960,6 +6981,21 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
          topCaptionEdit = new CaptionPhotoViewer(activityContext, windowView, containerView, containerView, resourcesProvider, blurManager, this::applyCaption) {
              private final Path path = new Path();
  
@@ -153,6 +157,9 @@ index 0000000..0000000 100644
 +            protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
 +                if (child == editText && desu.inugram.helpers.media.AttachmentAnimationHelper.isLightweightAttachmentPreview(PhotoViewer.this, sendPhotoType)) {
 +                    int inu_save = canvas.save();
++                    // Stock creates a nearly viewer-sized alpha layer before clipping to the caption.
++                    // Clip first so the temporary layer only covers the visible caption, reducing
++                    // offscreen buffer size and rendering work during the opening animation.
 +                    canvas.clipRect(bounds);
 +                    boolean inu_result = super.drawChild(canvas, child, drawingTime);
 +                    canvas.restoreToCount(inu_save);
@@ -175,11 +182,12 @@ index 0000000..0000000 100644
                      return;
                  }
                  super.invalidate();
-@@ -14567,6 +14605,10 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -14567,6 +14605,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                  paintItem.setVisibility(View.GONE);
                  tuneItem.setVisibility(View.GONE);
              }
 +            if (desu.inugram.helpers.media.AttachmentAnimationHelper.isLightweightAttachmentPreview(this, sendPhotoType) && placeProvider.getSelectedCount() == 0) {
++                // Controls are visible immediately: do not animate an empty counter's initial "1" away.
 +                photosCounterView.setScaleX(0.0f);
 +                photosCounterView.setScaleY(0.0f);
 +            }
@@ -195,12 +203,13 @@ index 0000000..0000000 100644
                  }
  
                  if (cropTransform != null) {
-@@ -17979,8 +18022,17 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -17979,8 +18022,18 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                      if (provider != null) {
                          provider.onPreOpen();
                      }
 +                    final boolean inu_lightweightOpening = desu.inugram.helpers.media.AttachmentAnimationHelper.prepareAttachmentOpening(PhotoViewer.this, sendPhotoType);
 +                    if (inu_lightweightOpening) {
++                        // A fresh viewer starts fully shown; seed the hidden state for the existing selector entrance.
 +                        checkImageView.setAlpha(0f);
 +                        checkImageView.setTranslationY(-dpf2(24));
 +                        photosCounterView.setAlpha(0f);
@@ -232,11 +241,13 @@ index 0000000..0000000 100644
                          animators.add(ObjectAnimator.ofFloat(navigationBar, View.ALPHA, 0.0f, 1.0f));
                          if (sendPhotoType == SELECT_TYPE_AVATAR) {
                              animators.add(ObjectAnimator.ofFloat(photoCropView, View.ALPHA, 0, 1.0f));
-@@ -18060,7 +18123,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -18060,7 +18123,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                              }
                          });
  
 -                        containerView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
++                        // The lightweight path animates the thumbnail separately; caching the whole
++                        // container in a hardware layer adds a large texture allocation during opening.
 +                        if (!inu_lightweightOpening) {
 +                            containerView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 +                        }
@@ -281,10 +292,11 @@ index 0000000..0000000 100644
          if (clipFancyShadows == null) {
              clipFancyShadows = new Path();
              topFancyShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-@@ -22301,6 +22374,9 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -22301,6 +22374,10 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
      private final LongSparseArray<RenderNode> matrixRenderNodes = new LongSparseArray<>();
  
      public boolean BLUR_RENDERNODE() {
++        // Viewer blur adds separate rendering passes even when the backdrop is frozen.
 +        if (desu.inugram.helpers.media.AttachmentAnimationHelper.isLightweightAttachmentPreview(this, sendPhotoType)) {
 +            return false;
 +        }
@@ -330,11 +342,12 @@ index 0000000..0000000 100644
          if (!BLUR_RENDERNODE() && !SharedConfig.photoViewerBlurEnabled()) {
              return;
          }
-@@ -23999,6 +24081,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+@@ -23999,6 +24081,12 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
              // setMeasuredDimension(widthSize, heightSize);
              ViewGroup.LayoutParams layoutParams = animatingImageView.getLayoutParams();
              animatingImageView.measure(MeasureSpec.makeMeasureSpec(layoutParams.width, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.AT_MOST));
 +            if (desu.inugram.helpers.media.AttachmentAnimationHelper.isLightweightAttachmentPreview(PhotoViewer.this, sendPhotoType)) {
++                // Controls appear immediately; apply their final margins before the first frame, not in onLayout's posted callback.
 +                int inu_statusBarHeight = isStatusBarVisible() ? AndroidUtilities.statusBarHeight : 0;
 +                ((LayoutParams) checkImageView.getLayoutParams()).topMargin = (ActionBar.getCurrentActionBarHeight() - dp(34)) / 2 + inu_statusBarHeight;
 +                ((LayoutParams) photosCounterView.getLayoutParams()).topMargin = (ActionBar.getCurrentActionBarHeight() - dp(40)) / 2 + inu_statusBarHeight;

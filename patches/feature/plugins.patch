@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Wed, 2 Sep 2026 05:51:47 +0400
 Subject: Add the QuickJS plugin engine (hooks, action rows)
 
@@ -96,7 +96,7 @@ index 0000000..0000000 100644
                      });
                  }
              } else {
-@@ -17962,8 +17968,64 @@ public class MessagesController extends BaseController implements NotificationCe
+@@ -17985,8 +17991,64 @@ public class MessagesController extends BaseController implements NotificationCe
          }
      }
  
@@ -161,7 +161,7 @@ index 0000000..0000000 100644
          ArrayList<Long> needGetChannelsDiff = null;
          boolean needGetDiff = false;
          boolean needReceivedQueue = false;
-@@ -18064,54 +18126,7 @@ public class MessagesController extends BaseController implements NotificationCe
+@@ -18087,54 +18149,7 @@ public class MessagesController extends BaseController implements NotificationCe
                  needGetDiff = true;
              } else {
                  if (getMessagesStorage().getLastPtsValue() + updates.pts_count == updates.pts) {
@@ -217,7 +217,7 @@ index 0000000..0000000 100644
  
                      getMessagesStorage().setLastPtsValue(updates.pts);
                      boolean isDialogCreated = createdDialogIds.contains(message.dialog_id);
-@@ -18590,6 +18605,9 @@ public class MessagesController extends BaseController implements NotificationCe
+@@ -18615,6 +18630,9 @@ public class MessagesController extends BaseController implements NotificationCe
                  FileLog.d("process update " + baseUpdate.getClass().getSimpleName());
              }
              desu.inugram.InuHooks.onUpdate(baseUpdate, currentAccount);

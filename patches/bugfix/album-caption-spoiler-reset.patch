@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Mon, 3 Aug 2026 13:13:51 +0400
 Subject: Fix revealed album caption spoilers re-hiding after scroll
 
@@ -11,7 +11,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.j
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java
-@@ -4596,7 +4596,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
+@@ -4593,7 +4593,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
              isSpoilerRevealing = true;
              spoilerPressed.setOnRippleEndCallback(() -> post(() -> {
                  isSpoilerRevealing = false;

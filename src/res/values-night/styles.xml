@@ -1,6 +1,7 @@
 <!--
   ~ This is the source code of Telegram for Android v. 5.x.x.
   ~ It is licensed under GNU GPL v. 2 or later.
+  ~ You should have received a copy of the license in this archive (see LICENSE).
   ~
   ~ Copyright Nikolai Kudashov, 2013-2018.
   -->
@@ -24,6 +25,14 @@
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/inu_splash_320</item>
         <item name="android:windowSplashScreenAnimationDuration">@integer/splash_screen_duration</item>
         <item name="android:windowSplashScreenBackground">#121318</item>
+    </style>
+
+    <style name="Theme.TMessages.Start.Old" parent="Theme.TMessages.Start">
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/inu_splash_old_320</item>
+    </style>
+
+    <style name="Theme.TMessages.Start.Tribute" parent="Theme.TMessages.Start">
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/inu_splash_tribute_320</item>
     </style>
 
     <style name="ActionBar.Transparent.TMessages.Start" parent="android:style/Widget.Material.Light.ActionBar">

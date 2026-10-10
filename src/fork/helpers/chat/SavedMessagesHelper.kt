@@ -696,11 +696,11 @@ object SavedMessagesHelper {
         return LocaleController.getString(res)
     }
 
+    // lumine: a deletion is only worth archiving when we actually hold something to preserve
     private fun findShadowDialog(account: Int, msgId: Int): Long? = synchronized(cacheLock) {
         shadowMessageCache.get(account.toLong())?.keys?.lastOrNull { it.second == msgId && it.first > 0 }?.first
     }
 
-    // lumine: a deletion is only worth archiving when we actually hold something to preserve
     private fun hasPreservableData(text: String?, message: TLRPC.Message?): Boolean {
         if (!text.isNullOrBlank()) return true
         val media = message?.media ?: return false
@@ -740,6 +740,7 @@ object SavedMessagesHelper {
         var dialogId = dialogId
         var text = textIn
         val msgId = msgIdIn
+        // lumine: private deletes arrive without a dialog id, recover it from the shadow cache
         if (dialogId == 0L && message == null && msgId > 0) {
             findShadowDialog(account, msgId)?.let { dialogId = it }
         }
@@ -748,6 +749,7 @@ object SavedMessagesHelper {
         }
         // lumine: reject dialog id 0 to prevent marking matching IDs in unrelated chats as deleted
         if (dialogId == 0L) return
+        // lumine: unsent or cancelled uploads carry local ids and must never reach the archive
         if (msgId <= 0 || (message != null && message.send_state != 0)) return
         // lumine: a message already archived (timer path) keeps getting its real text from the storage delete even when the chat type is off
         val alreadyRecorded = isMessageDeleted(account, dialogId, msgId)
@@ -854,6 +856,7 @@ object SavedMessagesHelper {
 
     @JvmStatic
     fun isMessageDeleted(account: Int, dialogId: Long, msgId: Int): Boolean {
+        // lumine: timer and secret-chat archives keep their mark with the general toggle off
         if (!isSaveDeletedEnabled() && !InuConfig.SAVE_TIMED_MESSAGES.value && !InuConfig.SAVE_SELF_DESTRUCT_TEXT.value) return false
         ensureAccountLoaded(account)
         return synchronized(cacheLock) {

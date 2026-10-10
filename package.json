@@ -2,7 +2,7 @@
   "name": "luminegram",
   "type": "module",
   "private": true,
-  "packageManager": "bun@1.3.13",
+  "packageManager": "bun@1.4.2",
   "scripts": {
     "setup": "bun scripts/setup.ts",
     "generate-icons": "bun scripts/generate-icons.ts",
@@ -11,8 +11,11 @@
     "find-patches": "bun scripts/find-patches.ts",
     "lint-patches": "bun scripts/lint-patches.ts",
     "luminechecker": "bun scripts/luminechecker.ts",
+    "push-theme": "bun scripts/push-theme.ts",
+    "check-translations": "bun scripts/check-translations.ts",
     "build-debug": "bun scripts/generate-grants.ts && cd worktree && ./gradlew TMessagesProj_App:assembleDebug",
     "run-debug": "cd worktree && ./gradlew TMessagesProj_App:installDebug && adb shell am start com.lumine.gram/org.telegram.ui.LaunchActivity",
+    "prepare": "husky",
     "generate-tl": "bun scripts/generate-tl.ts",
     "generate-grants": "bun scripts/generate-grants.ts",
     "build-debug-pluginless": "cd worktree-pluginless && ./gradlew TMessagesProj_App:assembleDebug"
@@ -29,7 +32,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.6.1",
-    "sharp": "^0.35.3",
+    "husky": "^9.1.7",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },

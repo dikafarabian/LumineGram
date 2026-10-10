@@ -24,8 +24,10 @@ internal class AttachmentBackdrop(private val width: Int, private val height: In
     private val buffer: HardwareBuffer
     private val renderer: HardwareBufferRenderer
     private val node = RenderNode("inu.attachmentBackdrop")
+    // Opening pre-draw can run before queued UI callbacks. Publish the finished GPU result directly.
     @Volatile var bitmap: Bitmap? = null
         private set
+    // A wrapped bitmap must not observe another render writing to the same buffer.
     private var renderStarted = false
     private var inFlight = false
     private var closeRequested = false
@@ -74,6 +76,7 @@ internal class AttachmentBackdrop(private val width: Int, private val height: In
                 var renderedBitmap: Bitmap? = null
                 try {
                     result.fence.use { fence ->
+                        // The callback can precede GPU completion; wait on this worker before publishing.
                         val signaled = fence.awaitForever()
                         if (signaled && result.status == HardwareBufferRenderer.RenderResult.SUCCESS) {
                             renderedBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB))
@@ -109,6 +112,7 @@ internal class AttachmentBackdrop(private val width: Int, private val height: In
         if (inFlight || renderer.isClosed) return
         renderer.close()
         node.discardDisplayList()
+        // wrapHardwareBuffer retains its own reference, so closing this handle keeps the bitmap valid.
         buffer.close()
     }
 

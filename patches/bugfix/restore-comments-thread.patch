@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.su>
 Date: Tue, 23 Jun 2026 17:51:26 +0400
 Subject: Fix comments/topic thread restored as plain discussion group/chat after recreation
 
@@ -35,7 +35,7 @@ index 0000000..0000000 100644
                                  if (args != null) {
                                      ChatActivity chat = new ChatActivity(args);
                                      if (actionBarLayout.addFragmentToStack(chat)) {
-@@ -8303,6 +8320,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
+@@ -8301,6 +8318,14 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                  if (lastFragment instanceof ChatActivity && args != null) {
                      outState.putBundle("args", args);
                      outState.putString("fragment", "chat");

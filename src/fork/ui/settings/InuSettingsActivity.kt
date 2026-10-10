@@ -18,6 +18,23 @@ import org.telegram.ui.ProfileActivity
 import java.util.Locale
 
 class InuSettingsActivity : SettingsPageActivity() {
+    private var authorCard: AuthorCardCell? = null
+
+    private fun getOrCreateAuthorCard(): AuthorCardCell {
+        authorCard?.let { return it }
+        val ctx = context!!
+        val card = AuthorCardCell(
+            ctx,
+            resourceProvider,
+            AUTHOR_USERNAME,
+            AUTHOR_GITHUB,
+            onOpenTelegram = { Browser.openUrl(ctx, "https://t.me/$AUTHOR_USERNAME") },
+            onOpenGithub = { Browser.openUrl(ctx, "https://github.com/$AUTHOR_GITHUB") },
+        )
+        authorCard = card
+        return card
+    }
+
     override fun getTitle(): CharSequence = LocaleController.getString(R.string.InuSettings)
 
     private var searchAdapter: ProfileActivity.SearchAdapter? = null
@@ -61,23 +78,6 @@ class InuSettingsActivity : SettingsPageActivity() {
                 }
             })
         }
-    }
-
-    private var authorCard: AuthorCardCell? = null
-
-    private fun getOrCreateAuthorCard(): AuthorCardCell {
-        authorCard?.let { return it }
-        val ctx = context!!
-        val card = AuthorCardCell(
-            ctx,
-            resourceProvider,
-            AUTHOR_USERNAME,
-            AUTHOR_GITHUB,
-            onOpenTelegram = { Browser.openUrl(ctx, "https://t.me/$AUTHOR_USERNAME") },
-            onOpenGithub = { Browser.openUrl(ctx, "https://github.com/$AUTHOR_GITHUB") },
-        )
-        authorCard = card
-        return card
     }
 
     private fun createHeaderView(): View {
@@ -155,7 +155,7 @@ class InuSettingsActivity : SettingsPageActivity() {
             }
             return
         }
-        if (context == null) return
+        val ctx = context ?: return
         when (item.id) {
             CAT_APPEARANCE -> presentFragment(AppearanceSettingsActivity())
             CAT_CHATS -> presentFragment(CategoryChatsSettingsActivity())
@@ -187,10 +187,10 @@ class InuSettingsActivity : SettingsPageActivity() {
         private val BUTTON_PLUGINS = InuUtils.generateId()
         private val CAT_SYSTEM = InuUtils.generateId()
         private val CAT_NICHE = InuUtils.generateId()
-        private const val AUTHOR_USERNAME = "chainonyourdoor"
-        private const val AUTHOR_GITHUB = "chainonyourdoor"
         private const val HEADER_TAP_COUNT = 5
         private const val HEADER_TAP_WINDOW_MS = 2000L
+        private const val AUTHOR_USERNAME = "chainonyourdoor"
+        private const val AUTHOR_GITHUB = "chainonyourdoor"
         private val BUTTON_AUTHOR = InuUtils.generateId()
 
         @JvmField

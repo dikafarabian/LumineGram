@@ -12,6 +12,7 @@ import org.telegram.messenger.FileLog
 import org.telegram.ui.LaunchActivity
 import java.lang.ref.WeakReference
 
+// lumine: temporary diagnostics for the status bar disappearing; writes to the app log only while logs are enabled
 object SystemBarsDiagHelper {
     private var attached = WeakReference<View>(null)
     private var lastState = ""

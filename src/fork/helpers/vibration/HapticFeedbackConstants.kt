@@ -3,6 +3,7 @@ package desu.inugram.helpers.vibration
 import desu.inugram.InuConfig
 import android.view.HapticFeedbackConstants as Android
 
+// lumine: stands in for android.view.HapticFeedbackConstants so every performHapticFeedback call can be silenced from one switch
 object HapticFeedbackConstants {
     private const val NONE = -1
 

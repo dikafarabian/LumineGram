@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: dikafarabian <dikafarabian@gmail.com>
+From: alina sireneva <alina@tei.pet>
 Date: Wed, 12 Aug 2026 22:30:08 +0400
 Subject: Dont auto-play music when opening the profile music player
 
@@ -12,7 +12,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MediaController.
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/messenger/MediaController.java
 +++ b/TMessagesProj/src/main/java/org/telegram/messenger/MediaController.java
-@@ -3659,6 +3659,18 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
+@@ -3661,6 +3661,18 @@ public class MediaController implements AudioManager.OnAudioFocusChangeListener,
          return playMessage(messageObject, false);
      }
  
@@ -35,7 +35,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java b/
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ProfileActivity.java
-@@ -3898,7 +3898,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
+@@ -3904,7 +3904,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                      MediaController.getInstance().currentSavedMusicList = savedMusicList;
                      MediaController.getInstance().getPlaylist().clear();
                      MediaController.getInstance().getPlaylist().addAll(savedMusicList.list);
