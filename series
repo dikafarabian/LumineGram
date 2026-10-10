@@ -517,3 +517,4 @@ feature/keep-screen-on-recording.patch
 feature/explicit-biometric-confirmation.patch
 feature/premium-badge-dialogs.patch
 feature/feed-media-channel-name.patch
+bugfix/forum-cache-race.patch
