@@ -322,7 +322,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChatRightsEditActivity.
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/ChatRightsEditActivity.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/ChatRightsEditActivity.java
-@@ -1940,6 +1940,9 @@ public class ChatRightsEditActivity extends BaseFragment implements Notification
+@@ -1958,6 +1958,9 @@ public class ChatRightsEditActivity extends BaseFragment implements Notification
                  case VIEW_TYPE_HEADER_CELL:
                      view = new HeaderCell(mContext, Theme.key_windowBackgroundWhiteBlueHeader, 21, 15, true);
                      view.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
@@ -508,7 +508,7 @@ diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/TranslateAle
 index 0000000..0000000 100644
 --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/TranslateAlert3.java
 +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/TranslateAlert3.java
-@@ -577,6 +577,7 @@ public class TranslateAlert3 extends BottomSheetWithRecyclerListView {
+@@ -576,6 +576,7 @@ public class TranslateAlert3 extends BottomSheetWithRecyclerListView {
              anotherExampleIcon.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider), PorterDuff.Mode.SRC_IN));
              anotherExampleText.setTextColor(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider));
              anotherExample.setBackground(Theme.createRadSelectorDrawable(Theme.multAlpha(Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider), .10f), dp(8), dp(8)));
@@ -516,7 +516,7 @@ index 0000000..0000000 100644
          }
  
          public void set(CharSequence text1, CharSequence text2, CharSequence text3, View.OnClickListener onText2Click, boolean emojify, View.OnClickListener onEmojifyClick, View.OnClickListener onAnotherExampleClick) {
-@@ -691,7 +692,7 @@ public class TranslateAlert3 extends BottomSheetWithRecyclerListView {
+@@ -690,7 +691,7 @@ public class TranslateAlert3 extends BottomSheetWithRecyclerListView {
              this.resourcesProvider = resourcesProvider;
  
              setClipToPadding(false);
@@ -727,7 +727,7 @@ index 0000000..0000000 100644
 +                    paint.setShader(null);
 +                    paint.setColor(inu_monetColor);
 +                    Rect b = getBounds();
-+                    canvas.drawCircle(b.exactCenterX(), b.exactCenterY(), Math.min(b.width(), b.height()) / 2f, paint);
++                    if (desu.inugram.helpers.theme.M3SectionsHelper.isCircleIconsEnabled()) canvas.drawCircle(b.exactCenterX(), b.exactCenterY(), Math.min(b.width(), b.height()) / 2f, paint); else { AndroidUtilities.rectTmp.set(b); canvas.drawRoundRect(AndroidUtilities.rectTmp, dp(10), dp(10), paint); }
 +                    return;
 +                }
                  final float r = dp(10);
