@@ -117,6 +117,10 @@
     <string name="InuUnifiedPushGatewayInfo">Rewrite proxy for distributors that require WebPush POST and VAPID (e.g. gCompat-UP, Sunup, Prism).</string>
     <string name="InuUnifiedPushGatewayDirect">Direct (no gateway)</string>
     <string name="InuUnifiedPushGatewayDefault">Default</string>
+    <string name="InuNotifChannelSync">System channel mutes chats</string>
+    <string name="InuNotifChannelSyncInfo">Turning notifications off for a channel in the system settings also mutes those chats inside the app and on the server. When off, the mute stays in the system settings only.</string>
+    <string name="InuPerChatNotifChannels">Separate channel for every chat</string>
+    <string name="InuPerChatNotifChannelsInfo">Creates an individual system notification channel per chat instead of one shared channel per type, so muting one channel or topic cannot silence the others. Existing channels are recreated.</string>
     <string name="InuUpdatesIncludeBetaInfo">Also offer pre-release/beta builds.</string>
     <string name="InuVersionBetaSuffix">(Beta)</string>
     <string name="InuPerformanceClass">Performance class</string>
@@ -129,7 +133,8 @@
     <string name="InuAnnoyancesChats">Chats</string>
     <string name="InuAnnoyancesStories">Stories</string>
     <string name="InuAnnoyancesProfile">Profile</string>
-    <string name="InuAnnoyancesGifts">Gifts &amp; Premium</string>
+    <string name="InuAnnoyancesGifts">Gifts</string>
+    <string name="InuAnnoyancesPremium">Telegram Premium</string>
     <string name="InuAnnoyancesInterface">Chats &amp; Interface</string>
     <string name="InuAnnoyancesChannels">Channels &amp; Recommendations</string>
     <string name="InuAnnoyancesMedia">Media</string>
@@ -321,6 +326,13 @@
     <string name="InuHideGiftCardsInChatInfo">Hide gift service messages (Stars, TON, Premium) from chats. Reopen the chat to apply.</string>
     <string name="InuHideGiveaways">Hide giveaways</string>
     <string name="InuHideGroupStickerPack">Hide group emoji pack hint</string>
+    <string name="InuCustomizeMessages">Messages</string>
+    <string name="InuHideReplyBackground">Hide reply background</string>
+    <string name="InuHideReplyBackgroundInfo">Draws replies and quotes with a transparent background</string>
+    <string name="InuDisableReplyCustomColors">Disable custom reply colors</string>
+    <string name="InuDisableReplyCustomColorsInfo">Uses standard reply colors instead of the sender\'s custom color</string>
+    <string name="InuHideReplyBackgroundEmoji">Hide emoji in replies</string>
+    <string name="InuHideReplyBackgroundEmojiInfo">Hides custom background emoji pattern in replies and quotes</string>
     <string name="InuDisableChatBackgrounds">Disable custom chat backgrounds</string>
     <string name="InuDisableChatThemes">Disable custom chat themes</string>
     <string name="InuDisableBgParallax">Disable background parallax</string>
@@ -1342,7 +1354,6 @@
     <string name="InuCenterTitleMainInfo">Centers action bar titles outside chats. Chats have their own toggle below.</string>
     <string name="InuChatHeaderSettings">Chat header</string>
     <string name="InuChatHeaderSettingsInfo">Live preview above updates instantly as you change the options below.</string>
-    <string name="InuChatHeaderPreviewName">Alex</string>
     <string name="InuCenterTitleChats">Center in chats/channels</string>
     <string name="InuCenterTitleChatsInfo">Centers the chat title and subtitle; the avatar stays left. Works on its own.</string>
     <string name="InuCenterTitleRightAvatar">Show avatar on the right</string>
@@ -2019,4 +2030,7 @@
     <string name="InuAppIconDescOsu">Low-poly hit-circle pink</string>
     <string name="InuAppIconDescAmongUs">A crewmate on bright yellow</string>
     <string name="InuAppIconDescCrimson">A blood moon over a sakura dusk</string>
+    <string name="InuUnreadBadgeOnBackButton">Show unread chats counter</string>
+    <string name="InuUnreadBadgeOnBackButtonInfo">Show the number of unread chats on the back button in a chat.</string>
+    <string name="InuUnreadBadgeOnBackButtonIos">iOS-styled counter</string>
 </resources>

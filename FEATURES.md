@@ -77,6 +77,7 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 ### appearance & customization
 
 - 📡 **system folders**: Administrator, Bots, Unread, Groups and Channels tabs in the folder bar - *inspired by [NagramXF](https://github.com/Keeperorowner/NagramXF)*
+- 📡 **fix folder opening empty**: switching to a folder tab always shows its chats on the first try
 - 📡 **avatar corners**: adjustable radius - *ported from [NagramXF](https://github.com/Keeperorowner/NagramXF)*
 - 📡 **clown avatar for blocked users**: blocked users show 🤡 (or 💩 / 💀) instead of their photo - *ported from [NiagramX](https://github.com/HSSkyBoy/NiagramX)*
 - 📡 **clown avatar for users who blocked me**: guessed from a missing photo and last seen, so it can be wrong - *ported from [NagramXF](https://github.com/Keeperorowner/NagramXF)*
@@ -93,10 +94,12 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **action button style**: Accent, Neutral or White - *ported from [Nagram X Turbo](https://github.com/temporaryna/NagramXTurbo) (@temporaryna)*
 - 📡 **header centering** and customizable chat headers
 - 📡 **compact pill & profile transition fixes**
+- 📡 **fix topics side panel flicker**: no more constant jitter/smearing after using search inside the panel
 - 📡 **auto marquee** for long titles - *inspired by auto_marquee plugin (@chestertech)*
+- 📡 **unread counter on the chat header back button**, with an iOS-styled variant and a live preview in chat header settings - *ported from [Finegram](https://github.com/Th3Nekit/Finegram)*
 - 📡 **Material 3 music player**: full-screen player with cover-based colors, wavy seek bar, morphing controls, queue, synced lyrics and a mini player - *ported from [exteraless](https://github.com/exteraless/exteraless)*
 - 📡 **show spoilers directly**
-- 📡 **customizable bottom tabs**, with an optional separate Search button - *button layout ported from [NagramXF](https://github.com/Keeperorowner/NagramXF)*
+- 📡 **customizable bottom tabs**, with an optional separate Search button; the Chats tab can be moved too - *button layout ported from [NagramXF](https://github.com/Keeperorowner/NagramXF)*
 - 📡 **recent chats**: popup, side panel or full page with tabs, search and history limit - *inspired by [exteraless](https://github.com/exteraless/exteraless), [Aprel Gram](https://t.me/aprelmods) and [NagramXF](https://github.com/Keeperorowner/NagramXF)*
 - 📡 **clear cache** and **restart app** shortcuts in the chats menu; **restart app** is also available in the side menu
 - 📡 **customizable settings screen**: reorder and hide rows
@@ -111,6 +114,7 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **support card**: optional way to support the developer, can be hidden
 - 📡 **downloads button**: always show the downloads list button in the chats header
 - 📡 **app icon picker**: full-screen icon chooser with live preview - *ported from [exteraless](https://github.com/exteraless/exteraless)*
+- 📡 **messages appearance**: hide reply background, custom reply colors and pattern emoji - *inspired by [Finegram](https://github.com/Th3Nekit/Finegram)*
 
 ### profile & identity tools
 
@@ -150,12 +154,16 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **export chat** as JSON or HTML
 - 📡 **UnifiedPush** notifications without Google Play - *ported from [Forkgram](https://github.com/forkgram/TelegramAndroid) & [Mercurygram](https://github.com/mercurygram/mercurygram)*
 - 📡 **background service**: optional always-on connection so notifications arrive on time, at the cost of battery - *inspired by [exteraGram](https://github.com/exteraSquad/exteraGram)*
+- 📡 **fix notifications dying everywhere**: muting one topic or system notification channel no longer mutes the whole chat list, no server-side mute either
+- 📡 **system channel mute**: optional — keep a channel muted only in system settings, without the app muting those chats too
+- 📡 **per-chat notification channels**: own system channel for every chat, so muting one channel or topic can't silence the rest
 - 📡 **fix stuck playback on pause** (MIUI and certain DSPs)
 - 📡 **fix in-app vibration setting ignored**: turning in-app notification vibration on or off now takes effect
 - 📡 **disable all vibration**: haptics, in-app, call and notification vibration off, whatever Telegram's own settings say
 - 📡 **rotate the call screen** instead of locking it to portrait
 - 📡 **cache management**: per-category size overview; clear deleted messages, edit history, removed reactions, saved media, presence logs, feed, recent chats, temp files and logs one by one or all at once
 - 📡 **media size badge**: optional file size label on photos
+- 📡 **PhotoViewer close crash fix** when the selected-media strip is not initialized
 - 📡 **square camera tile**: the attach gallery camera takes one cell instead of two
 - 📡 **save selected files**: download button when selecting files in profile media and search - *ported from the Save Selected Files plugin by @akresik*
 - 📡 **free memory in background**: clears image caches shortly after the app is minimized
@@ -318,6 +326,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - 🐶 lift 100-message selection cap (forwards/saves/deletes are auto-chunked)
 - 🐶 two-finger swipe over messages to select/deselect them
 - more bulk actions in message selection mode (save, translate, gallery, pin/unpin, no-quote forward)
+- three-dot menu in shared media selection mode (save, gallery, no-quote forward, plugin actions)
 - in-place message translation, with optional web preview translation, original-text appending and on-device source-language auto-detection (hides Translate when already in your language)
 - instant view pages translator
 - show original time/date in the forwarded header, with regular, icon-only label, and compact one-line modes
@@ -488,6 +497,8 @@ the sections below contain the broader feature set: inugram functionality, featu
 - expired once-view/self-destruct media now reliably shows the "Expired video/photo" placeholder instead of sometimes getting stuck showing live media (stock bug: the refresh triggered when `SecretMediaViewer` closes checked the media fields directly, which aren't cleared yet at that point — only a separate `forceExpired` flag is)
 - reaction counter shift during long-tap menu
 - reactions silently disappearing right after being sent (stale server read race)
+- seen reactions coming back to the unread reactions counter (stock only told the server once the local counter hit 0, so every server count reload resurrected them); each read is now reported via `readMessageContents`
+- reactions vanishing for a moment after editing a message that got reacted to while the edit was open (the edit applied a stale copy of the message)
 - channel reactions: toggling "Enable Reactions" was silently discarded on back (unsaved-changes check only compared the emoji selection, never the enabled state), and re-enabling always saved the prefilled list as an explicit set instead of "All"
 - rounded section backgrounds ignored the alpha of the fading container they lived in, so they stayed fully opaque during the animation and only popped away on the next unrelated redraw (e.g. toggling "Enable Reactions" in channel reactions)
 - sticky date pill jump and color shift when replacing an inline date separator

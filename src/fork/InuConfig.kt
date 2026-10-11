@@ -240,6 +240,15 @@ object InuConfig {
     val SHOW_SECONDS = BoolItem("show_seconds", false)
 
     @JvmField
+    val HIDE_REPLY_BACKGROUND = BoolItem("hide_reply_background", false)
+
+    @JvmField
+    val DISABLE_REPLY_CUSTOM_COLORS = BoolItem("disable_reply_custom_colors", false)
+
+    @JvmField
+    val HIDE_REPLY_BACKGROUND_EMOJI = BoolItem("hide_reply_background_emoji", false)
+
+    @JvmField
     val DISABLE_ROUNDING = BoolItem("disable_rounding", false)
 
     @JvmField
@@ -1496,6 +1505,12 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val CHAT_TITLE_MARQUEE = BoolItem("chat_title_marquee", false)
 
     @JvmField
+    val UNREAD_BADGE_ON_BACK_BUTTON = BoolItem("unread_badge_on_back_button", false)
+
+    @JvmField
+    val UNREAD_BADGE_ON_BACK_BUTTON_IOS = BoolItem("unread_badge_on_back_button_ios", false)
+
+    @JvmField
     val SAVE_SELF_DESTRUCT_MEDIA = BoolItem("save_self_destruct_media", false)
 
     @JvmField
@@ -1649,6 +1664,12 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val NOTIFICATION_ICON = NotificationIconItem()
+
+    @JvmField
+    val NOTIF_CHANNEL_SYNC = BoolItem("notif_channel_sync", true)
+
+    @JvmField
+    val PER_CHAT_NOTIF_CHANNELS = BoolItem("per_chat_notif_channels", false)
 
     class MapProviderItem : IntItem("map_provider", OSM_LITE) {
         // lumine: a plugin's tile source only exists on the osmdroid map, the stored choice stays untouched

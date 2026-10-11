@@ -81,7 +81,8 @@
     <string name="InuAnnoyances">المزعجات</string>
     <string name="InuAnnoyancesStories">القصص</string>
     <string name="InuAnnoyancesProfile">الملف الشخصي</string>
-    <string name="InuAnnoyancesGifts">الهدايا &amp; Premium</string>
+    <string name="InuAnnoyancesGifts">الهدايا</string>
+    <string name="InuAnnoyancesPremium">Telegram Premium</string>
     <string name="InuAnnoyancesInterface">المحادثات &amp; الواجهة</string>
     <string name="InuAnnoyancesChannels">القنوات &amp; التوصيات</string>
     <string name="InuAnnoyancesMedia">الوسائط</string>
@@ -242,6 +243,13 @@
     <string name="InuHideGiftCardsInChatInfo">إخفاء رسائل الخدمة الخاصة بالهدايا (النجوم وTON وPremium) من المحادثات. أعد فتح المحادثة للتطبيق.</string>
     <string name="InuHideGiveaways">إخفاء المسابقات</string>
     <string name="InuHideGroupStickerPack">إخفاء تلميح حزمة إيموجي المجموعة</string>
+    <string name="InuCustomizeMessages">الرسائل</string>
+    <string name="InuHideReplyBackground">إخفاء خلفية الردود</string>
+    <string name="InuHideReplyBackgroundInfo">عرض الردود والاقتباسات بخلفية شفافة</string>
+    <string name="InuDisableReplyCustomColors">تعطيل الألوان المخصصة في الردود</string>
+    <string name="InuDisableReplyCustomColorsInfo">استخدام ألوان الرد الافتراضية بدلاً من لون المرسل المخصص</string>
+    <string name="InuHideReplyBackgroundEmoji">إخفاء الرموز التعبيرية في الردود</string>
+    <string name="InuHideReplyBackgroundEmojiInfo">إخفاء نمط الرموز التعبيرية في خلفية الردود والاقتباسات</string>
     <string name="InuDisableChatBackgrounds">تعطيل خلفيات المحادثة المخصصة</string>
     <string name="InuDisableChatThemes">تعطيل سمات المحادثة المخصصة</string>
     <string name="InuDisableBgParallax">تعطيل تأثير عمق الخلفية</string>
@@ -1242,7 +1250,6 @@
     <string name="InuCenterTitleMainInfo">يوسّط عناوين شريط الإجراءات خارج المحادثات. للمحادثات مفتاحها الخاص أدناه.</string>
     <string name="InuChatHeaderSettings">ترويسة المحادثة</string>
     <string name="InuChatHeaderSettingsInfo">المعاينة الحية أعلاه تتحدث فوراً عند تغيير الخيارات أدناه.</string>
-    <string name="InuChatHeaderPreviewName">أحمد</string>
     <string name="InuCenterTitleChats">التوسيط في المحادثات/القنوات</string>
     <string name="InuCenterTitleChatsInfo">يوسّط عنوان المحادثة وعنوانها الفرعي؛ وتبقى الصورة الرمزية في جهتها. يعمل بمفرده.</string>
     <string name="InuCenterTitleRightAvatar">إظهار الصورة الرمزية على الجانب الآخر</string>
@@ -1914,4 +1921,7 @@
     <string name="InuHideMessage">إخفاء</string>
     <string name="InuSideMenu">القائمة الجانبية</string>
     <string name="InuSideMenuInfo">القائمة المنسدلة وأقسامها والحسابات وعناصر القائمة.</string>
+    <string name="InuUnreadBadgeOnBackButton">إظهار عدّاد المحادثات غير المقروءة</string>
+    <string name="InuUnreadBadgeOnBackButtonInfo">يعرض عدد المحادثات غير المقروءة على زر الرجوع داخل المحادثة.</string>
+    <string name="InuUnreadBadgeOnBackButtonIos">عدّاد بأسلوب iOS</string>
 </resources>

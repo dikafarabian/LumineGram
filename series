@@ -256,7 +256,6 @@ feature/faster-file-load.patch
 bugfix/album-caption-spoiler-reset.patch
 bugfix/story-privacy-hint-npe.patch
 bugfix/preview-rotation-black-screen.patch
-bugfix/dead-animated-drawable.patch
 bugfix/community-admin-list-spam.patch
 feature/unified-video-rewind.patch
 feature/user-deeplink.patch
@@ -389,6 +388,13 @@ bugfix/case-insensitive-settings-search.patch
 feature/edited-message-date.patch
 bugfix/photo-viewer-selection-crash.patch
 bugfix/forum-cache-race.patch
+misc/debug-stale-reactions.patch
+bugfix/edit-stale-message-object.patch
+bugfix/reaction-read-sync.patch
+hooks/code-highlight-spans.patch
+feature/shared-media-selection-menu.patch
+bugfix/extended-grid-layout-cache.patch
+bugfix/forum-bot-menu-layering.patch
 lumine/ui/amoled-theme.patch
 lumine/ui/hide-dialogs-banners.patch
 lumine/premium/hide-attach-emoji-premium-upsells.patch
@@ -521,3 +527,11 @@ lumine/ui/md3-player.patch
 lumine/ui/app-icon-picker.patch
 lumine/tabs/system-folders.patch
 lumine/proxy/proxy-menu.patch
+lumine/notifications/notifications-channel-scope.patch
+lumine/ui/topics-panel-redraw-storm.patch
+lumine/tabs/folder-empty-on-switch.patch
+lumine/chat/chat-header-pill-width.patch
+lumine/tabs/movable-chats-tab.patch
+lumine/chat/reply-background.patch
+lumine/chat/unread-badge-on-back-button.patch
+lumine/media/photo-viewer-null-stop-scroll.patch
