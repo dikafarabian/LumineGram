@@ -12,7 +12,7 @@ object PluginDependencies {
     const val KEY = "requires"
 
     /** the plugin that carries the LumineGram SDK; plugins that use its directives require it */
-    const val SDK_ID = "luminegram.sdk"
+    const val SDK_ID = "entinygram.sdk"
 
     class Need(val id: String, val minVersion: String?)
 

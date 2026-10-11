@@ -1,4 +1,4 @@
-package desu.inugram.helpers.lumine
+package desu.inugram.helpers.entiny
 
 // #if PLUGINS
 import desu.inugram.InuConfig
@@ -14,7 +14,7 @@ import org.telegram.ui.Components.BulletinFactory
 import org.telegram.ui.LaunchActivity
 
 // lumine: the SDK plugin reaches this through inu.jvm (unsafe.jvm); the engine's own package is closed to it
-object LumineMarketBridge {
+object EntinyMarketBridge {
     @JvmStatic
     fun indexUrl(): String = InuConfig.MARKET_INDEX_URL.value
 
