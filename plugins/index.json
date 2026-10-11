@@ -1,4 +1,141 @@
 {
   "version": 1,
-  "plugins": []
+  "plugins": [
+    {
+      "id": "entinygram.2gis",
+      "name": "2GIS",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2026-10-07",
+          "notes": "",
+          "file": "dist/entinygram.2gis/1.0.0.inu.js",
+          "sha256": "cbe1828ee3cd07287b4464a83aa0fde28c38dddffee4fe0c427f574059c620c1",
+          "requires": [
+            "entinygram.sdk >=0.1.0-alpha"
+          ],
+          "pluginApi": 1
+        }
+      ],
+      "author": "entinyGram",
+      "description": "2GIS map and location previews",
+      "icon": "2gis/icon.svg"
+    },
+    {
+      "id": "entinygram.calendar-systems",
+      "name": "Calendar systems",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2026-10-06",
+          "notes": "",
+          "file": "dist/entinygram.calendar-systems/1.0.0.inu.js",
+          "sha256": "811e54ce55c50947d5b6704c491767dc6224a7b7108a923563ad8df873c5d967",
+          "requires": [
+            "entinygram.sdk >=0.1.0-alpha"
+          ],
+          "pluginApi": 1
+        }
+      ],
+      "author": "entinyGram",
+      "description": "Show dates in the Hijri, Persian, Indian and other calendars",
+      "icon": "calendar-systems/icon.svg"
+    },
+    {
+      "id": "entinygram.doc-viewer",
+      "name": "Doc Viewer",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2026-10-10",
+          "notes": "- Initial release of Doc Viewer for Inugram / entinyGram.\n- Ported from the Python plugin by Daxo-Developer & @Daxo_OS.\n- In-app viewing for PDF, images, text, code, JSON, CSV, Jupyter Notebooks, Markdown, HTML, SVG, office documents (DOCX, XLSX, PPTX, ODF, RTF, EML), books (EPUB, FB2) and archives (ZIP, TAR).",
+          "file": "dist/entinygram.doc-viewer/1.0.0.inu.js",
+          "sha256": "b730dbce4a50154daaf20015ad9c1632bf79d7f1138c9356243949fcba2f6a6a",
+          "requires": [
+            "entinygram.sdk >=0.1.0-alpha"
+          ],
+          "pluginApi": 1
+        }
+      ],
+      "author": "Daxo-Developer && @Daxo_OS (original), entinyGram (Inugram port)",
+      "description": "In-app viewer for PDF, DOCX, XLSX, text, code, images, archives and more",
+      "icon": "doc-viewer/icon.svg"
+    },
+    {
+      "id": "entinygram.sdk",
+      "name": "entinyGram SDK",
+      "versions": [
+        {
+          "version": "0.1.2-beta",
+          "date": "2026-10-09",
+          "notes": "- Installing in inugram downloads the file from the plugin release instead of opening a page",
+          "file": "dist/entinygram.sdk/0.1.2-beta.inu.js",
+          "sha256": "8fbdbb42fb2380ebcd990be95e1fe1146de9dd366e7ac7e6301c3d6c3d46fb9f",
+          "requires": [],
+          "pluginApi": 1
+        },
+        {
+          "version": "0.1.1-beta",
+          "date": "2026-10-09",
+          "notes": "- Works in plain inugram: without the entinyGram bridge the SDK runs standalone and no longer crashes\n- Marketplace reads the installed plugins from the app directory in standalone mode\n- Installing from the marketplace in inugram hands over the download link and checksum",
+          "file": "dist/entinygram.sdk/0.1.1-beta.inu.js",
+          "sha256": "b87bb7bc76ccc90a15b53bb75a437079d8ef6076a3ecab6f3919c9c14b11ad7e",
+          "requires": [],
+          "pluginApi": 1
+        },
+        {
+          "version": "0.1.0-alpha",
+          "date": "2026-10-06",
+          "notes": "",
+          "file": "dist/entinygram.sdk/0.1.0-alpha.inu.js",
+          "sha256": "6c0568798273247374164c589b8d637952fded010d113933fa56d8519c9ac5d6",
+          "requires": [],
+          "pluginApi": 1
+        }
+      ],
+      "author": "entinyGram",
+      "description": "Needed by plugins that use the entinyGram SDK",
+      "icon": "entiny-sdk/icon.svg"
+    },
+    {
+      "id": "entinygram.text-animation",
+      "name": "Text animation",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2026-10-08",
+          "notes": "",
+          "file": "dist/entinygram.text-animation/1.0.0.inu.js",
+          "sha256": "e9574f343eeddc597bd472fea018866a0839bdb121885ee52f582f870be37130",
+          "requires": [
+            "entinygram.sdk >=0.1.0-alpha"
+          ],
+          "pluginApi": 1
+        }
+      ],
+      "author": "entinyGram",
+      "description": "Animated typing and deleting in the message input",
+      "icon": "text-animation/icon.svg"
+    },
+    {
+      "id": "entinygram.yandex",
+      "name": "Yandex",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2026-10-06",
+          "notes": "",
+          "file": "dist/entinygram.yandex/1.0.0.inu.js",
+          "sha256": "786ee82d57035d8872089e932d65670e8d1973fe0fdf87f7fe6cf8e923cbdb14",
+          "requires": [
+            "entinygram.sdk >=0.1.0-alpha"
+          ],
+          "pluginApi": 1
+        }
+      ],
+      "author": "entinyGram",
+      "description": "Yandex Cloud Translate and Yandex static maps",
+      "icon": "yandex/icon.svg"
+    }
+  ]
 }
