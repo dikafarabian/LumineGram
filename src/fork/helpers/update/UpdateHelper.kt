@@ -272,6 +272,10 @@ object UpdateHelper {
             callback?.invoke(CheckResult.Error("updates are disabled"))
             return
         }
+        if (USERNAME.isEmpty()) {
+            callback?.invoke(CheckResult.Error("no update channel"))
+            return
+        }
         if (!UserConfig.getInstance(account).isClientActivated) {
             callback?.invoke(CheckResult.Error("Not logged in"))
             return
