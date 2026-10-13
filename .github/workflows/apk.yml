@@ -196,9 +196,9 @@ jobs:
           CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime,locale,system_headers
           CCACHE_BASEDIR: ${{ github.workspace }}/${{ env.WT }}
         run: |
-          ./gradlew --no-daemon :TMessagesProj_App:assembleRelease
+          ./gradlew --no-daemon :TMessagesProj_App:assembleAfatRelease
           mkdir -p "$GITHUB_WORKSPACE/out"
-          cp TMessagesProj_App/build/outputs/apk/release/app.apk "$GITHUB_WORKSPACE/out/$APK_NAME"
+          cp TMessagesProj_App/build/outputs/apk/afat/release/app.apk "$GITHUB_WORKSPACE/out/$APK_NAME"
 
       - name: Sign
         env:
