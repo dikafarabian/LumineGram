@@ -482,7 +482,7 @@ object InuConfig {
     val UNLIMITED_FOLDER_CHATS = BoolItem("unlimited_folder_chats", false)
 
     @JvmField
-    val SYSTEM_FOLDERS = BoolItem("system_folders", false)
+    val SYSTEM_FOLDERS_STATE = StringItem("system_folders_state", "")
 
     @JvmField
     val LOCAL_FOLDERS = BoolItem("local_folders", false)
@@ -1185,6 +1185,18 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     @JvmField
     val ROUND_RECORDER_EXPOSURE_BACK = FloatItem("round_recorder_exposure_back", 0f)
 
+    @JvmField
+    val ROUND_VIDEO_RESOLUTION = IntItem("round_video_resolution", 0)
+
+    @JvmField
+    val ROUND_VIDEO_BITRATE = IntItem("round_video_bitrate", 0)
+
+    @JvmField
+    val ROUND_AUDIO_BITRATE = IntItem("round_audio_bitrate", 0)
+
+    @JvmField
+    val ROUND_AUDIO_SOURCE = IntItem("round_audio_source", 0)
+
     class NonIslandSplitFromTabBarsItem(key: String) : BoolItem(key, false) {
         override fun read(prefs: SharedPreferences): Boolean {
             if (prefs.contains(key)) return prefs.getBoolean(key, default)
@@ -1390,6 +1402,7 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val CHAT_MENU_ITEMS = ChatMenuConfig("chat_menu_items")
+    @JvmField val GROUP_CHAT_ARCHIVES = BoolItem("group_chat_archives", false)
 
     @JvmField
     val PROFILE_SETTINGS_ROWS = ProfileMenuConfig("profile_settings_rows")
@@ -1523,6 +1536,19 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val VIEW_ONCE_SHOW_NORMAL = BoolItem("view_once_show_normal", false)
 
     @JvmField
+    val BURN_TIMED_MEDIA = BoolItem("burn_timed_media", false)
+
+    @JvmField
+    val TIMED_MEDIA_AFTER_VIEW = TimedMediaAfterViewItem()
+
+    class TimedMediaAfterViewItem : IntItem("timed_media_after_view", BURN) {
+        companion object {
+            const val BURN = 0
+            const val KEEP = 1
+        }
+    }
+
+    @JvmField
     val AUTO_SAVE_ONE_TIME = BoolItem("auto_save_one_time", false)
 
     @JvmField
@@ -1536,6 +1562,7 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val LOCAL_NAMES = BoolItem("local_names", false)
+    @JvmField val LOCAL_MESSAGE_EDIT = BoolItem("local_message_edit", false)
 
     @JvmField
     val AUTO_SAVE_STORIES = BoolItem("auto_save_stories", false)
@@ -1858,6 +1885,9 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val ACCOUNT_SWITCH_SHORTCUT = BoolItem("account_switch_shortcut", false)
+
+    @JvmField
+    val RECENT_CHATS_ENABLED = BoolItem("recent_chats_enabled", false)
 
     @JvmField
     val HIDE_RECENT_CHATS_SHORTCUTS = BoolItem("hide_recent_chats_shortcuts", false)

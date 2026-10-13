@@ -170,6 +170,7 @@ class ChatMenuConfig(key: String) : MenuOrderConfig<ChatMenuConfig.Item>(key, It
         TYPING_SPOOF("typing_spoof", listOf(ChatActionsHelper.ACTION_TYPING_SPOOF), R.string.InuTypingSpoof, R.drawable.input_mic),
         REGEX_CHAT_FILTERS("regex_chat_filters", listOf(ChatActionsHelper.ACTION_REGEX_CHAT_FILTERS), R.string.InuRegexChatFilters, R.drawable.msg_block2),
         DELETED_MESSAGES("deleted_messages", listOf(ChatActionsHelper.ACTION_DELETED_MESSAGES), R.string.InuDeletedArchive, R.drawable.msg_delete),
+        EDITED_MESSAGES("edited_messages", listOf(ChatActionsHelper.ACTION_EDITED_MESSAGES), R.string.InuEditedArchive, R.drawable.msg_edit),
         GHOST_MODE("ghost_mode", listOf(ChatActionsHelper.ACTION_GHOST_MODE), R.string.InuGhostMode, R.drawable.inu_ghost),
         CHAT_EXPORT("chat_export", listOf(ChatActionsHelper.ACTION_CHAT_EXPORT), R.string.InuChatExport, R.drawable.msg_share_solar),
         CHAT_LOCAL_NAME("chat_local_name", listOf(ChatActionsHelper.ACTION_CHAT_LOCAL_NAME), R.string.InuLocalName, R.drawable.msg_edit),
@@ -262,13 +263,14 @@ class ProfileMenuConfig(key: String) : MenuOrderConfig<ProfileMenuConfig.Item>(k
         PREMIUM("premium", 11, R.string.TelegramPremium, R.drawable.settings_premium),
         STARS("stars", 12, R.string.TelegramStars, R.drawable.settings_stars),
         TON("ton", 13, R.string.MyTON, R.drawable.settings_gram_24),
-        WALLET("wallet", 0, R.string.InuSettingsRowWallet, R.drawable.settings_wallet),
+        WALLET("wallet", 25, R.string.InuSettingsRowWallet, R.drawable.settings_wallet),
         BUSINESS("business", 15, R.string.TelegramBusiness, R.drawable.settings_business),
         PREMIUM_GIFTING("premium_gifting", 16, R.string.SendAGift, R.drawable.settings_gift),
         QUESTION("question", 17, R.string.AskAQuestion, R.drawable.settings_ask),
         FAQ("faq", 18, R.string.TelegramFAQ, R.drawable.settings_faq),
         FEATURES("features", 23, R.string.TelegramFeatures, R.drawable.settings_features),
-        POLICY("policy", 19, R.string.PrivacyPolicy, R.drawable.settings_policy);
+        POLICY("policy", 19, R.string.PrivacyPolicy, R.drawable.settings_policy),
+        ROUND_VIDEO("round_video", 24, R.string.RoundVideoSettings, R.drawable.msg_video);
 
         companion object {
             private val byKey: Map<String, Item> by lazy { entries.associateBy { it.key } }
@@ -407,6 +409,7 @@ class MessageMenuConfig(key: String) : MenuOrderConfig<MessageMenuConfig.Item>(k
         EDIT_HISTORY("edit_history", listOf(ChatHelper.OPTION_EDIT_HISTORY), R.string.InuEditHistory, R.drawable.inu_tabler_file_diff),
         ADD_FILTER("add_filter", listOf(ChatHelper.OPTION_ADD_FILTER), R.string.InuRegexFilterAddFromMessage, R.drawable.inu_tabler_filter),
         SET_REMINDER("set_reminder", listOf(ChatHelper.OPTION_SET_REMINDER), R.string.InuSetReminder, R.drawable.msg_notifications),
+        LOCAL_EDIT("local_edit", listOf(ChatHelper.OPTION_LOCAL_EDIT, ChatHelper.OPTION_LOCAL_EDIT_RESET), R.string.InuLocalEditMessage, R.drawable.msg_edit),
         HIDE_MESSAGE("hide_message", listOf(ChatHelper.OPTION_HIDE_MESSAGE), R.string.InuHideMessage, R.drawable.inu_tabler_eye_off),
         ACTIONS("actions", listOf(ChatHelper.OPTION_PLUGIN_ACTIONS), R.string.InuActions, R.drawable.msg_settings_old),
 
@@ -432,7 +435,7 @@ class MessageMenuConfig(key: String) : MenuOrderConfig<MessageMenuConfig.Item>(k
     override fun itemByKey(key: String): Item? = Item.forKey(key)
 
     companion object {
-        private val OFF_BY_DEFAULT = setOf(Item.REPLY_IN, Item.DETAILS, Item.FORWARD_NO_QUOTE, Item.SUMMARIZE, Item.REMOVE_FROM_CACHE, Item.REPEAT, Item.ADD_FILTER, Item.SET_REMINDER)
+        private val OFF_BY_DEFAULT = setOf(Item.REPLY_IN, Item.DETAILS, Item.FORWARD_NO_QUOTE, Item.SUMMARIZE, Item.REMOVE_FROM_CACHE, Item.REPEAT, Item.ADD_FILTER, Item.SET_REMINDER, Item.LOCAL_EDIT)
     }
 }
 

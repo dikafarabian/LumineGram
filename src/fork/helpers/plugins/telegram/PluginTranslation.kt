@@ -9,6 +9,7 @@ import desu.inugram.helpers.plugins.SessionResource
 import desu.inugram.helpers.plugins.TranslationListener
 import desu.inugram.helpers.plugins.tl.TlFilter
 import desu.inugram.helpers.plugins.tl.TlJson
+import desu.inugram.helpers.translate.engine.TranslationProviders
 import org.json.JSONArray
 import org.json.JSONObject
 import org.telegram.tgnet.TLRPC
@@ -20,7 +21,7 @@ object PluginTranslation : SessionResource {
         val key: String get() = "${session.plugin.id}:$id"
     }
 
-    private class Pending(val session: PluginSession, val done: (ArrayList<TLRPC.TL_textWithEntities>?) -> Unit) {
+    private class Pending(val session: PluginSession, val providerId: String, val done: (ArrayList<TLRPC.TL_textWithEntities>?) -> Unit) {
         lateinit var deadline: DispatchDeadline
     }
 
@@ -52,7 +53,12 @@ object PluginTranslation : SessionResource {
     /** a removed plugin's provider gives the choice back to Telegram */
     fun retainInstalls(live: Set<String>) {
         val key = InuConfig.TRANSLATION_PROVIDER.value
-        if (key.isNotEmpty() && key.substringBefore(':') !in live) InuConfig.TRANSLATION_PROVIDER.value = ""
+        if (key.isNotEmpty() && key.substringBefore(':') !in live) {
+            InuConfig.TRANSLATION_PROVIDER.value = ""
+            if (InuConfig.TRANSLATE_PROVIDER.value == TranslationProviders.PROVIDER_PLUGIN) {
+                InuConfig.TRANSLATE_PROVIDER.value = TranslationProviders.PROVIDER_TELEGRAM
+            }
+        }
     }
 
     fun findProvider(key: String): Provider? = providers.firstOrNull { it.key == key && it.session.canDispatch() }
@@ -95,7 +101,7 @@ object PluginTranslation : SessionResource {
             .put("to", toLang)
         if (tone != null) request.put("tone", tone)
         val dispatchId = nextDispatchId++
-        val entry = Pending(provider.session, done)
+        val entry = Pending(provider.session, provider.id, done)
         entry.deadline = DispatchDeadline(EngineDispatch.scheduler, BUDGET_MS) { expire(dispatchId) }
         pending[dispatchId] = entry
         entry.deadline.resume()
@@ -112,7 +118,7 @@ object PluginTranslation : SessionResource {
 
     private fun expire(dispatchId: Long) {
         val entry = pending.remove(dispatchId) ?: return
-        entry.session.log.w("translation", "a translation ran past its ${BUDGET_MS}ms budget")
+        entry.session.log.w("translation", "provider '${entry.providerId}' ran past its ${BUDGET_MS}ms budget")
         entry.session.engine.abandonTranslation(dispatchId, true)
         entry.done(null)
     }

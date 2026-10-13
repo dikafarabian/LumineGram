@@ -26,9 +26,17 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
   - save messages and media deleted by the other side (🗑️); your own deletions are never kept
   - per-category controls for private chats, groups, channels and bots
   - save edit history (✏️) with formatting, media and text diff
+  - separate deleted and edited archives with message and media previews, per-chat clearing and bulk chat selection
+  - edited archive hides repeated identical revisions
+  - text and caption diffs between revisions of the same post in edited archives
+  - download missing archived media on tap without background prefetching
+  - preserve downloaded media before deletion cleanup and reject incomplete documents
   - custom styling for deleted messages
   - full-text search and a browsable archive of everything saved, with sender names in groups
   - cache TTL and automatic expiration
+  - preserve repeated revisions and formatting changes, with private account-isolated media archives
+  - open private archived media without crashing
+  - separate settings sections for deleted messages, edit history and self-destructing media
   - export the archive to a JSON file
 - 📡 **self-destructing & expiring media**:
   - save view-once photos, videos, video notes and voice notes, optionally straight to the gallery when you open them
@@ -58,6 +66,7 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **local Telegram Premium**: Premium UI and limits on the client side
 - 📡 **local custom emoji**: send Premium custom emoji without Premium
 - 📡 **local names**: change name, username, photo, bio, verified badge, Premium badge and emoji status of any person, bot, group or channel on your device only, with export and import
+- ✏️ **local message edit**: edit the text of any message on your device only and reset it back anytime, from the message menu - *inspired by Local Message Edit plugin (Pixuz)*
 - 📡 **content protection & forward bypass**:
   - save any story to gallery, or auto-save the ones you view
   - copy and forward from protected chats and channels
@@ -71,12 +80,14 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **translate in send preview** - *inspired by [NagramX](https://github.com/temporaryna/NagramXTurbo)*
 - 📡 **free voice transcription** via Groq Whisper, Gemini Flash, OpenAI or Cloudflare AI
 - 📡 **official-app emulation**: purchases and premium checkout without official app blocks
+- 📡 **wallet for everyone**: the Gram wallet entry is always available - *inspired by [exteraless](https://github.com/exteraless/exteraless)*
 - 📡 **raised limits**: pins, favorites and folders
 - 📡 **skip login code countdown** - *inspired by [NiagramX](https://github.com/HSSkyBoy/NiagramX)*
 
 ### appearance & customization
 
-- 📡 **system folders**: Administrator, Bots, Unread, Groups and Channels tabs in the folder bar - *inspired by [NagramXF](https://github.com/Keeperorowner/NagramXF)*
+- 📡 **chat header preview**: real chat header with your avatar and wallpaper in settings - *inspired by [Finegram](https://github.com/Th3Nekit/Finegram) (@Th3Nekit)*
+- 📡 **system folders**: Administrator, Bots, Unread, Groups and Channels tabs in the folder bar, each switchable and removable on this device - *inspired by [NagramXF](https://github.com/Keeperorowner/NagramXF)*
 - 📡 **fix folder opening empty**: switching to a folder tab always shows its chats on the first try
 - 📡 **avatar corners**: adjustable radius - *ported from [NagramXF](https://github.com/Keeperorowner/NagramXF)*
 - 📡 **clown avatar for blocked users**: blocked users show 🤡 (or 💩 / 💀) instead of their photo - *ported from [NiagramX](https://github.com/HSSkyBoy/NiagramX)*
@@ -107,6 +118,7 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **customizable My Profile info rows**
 - 📡 **wide channel posts** with adjustable side padding
 - 📡 **feed**: all subscribed channels in one native chat-style timeline with channel management, folder filter and an option to show the newest posts on top, off by default - *ported from [exteraless](https://github.com/exteraless/exteraless)*
+  - new posts preserve your reading position; the jump button counts unread messages toward the newest post, and media posts show the channel name
 - 📡 **color-coded online dot** - *inspired by [NagramX](https://github.com/NextAlone/NagramX)*
 - 📡 **clock format**: system, 12-hour or 24-hour
 - 📡 **branded first-run intro**
@@ -140,6 +152,8 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **send as round video** from the gallery
 - 📡 **round recorder**: zoom buttons, exposure lock and EV buttons - *exposure lock inspired by [Cherrygram](https://github.com/arsLan4k1390/Cherrygram)*
 - 📡 **60 FPS round video messages**
+- 📡 **round video up to 720p**
+- 📡 **round audio**: pick video bitrate up to 4 Mbps, audio bitrate and microphone source for round videos
 - 📡 **proxy management**: delete failed, ping all, save without connecting
 - 📡 **tap avatar to open profile** from the chat list
 - 📡 **confirm before sending** voice/video messages, stickers and GIFs
@@ -467,6 +481,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - photo crop silently not applied to the sent image
 - high-quality photo cropping in PhotoViewer (crop *before* downscaling)
 - sticker creator output sent as photo when high-quality default is on
+- sticker-pack Edit button no longer ignores slower taps or inherits the recent-stickers Create button's long-press action
 - non-square webm stickers rendered off-center in the emoji panel (precached frames were blitted top-left and scaled by width only)
 - webm sticker permanently stuck blank until the app is restarted (an image load cancelled mid-flight published a decoder-less drawable into the animation cache, whose stream stayed cancelled and which never retried decoding)
 - webm stickers played too fast (frame pacing was driven by the container's declared fps instead of frame timestamps, so variable-rate or mis-probed webm ran at up to 2x)
@@ -509,6 +524,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - applying a style over a mixed-span selection smearing one span (e.g. mono) across the whole range
 - photo viewer ui respects litemode blur
 - search-as-list box respects litemode blur
+- emoji/sticker panel bottom controls use solid backgrounds when Power Saving blur is disabled
 - lazy face detect (only on filters tab)
 - lazy chromecast init in photo viewer
 - stale video seekbar leaking onto photos in photo viewer
@@ -527,6 +543,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - nav stack lockup after rapid back swipes
 - click-through area to the left/right of bottom bar tabs
 - profile scroll jump when opening uncached user
+- "Add post" button no longer flashes when opening your profile before the Posts section is visible
 - stale unread badges on global-search top peers
 - stale unread mention pointer after reading mention on another device (mention button jumping to old message)
 - folder pins silently missing when the pinned dialog isn't in the local dialogs cache (now fetched from server)
@@ -568,6 +585,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - notifications for chats read on another device no longer linger forever when the app process was killed in between (stock only tracked posted notifications in memory)
 - more stale notification fixes: reaction, "scheduled message sent", story and forum-topic notifications now clear when read/seen on another device while the app is connected (stock only cleared these via FCM pushes, which aren't delivered to online sessions, or on opening the chat locally); notification refresh is no longer skipped when unread counts happen to stay equal (forums, communities, muted chats)
 - unchanged notifications are no longer re-posted on every update (stock re-notifies every chat each time anything changes, making notification bridges like Mi Fitness re-forward the whole stack to the wearable)
+- notification avatars no longer go missing after the system evicts them from cache: a missing avatar is downloaded and the notification updated silently once it arrives
 - crash long-pressing a sticker set while off-screen rows are cached (reorder update bound null item on cached/hidden holders)
 - crash cutting out a sticker after the photo editor recycled the source image mid-segmentation
 - crash after transferring channel ownership (admin sort comparator overflowed on 64-bit peer ids)
@@ -577,6 +595,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - chat drifting a few px off the input when hiding the keyboard while a message animation runs (aosp recyclerview bug: end-anchored padding delta applied twice across pre+post layout)
 - crash expanding/loading more votes in poll results (sections adapter diffed against an empty hash list on the first update, re-inserting every already-laid-out item)
 - crash tapping the story privacy badge on a story from a user with no first name (e.g. deleted account)
+- expanded story reactions no longer remain above the app after dismissing the reply keyboard with the system back gesture
 - stop spamming doomed admin-list requests (`COMMUNITY_FILTER_INVALID`) on every open of a community you're not an admin of
 - crash in the forward picker inside a community when the community's info updates (stock updates an action bar avatar view that picker mode never creates)
 - crash rendering tables in rich messages and instant view with oversized/negative col/rowspans or a row wider than the first (stock sized the grid from raw spans and the first row only)

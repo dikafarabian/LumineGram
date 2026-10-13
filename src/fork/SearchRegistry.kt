@@ -14,6 +14,7 @@ import desu.inugram.ui.settings.AppearanceSettingsActivity
 import desu.inugram.ui.settings.BackupSettingsActivity
 import desu.inugram.ui.settings.BehaviorSettingsActivity
 import desu.inugram.ui.settings.CacheManagementSettingsActivity
+import desu.inugram.ui.settings.CameraSoundSettingsActivity
 import desu.inugram.ui.settings.CategoryChatsSettingsActivity
 import desu.inugram.ui.settings.ChatHeaderSettingsActivity
 import desu.inugram.ui.settings.DatacenterStatusActivity
@@ -28,6 +29,7 @@ import desu.inugram.ui.settings.IosStyleSettingsActivity
 import desu.inugram.ui.settings.MessageDesignSettingsActivity
 import desu.inugram.ui.settings.DrawerSettingsActivity
 import desu.inugram.ui.settings.DrawerMenuOrderActivity
+import desu.inugram.ui.settings.MainScreenSettingsActivity
 import desu.inugram.ui.settings.MenusSettingsActivity
 import desu.inugram.ui.settings.MessagesSettingsActivity
 import desu.inugram.ui.settings.PillStackSettingsActivity
@@ -78,12 +80,14 @@ object SearchRegistry {
             FontsSettingsActivity.PAGE,
             FontStackActivity.PAGE,
             CategoryChatsSettingsActivity.PAGE,
+            CameraSoundSettingsActivity.PAGE,
             MessagesSettingsActivity.PAGE,
             AiSettingsActivity.PAGE,
             AiVoiceSettingsActivity.PAGE,
             AiEditorSettingsActivity.PAGE,
             AiSummarySettingsActivity.PAGE,
             AnnoyancesSettingsActivity.PAGE,
+            MainScreenSettingsActivity.PAGE,
             BehaviorSettingsActivity.PAGE,
             TosSettingsActivity.PAGE,
             GhostModeSettingsActivity.PAGE,

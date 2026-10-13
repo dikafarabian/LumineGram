@@ -6,7 +6,6 @@ import android.widget.LinearLayout
 import desu.inugram.InuConfig
 import desu.inugram.SearchRegistry
 import desu.inugram.helpers.dialogs.DialogsFabHelper
-import desu.inugram.helpers.dialogs.SystemFoldersHelper
 import desu.inugram.helpers.InuUtils
 import desu.inugram.helpers.feed.FeedHelper
 import desu.inugram.helpers.menu.MainTabsMenuConfig
@@ -34,14 +33,6 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
     override fun getTitle(): CharSequence = LocaleController.getString(R.string.InuMainPage)
 
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
-        items.add(mkSubPageButton(BUTTON_PILL_STACK, R.drawable.inu_tabler_stack_2, LocaleController.getString(R.string.InuPillStack)))
-        items.add(mkSubPageButton(BUTTON_RECENT_CHATS, R.drawable.msg_recent, LocaleController.getString(R.string.InuRecentChats)))
-        items.add(mkTwoLineCheckItem(TOGGLE_FEED_ENABLED, R.string.InuFeed, R.string.InuFeedToggleInfo, FeedHelper.isEnabled()))
-        if (FeedHelper.isEnabled()) {
-            items.add(mkSubPageButton(BUTTON_FEED_SETTINGS, R.drawable.msg_channel, LocaleController.getString(R.string.InuFeedManageChannels)))
-        }
-        items.add(UItem.asShadow(null))
-
         items.add(UItem.asHeader(LocaleController.getString(R.string.InuFolders)))
         if (filterTabsPreview == null) {
             filterTabsPreview = FilterTabsPreviewCell(this.context)
@@ -108,10 +99,10 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
         )
 
         items.add(
-            UItem.asCheck(
-                TOGGLE_SYSTEM_FOLDERS,
+            mkSubPageButton(
+                BUTTON_SYSTEM_FOLDERS,
                 LocaleController.getString(R.string.InuSystemFolders),
-            ).setChecked(InuConfig.SYSTEM_FOLDERS.value)
+            )
         )
 
         items.add(
@@ -193,8 +184,9 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
             )
         )
         items.add(
-            mkTwoLineCheckItem(
+            mkIconCheckItem(
                 TOGGLE_ALWAYS_SHOW_DOWNLOADS,
+                R.drawable.inu_download_arrow,
                 R.string.InuAlwaysShowDownloads,
                 R.string.InuAlwaysShowDownloadsInfo,
                 InuConfig.ALWAYS_SHOW_DOWNLOADS.value
@@ -378,11 +370,7 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 showRestartBulletin()
             }
 
-            TOGGLE_SYSTEM_FOLDERS -> {
-                val new = InuConfig.SYSTEM_FOLDERS.toggle()
-                (view as? TextCheckCell)?.isChecked = new
-                SystemFoldersHelper.sync(UserConfig.selectedAccount)
-            }
+            BUTTON_SYSTEM_FOLDERS -> presentFragment(SystemFoldersSettingsActivity())
 
             TOGGLE_HIDE_ARCHIVE -> {
                 val new = InuConfig.HIDE_ARCHIVE_FROM_CHAT_LIST.toggle()
@@ -521,19 +509,6 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 val new = InuConfig.DIALOGS_FAB_LEFT_SIDE.toggle()
                 (view as? TextCheckCell)?.isChecked = new
                 softRebuild()
-            }
-
-            BUTTON_PILL_STACK -> presentFragment(PillStackSettingsActivity())
-            BUTTON_RECENT_CHATS -> presentFragment(RecentChatsSettingsActivity())
-            BUTTON_FEED_SETTINGS -> presentFragment(FeedExcludedChannelsSettingsActivity())
-
-            TOGGLE_FEED_ENABLED -> {
-                val new = !FeedHelper.isEnabled()
-                FeedHelper.setEnabled(new)
-                (view as? NotificationsCheckCell)?.isChecked = new
-                mainTabsPreview?.let { refreshMainTabsPreview(it) }
-                softRebuild()
-                showRestartBulletin()
             }
         }
     }
@@ -697,7 +672,7 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
         private val TOGGLE_TAB_INDICATOR_STROKE = InuUtils.generateId()
         private val BUTTON_FOLDERS_UNREAD_COUNTER_MODE = InuUtils.generateId()
         private val TOGGLE_FOLDERS_AT_BOTTOM = InuUtils.generateId()
-        private val TOGGLE_SYSTEM_FOLDERS = InuUtils.generateId()
+        private val BUTTON_SYSTEM_FOLDERS = InuUtils.generateId()
         private val TOGGLE_HIDE_ARCHIVE = InuUtils.generateId()
         private val TOGGLE_BOT_WEBVIEW_BUTTON = InuUtils.generateId()
         private val TOGGLE_OLD_MENTION_INDICATOR = InuUtils.generateId()
@@ -723,10 +698,6 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
         private val BUTTON_COMMUNITY_DISPLAY_MODE = InuUtils.generateId()
         private val BUTTON_TITLE_TEXT = InuUtils.generateId()
         private val TOGGLE_TITLE_TEXT_OVERRIDE_ARCHIVE = InuUtils.generateId()
-        private val BUTTON_PILL_STACK = InuUtils.generateId()
-        private val BUTTON_RECENT_CHATS = InuUtils.generateId()
-        private val TOGGLE_FEED_ENABLED = InuUtils.generateId()
-        private val BUTTON_FEED_SETTINGS = InuUtils.generateId()
 
         private fun titleTextLabel(value: Int): String = when (value) {
             InuConfig.DialogsTitleTextItem.USERNAME -> LocaleController.getString(R.string.Username)
@@ -767,7 +738,7 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 SearchRegistry.Entry("hide-all-chats-tab", R.string.InuHideAllChatsTab, TOGGLE_HIDE_ALL_CHATS_TAB),
                 SearchRegistry.Entry("remember-selected-folder", R.string.InuRememberSelectedFolder, TOGGLE_REMEMBER_SELECTED_FOLDER),
                 SearchRegistry.Entry("folders-at-bottom", R.string.InuFoldersAtBottom, TOGGLE_FOLDERS_AT_BOTTOM),
-                SearchRegistry.Entry("system-folders", R.string.InuSystemFolders, TOGGLE_SYSTEM_FOLDERS),
+                SearchRegistry.Entry("system-folders", R.string.InuSystemFolders, BUTTON_SYSTEM_FOLDERS),
                 SearchRegistry.Entry("hide-archive", R.string.InuHideArchive, TOGGLE_HIDE_ARCHIVE),
                 SearchRegistry.Entry("title-text", R.string.InuTitleText, BUTTON_TITLE_TEXT),
                 SearchRegistry.Entry("title-text-override-archive", R.string.InuTitleTextOverrideArchive, TOGGLE_TITLE_TEXT_OVERRIDE_ARCHIVE),
@@ -791,9 +762,6 @@ open class DialogsSettingsActivity : SettingsPageActivity() {
                 SearchRegistry.Entry("dialogs-fab-hide-on-scroll", R.string.InuDialogsFabHideOnScroll, TOGGLE_FAB_HIDE_ON_SCROLL),
                 SearchRegistry.Entry("dialogs-fab-offset-for-bottom-bar", R.string.InuDialogsFabOffsetForBottomBar, TOGGLE_FAB_OFFSET_FOR_BOTTOM_BAR),
                 SearchRegistry.Entry("dialogs-fab-left-side", R.string.InuDialogsFabLeftSide, TOGGLE_FAB_LEFT_SIDE),
-                SearchRegistry.Entry("pill-stack-open", R.string.InuPillStack, BUTTON_PILL_STACK),
-                SearchRegistry.Entry("recent-chats-open", R.string.InuRecentChats, BUTTON_RECENT_CHATS),
-                SearchRegistry.Entry("feed-toggle", R.string.InuFeed, TOGGLE_FEED_ENABLED),
             ),
         )
     }

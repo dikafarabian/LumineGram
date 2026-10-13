@@ -163,6 +163,8 @@ object ChatHelper {
     const val OPTION_SET_REMINDER = 531
     const val OPTION_HIDE_MESSAGE = 532
     const val OPTION_PLUGIN_ACTIONS = 533
+    const val OPTION_LOCAL_EDIT = 534
+    const val OPTION_LOCAL_EDIT_RESET = 535
 
     private fun getForwardsCount(msg: MessageObject?): Int {
         if (msg == null || !InuConfig.SHOW_FORWARDS_COUNT.value) return 0
@@ -500,6 +502,17 @@ object ChatHelper {
             icons.add(R.drawable.msg_notifications)
         }
 
+        if (isMenuItemEnabled(MessageMenuConfig.Item.LOCAL_EDIT) && LocalEditHelper.canEdit(selectedObject)) {
+            items.add(LocaleController.getString(R.string.InuLocalEditMessage))
+            options.add(OPTION_LOCAL_EDIT)
+            icons.add(R.drawable.msg_edit)
+            if (LocalEditHelper.has(selectedObject)) {
+                items.add(LocaleController.getString(R.string.InuLocalEditReset))
+                options.add(OPTION_LOCAL_EDIT_RESET)
+                icons.add(R.drawable.msg_retry)
+            }
+        }
+
         if (isMenuItemEnabled(MessageMenuConfig.Item.HIDE_MESSAGE)) {
             items.add(LocaleController.getString(R.string.InuHideMessage))
             options.add(OPTION_HIDE_MESSAGE)
@@ -616,13 +629,13 @@ object ChatHelper {
             icons.add(R.drawable.msg_share)
         }
 
-        // lumine: burn follows stock read+expire flow server-side; no delete confirm needed, isOut() guard
-        if (selectedObject.isSecretMedia() &&
+        // lumine: burn opens the secret viewer, so it cannot coexist with show-as-regular-photo
+        if (InuConfig.BURN_TIMED_MEDIA.value &&
+            selectedObject.isSecretMedia() &&
             !selectedObject.isOut() &&
-            SelfDestructHelper.shouldPreserveMedia(dialogId) &&
             !InuConfig.VIEW_ONCE_SHOW_NORMAL.value
         ) {
-            items.add(LocaleController.getString(R.string.InuBurnOneTime))
+            items.add(LocaleController.getString(R.string.InuOpenTimedMedia))
             options.add(OPTION_BURN_ONE_TIME)
             icons.add(R.drawable.filled_fire)
         }
@@ -1013,6 +1026,10 @@ object ChatHelper {
                 setReminder(activity, messages)
             }
 
+            OPTION_LOCAL_EDIT -> LocalEditHelper.edit(activity, selectedObject)
+
+            OPTION_LOCAL_EDIT_RESET -> LocalEditHelper.reset(activity, selectedObject)
+
             OPTION_HIDE_MESSAGE -> {
                 val messages = selectedObjectGroup?.messages ?: listOf(selectedObject)
                 BlockedMessagesHelper.hideManually(activity.chatAdapter, messages)
@@ -1180,13 +1197,11 @@ object ChatHelper {
             }
 
             OPTION_BURN_ONE_TIME -> {
-                // lumine: populate messageOwner.ttl from media.ttl_seconds so stock secret viewer does not return null
-                val media = selectedObject.messageOwner.media
-                if (selectedObject.messageOwner.ttl <= 0 && media != null && media.ttl_seconds != 0) {
-                    selectedObject.messageOwner.ttl = media.ttl_seconds
+                // lumine: keep mode copies first, the stock viewer empties the local file when it closes
+                if (InuConfig.TIMED_MEDIA_AFTER_VIEW.value == InuConfig.TimedMediaAfterViewItem.KEEP) {
+                    saveOneTimeMedia(activity, selectedObject, copyFirst = true)
                 }
-                // lumine: open secret media viewer to follow normal view-once playback flow before expiring
-                activity.inu_openSecretMediaViewer(selectedObject)
+                openSecretViewer(activity, selectedObject)
             }
 
             OPTION_SAVE_STICKER_TO_DOWNLOADS -> {
@@ -1212,6 +1227,16 @@ object ChatHelper {
     fun autoSaveOneTime(activity: ChatActivity, message: MessageObject) {
         if (!InuConfig.AUTO_SAVE_ONE_TIME.value) return
         saveOneTimeMedia(activity, message, copyFirst = true)
+    }
+
+    private fun openSecretViewer(activity: ChatActivity, message: MessageObject) {
+        // lumine: populate messageOwner.ttl from media.ttl_seconds so stock secret viewer does not return null
+        val media = message.messageOwner.media
+        if (message.messageOwner.ttl <= 0 && media != null && media.ttl_seconds != 0) {
+            message.messageOwner.ttl = media.ttl_seconds
+        }
+        // lumine: open secret media viewer to follow normal view-once playback flow before expiring
+        activity.inu_openSecretMediaViewer(message)
     }
 
     private fun saveOneTimeMedia(activity: ChatActivity, message: MessageObject, copyFirst: Boolean = false) {
@@ -2831,8 +2856,7 @@ object ChatHelper {
         val text = editTextCaption?.text
         if (!messageObject.isMediaEmpty || groupedMessages != null) return false
         if (text.isNullOrEmpty()) return false
-        val hasUrl = runCatching { AndroidUtilities.WEB_URL.matcher(text).find() }.getOrDefault(false)
-        if (!hasUrl) return false
+        if (!WebPreviewHelper.hasUrl(text)) return false
 
         ItemOptions.makeOptions(fragment, anchor, false, false, true)
             .forceTop(true)
@@ -2846,6 +2870,10 @@ object ChatHelper {
     @JvmStatic
     fun getChatInputTextSize(): Float = InuConfig.CHAT_INPUT_TEXT_SIZE.value.toFloat()
 
+    @JvmField
+    @Volatile
+    var folderTitle: CharSequence? = null
+
     @JvmStatic
     fun getDialogsTitle(account: Int): CharSequence {
         val user = UserConfig.getInstance(account).getCurrentUser()
@@ -2857,6 +2885,7 @@ object ChatHelper {
 
             InuConfig.DialogsTitleTextItem.FIRST_NAME -> getFirstNameOrDefault(user)
             InuConfig.DialogsTitleTextItem.CHATS -> LocaleController.getString(R.string.InuChats)
+            InuConfig.DialogsTitleTextItem.FOLDER -> folderTitle ?: LocaleController.getString(R.string.AppName)
             InuConfig.DialogsTitleTextItem.CUSTOM -> InuConfig.DIALOGS_TITLE_TEXT_CUSTOM_TEXT.value.ifBlank {
                 LocaleController.getString(R.string.AppName)
             }
