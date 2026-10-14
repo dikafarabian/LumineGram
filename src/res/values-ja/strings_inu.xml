@@ -519,6 +519,20 @@
     <string name="InuAboutGitHub">GitHub</string>
     <string name="InuAboutChannel">更新チャンネル</string>
     <string name="InuUpdates">アップデート</string>
+    <string name="InuUpdatesEnabled">アップデートを自動確認</string>
+    <string name="InuUpdateCheckNow">今すぐ確認</string>
+    <string name="InuUpdateBuildFullInfo">完全版を使用しています。**プラグインなし版に切り替える >**</string>
+    <string name="InuUpdateBuildPluginlessInfo">プラグインなし版を使用しています。**完全版に切り替える >**</string>
+    <string name="InuSwitchConfirmFull">完全版に切り替えますか？</string>
+    <string name="InuSwitchConfirmPluginless">プラグインなし版に切り替えますか？</string>
+    <string name="InuSwitchPreparing">ビルドを検索中</string>
+    <string name="InuSwitchDownloadingFull">完全版をダウンロード中</string>
+    <string name="InuSwitchDownloadingPluginless">プラグインなし版をダウンロード中</string>
+    <string name="InuSwitchDownloadFailed">選択したビルドをダウンロードできませんでした</string>
+    <string name="InuSwitchUnavailable">更新チャンネルにビルドが見つかりません</string>
+    <string name="InuUpdateLastChecked">最終確認: %1$s</string>
+    <string name="InuUpdateUpToDate">最新バージョンです</string>
+    <string name="InuUpdateError">アップデート確認に失敗: %1$s</string>
     <string name="InuUpdateInstalling">アップデートをインストール中</string>
     <string name="InuUpdateInstallingHint">インストール後にアプリが再起動します</string>
     <string name="InuUpdateInstallingNotificationHint">アップデートが完了したら通知します</string>
@@ -677,6 +691,7 @@
     <string name="InuParanoiaNeedSetup">先に解除コードを設定し、チャットを少なくとも1つ選んでください。</string>
     <string name="InuParanoiaExit">パラノイアモードを解除</string>
     <string name="InuSendToDiscussWithoutJoin">ディスカッショングループに参加せずに書き込む</string>
+    <string name="InuChatSnowflakes">チャットに雪を降らせる</string>
     <string name="InuSendToDiscussWithoutJoinInfo">ディスカッショングループのクライアント側メンバーシップチェックをスキップします</string>
     <string name="InuNavigationDrawer">ナビゲーションドロワー</string>
     <string name="InuNavigationDrawerInfo">下部タブバーを 12.0 以前のハンバーガーサイドドロワーに置き換えます。再起動が必要です。</string>
@@ -1628,6 +1643,9 @@
     <string name="InuPluginsInfo">プラグインはユーザーが作成した、アプリを拡張するスクリプトです。信頼できる提供元のプラグインのみインストールしてください。</string>
     <string name="InuPluginsEnableEngine">プラグインを有効化</string>
     <string name="InuPluginsEnableEngineInfo">起動時にインストール済みのプラグインを実行します</string>
+    <string name="InuPluginsEngineDisabled">プラグインは現在無効です\n\nこのプラグインをインストールするには設定で有効にしてください</string>
+    <string name="InuPluginsPluginlessBuild">このビルドはプラグインに対応していません\n\n「アプリについて」で完全版に切り替えてください</string>
+    <string name="InuPluginsOpenSettings">設定を開く</string>
     <string name="InuPluginsInstalled">インストール済み</string>
     <string name="InuPluginsEnabled">有効</string>
     <string name="InuPluginsEmpty">プラグインがインストールされていません</string>
@@ -1956,4 +1974,9 @@
     <string name="InuSystemFoldersAddRecommended">おすすめを追加</string>
     <string name="InuSystemFoldersInfo">フォルダーをタップするとフォルダーバーに表示/非表示を切り替えられます。長押しで削除します。これらのフォルダーはこの端末内にのみ保存されます。</string>
     <string name="InuVoiceMessages">ボイスメッセージ</string>
+    <string name="InuLogsRedact">機密データを隠す</string>
+    <string name="InuLogsRedactInfo">電話番号、ID、トークン、IP、ユーザー名を、ログへの書き込み時に固定のプレースホルダーへ置き換えます</string>
+    <string name="InuProfileJoinDate">参加日</string>
+    <string name="InuTranslateAutoFallback">ブロック時にプロバイダーを切り替える</string>
+    <string name="InuTranslateAutoFallbackInfo">ネットワークからの翻訳をGoogleがブロックした場合、BingそしてMyMemoryで再試行します。テキストはそちらに送信されます</string>
 </resources>

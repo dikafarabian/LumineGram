@@ -3,6 +3,7 @@
     <string name="InuOpenInDiscussion">Tartışmada aç</string>
     <string name="InuBanUserConfirm">%1$s bu gruptan yasaklansın mı?</string>
     <string name="InuSendToDiscussWithoutJoin">Katılmadan tartışma gruplarına yaz</string>
+    <string name="InuChatSnowflakes">Sohbetlerde kar taneleri</string>
     <string name="InuSendToDiscussWithoutJoinInfo">Tartışma grupları için yalnızca istemci tarafındaki üyelik kontrolünü atlar</string>
     <string name="InuNavigationDrawer">Gezinme menüsü</string>
     <string name="InuNavigationDrawerInfo">Alt sekme çubuğunu v12.0 öncesi sol yan menü ile değiştirir. Yeniden başlatma gerektirir.</string>
@@ -676,6 +677,20 @@
     <string name="InuAboutGitHub">GitHub</string>
     <string name="InuAboutChannel">Güncelleme kanalı</string>
     <string name="InuUpdates">Güncellemeler</string>
+    <string name="InuUpdatesEnabled">Güncellemeleri otomatik denetle</string>
+    <string name="InuUpdateCheckNow">Şimdi denetle</string>
+    <string name="InuUpdateBuildFullInfo">Tam sürümü kullanıyorsunuz. **Eklentisiz sürüme geç >**</string>
+    <string name="InuUpdateBuildPluginlessInfo">Eklentisiz sürümü kullanıyorsunuz. **Tam sürüme geç >**</string>
+    <string name="InuSwitchConfirmFull">Tam sürüme geçilsin mi?</string>
+    <string name="InuSwitchConfirmPluginless">Eklentisiz sürüme geçilsin mi?</string>
+    <string name="InuSwitchPreparing">Sürüm aranıyor</string>
+    <string name="InuSwitchDownloadingFull">Tam sürüm indiriliyor</string>
+    <string name="InuSwitchDownloadingPluginless">Eklentisiz sürüm indiriliyor</string>
+    <string name="InuSwitchDownloadFailed">Seçilen sürüm indirilemedi</string>
+    <string name="InuSwitchUnavailable">Güncelleme kanalında sürüm bulunamadı</string>
+    <string name="InuUpdateLastChecked">Son denetleme: %1$s</string>
+    <string name="InuUpdateUpToDate">En son sürümü kullanıyorsunuz</string>
+    <string name="InuUpdateError">Güncelleme denetimi başarısız: %1$s</string>
     <string name="InuUpdateInstalling">Güncelleme yükleniyor</string>
     <string name="InuUpdateInstallingHint">Uygulama yüklendikten sonra yeniden başlatılacak</string>
     <string name="InuUpdateInstallingNotificationHint">Güncelleme yüklendiğinde bilgilendirileceksiniz</string>
@@ -1628,6 +1643,9 @@
     <string name="InuPluginsInfo">Eklentiler, uygulamayı genişleten kullanıcı yapımı betiklerdir. Yalnızca güvendiğiniz kaynaklardan eklenti yükleyin.</string>
     <string name="InuPluginsEnableEngine">Eklentileri etkinleştir</string>
     <string name="InuPluginsEnableEngineInfo">Yüklü eklentileri başlangıçta çalıştır</string>
+    <string name="InuPluginsEngineDisabled">Eklentiler şu anda devre dışı\n\nBu eklentiyi yüklemek için ayarlardan etkinleştirin</string>
+    <string name="InuPluginsPluginlessBuild">Bu sürüm eklentileri desteklemiyor\n\nTam sürüme geçmek için Hakkında bölümüne gidin</string>
+    <string name="InuPluginsOpenSettings">Ayarları aç</string>
     <string name="InuPluginsInstalled">Yüklü</string>
     <string name="InuPluginsEnabled">Etkin</string>
     <string name="InuPluginsEmpty">Yüklü eklenti yok</string>
@@ -1957,4 +1975,9 @@
     <string name="InuSystemFoldersAddRecommended">Önerilenleri ekle</string>
     <string name="InuSystemFoldersInfo">Klasör çubuğunda göstermek veya gizlemek için bir klasöre dokunun. Silmek için uzun basın. Bu klasörler bu cihazda kalır.</string>
     <string name="InuVoiceMessages">Sesli mesajlar</string>
+    <string name="InuLogsRedact">Hassas verileri gizle</string>
+    <string name="InuLogsRedactInfo">Günlüklerdeki telefon numaralarını, kimlikleri, belirteçleri, IP\'leri ve kullanıcı adlarını yazılırken sabit yer tutucularla değiştirir</string>
+    <string name="InuProfileJoinDate">Katılma Tarihi</string>
+    <string name="InuTranslateAutoFallback">Engellenince sağlayıcı değiştir</string>
+    <string name="InuTranslateAutoFallbackInfo">Google ağınızdan çeviriyi engellerse Bing, ardından MyMemory ile yeniden denenir. Metniniz onlara gönderilir</string>
 </resources>

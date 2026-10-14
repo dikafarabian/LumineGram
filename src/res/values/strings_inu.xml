@@ -13,6 +13,7 @@
     <string name="InuBanUserConfirm">Ban %1$s from this group?</string>
     <string name="InuSendToDiscussWithoutJoin">Write to discuss groups without joining</string>
     <string name="InuSendToDiscussWithoutJoinInfo">Skip the client-only membership check for discussion groups</string>
+    <string name="InuChatSnowflakes">Snowflakes in chats</string>
     <string name="InuIosStyle">iOS style</string>
     <string name="InuIosSettings">iOS settings</string>
     <string name="InuIosSettingsInfo">Title centering, bottom bar, input field, chat header and liquid glass.</string>
@@ -1824,6 +1825,9 @@
     <string name="InuPluginsInfo">Plugins are user-made scripts that extend the app. Only install plugins from sources you trust.</string>
     <string name="InuPluginsEnableEngine">Enable plugins</string>
     <string name="InuPluginsEnableEngineInfo">Run installed plugins on startup</string>
+    <string name="InuPluginsEngineDisabled">Plugins are currently disabled\n\nEnable them in settings to install this plugin</string>
+    <string name="InuPluginsPluginlessBuild">This build does not include support for plugins\n\nGo to About to switch to the Full build</string>
+    <string name="InuPluginsOpenSettings">Open settings</string>
     <string name="InuPluginsInstalled">Installed</string>
     <string name="InuPluginsEnabled">Enabled</string>
     <string name="InuPluginsEmpty">No plugins installed</string>
@@ -2016,4 +2020,9 @@
     <string name="InuFeedSummary">Aggregated posts from your channels</string>
     <string name="InuEditedArchive">Edited archive</string>
     <string name="InuGroupChatArchives">Group archives in LumineGram folder</string>
+    <string name="InuLogsRedact">Redact sensitive data</string>
+    <string name="InuLogsRedactInfo">Replace phone numbers, IDs, tokens, IPs and usernames in logs with stable placeholders as they are written</string>
+    <string name="InuProfileJoinDate">Join Date</string>
+    <string name="InuTranslateAutoFallback">Switch provider when blocked</string>
+    <string name="InuTranslateAutoFallbackInfo">If Google blocks translation from your network, retry with Bing, then MyMemory. Your text is sent to them instead</string>
 </resources>

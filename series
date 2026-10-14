@@ -49,7 +49,6 @@ lumine/ui/id-in-profile.patch
 feature/hide-spoiler-pending.patch
 bugfix/paid-reaction-animation.patch
 feature/folders-display-mode.patch
-hooks/internal-web-app.patch
 hooks/profile-menu.patch
 debloat/disable-chat-themes.patch
 bugfix/attach-panel-perf.patch
@@ -75,7 +74,6 @@ debloat/motion-photos.patch
 feature/long-press-reply-in-replies.patch
 feature/animation-multiplier.patch
 feature/predictive-back.patch
-feature/search-media-type-filter.patch
 debloat/disable-bg-parallax.patch
 feature/no-join-discuss.patch
 feature/voice-recorder.patch
@@ -493,6 +491,7 @@ lumine/settings/logs-respect-toggle.patch
 lumine/ui/hide-chat-avatar.patch
 lumine/media/always-show-downloads.patch
 lumine/privacy/clown-avatar-blocked.patch
+feature/chat-search-filters.patch
 lumine/chat/hide-message.patch
 lumine/notifications/inapp-notification-vibration.patch
 lumine/ui/forum-search-back.patch
@@ -522,5 +521,15 @@ lumine/privacy/archive-persistence-fixes.patch
 bugfix/forum-title-overlay.patch
 bugfix/animated-drawable-recycle-interrupt.patch
 bugfix/story-reactions-window-keyboard.patch
+bugfix/folder-slot-stolen-by-picker.patch
+bugfix/transcription-on-message-replace.patch
+bugfix/sheet-dialog-dismiss.patch
+bugfix/item-options-touch-through.patch
+feature/join-request-open-profile.patch
+feature/join-request-open-page.patch
+bugfix/scrim-menu-theme.patch
 lumine/chat/local-message-edit.patch
 lumine/premium/force-wallet.patch
+lumine/chat/chat-snowflakes.patch
+lumine/privacy/log-redaction.patch
+lumine/tabs/folders-bottom-glass.patch

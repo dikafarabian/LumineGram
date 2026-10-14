@@ -518,6 +518,20 @@
     <string name="InuAboutGitHub">GitHub</string>
     <string name="InuAboutChannel">更新频道</string>
     <string name="InuUpdates">更新</string>
+    <string name="InuUpdatesEnabled">自动检查更新</string>
+    <string name="InuUpdateCheckNow">立即检查</string>
+    <string name="InuUpdateBuildFullInfo">当前使用完整版本。**切换到无插件版本 >**</string>
+    <string name="InuUpdateBuildPluginlessInfo">当前使用无插件版本。**切换到完整版本 >**</string>
+    <string name="InuSwitchConfirmFull">切换到完整版本？</string>
+    <string name="InuSwitchConfirmPluginless">切换到无插件版本？</string>
+    <string name="InuSwitchPreparing">正在查找版本</string>
+    <string name="InuSwitchDownloadingFull">正在下载完整版本</string>
+    <string name="InuSwitchDownloadingPluginless">正在下载无插件版本</string>
+    <string name="InuSwitchDownloadFailed">无法下载所选版本</string>
+    <string name="InuSwitchUnavailable">更新频道中未找到可用版本</string>
+    <string name="InuUpdateLastChecked">上次检查: %1$s</string>
+    <string name="InuUpdateUpToDate">已是最新版本</string>
+    <string name="InuUpdateError">检查更新失败: %1$s</string>
     <string name="InuUpdateInstalling">正在安装更新</string>
     <string name="InuUpdateInstallingHint">安装完成后应用将重启</string>
     <string name="InuUpdateInstallingNotificationHint">更新安装完成后会通知你</string>
@@ -676,6 +690,7 @@
     <string name="InuParanoiaNeedSetup">请先设置退出码并至少选择一个聊天。</string>
     <string name="InuParanoiaExit">退出偏执模式</string>
     <string name="InuSendToDiscussWithoutJoin">不加入即在讨论组发言</string>
+    <string name="InuChatSnowflakes">聊天中的雪花</string>
     <string name="InuSendToDiscussWithoutJoinInfo">跳过讨论组的客户端成员检查</string>
     <string name="InuNavigationDrawer">侧边抽屉</string>
     <string name="InuNavigationDrawerInfo">用 12.0 之前的汉堡侧边抽屉替换底部标签栏。需重启。</string>
@@ -1628,6 +1643,9 @@
     <string name="InuPluginsInfo">插件是由用户制作、用于扩展应用的脚本。请只安装来自可信来源的插件。</string>
     <string name="InuPluginsEnableEngine">启用插件</string>
     <string name="InuPluginsEnableEngineInfo">启动时运行已安装的插件</string>
+    <string name="InuPluginsEngineDisabled">插件目前已禁用\n\n请在设置中启用插件以安装此插件</string>
+    <string name="InuPluginsPluginlessBuild">此版本不支持插件\n\n请前往“关于”切换到完整版本</string>
+    <string name="InuPluginsOpenSettings">打开设置</string>
     <string name="InuPluginsInstalled">已安装</string>
     <string name="InuPluginsEnabled">已启用</string>
     <string name="InuPluginsEmpty">未安装插件</string>
@@ -1956,4 +1974,9 @@
     <string name="InuSystemFoldersAddRecommended">添加推荐项</string>
     <string name="InuSystemFoldersInfo">点按文件夹可在文件夹栏中显示或隐藏，长按可删除。这些文件夹仅保存在此设备上。</string>
     <string name="InuVoiceMessages">语音消息</string>
+    <string name="InuLogsRedact">隐藏敏感数据</string>
+    <string name="InuLogsRedactInfo">写入日志时,将手机号、ID、令牌、IP 和用户名替换为固定的占位符</string>
+    <string name="InuProfileJoinDate">加入日期</string>
+    <string name="InuTranslateAutoFallback">被屏蔽时切换提供商</string>
+    <string name="InuTranslateAutoFallbackInfo">如果 Google 屏蔽了您网络的翻译,将改用 Bing,然后是 MyMemory。文本将发送给它们</string>
 </resources>

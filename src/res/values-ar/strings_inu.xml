@@ -3,6 +3,7 @@
     <string name="InuOpenInDiscussion">فتح في النقاش</string>
     <string name="InuBanUserConfirm">حظر %1$s من هذه المجموعة؟</string>
     <string name="InuSendToDiscussWithoutJoin">الكتابة في مجموعات النقاش دون الانضمام</string>
+    <string name="InuChatSnowflakes">ندف الثلج في الدردشات</string>
     <string name="InuSendToDiscussWithoutJoinInfo">تخطي التحقق من العضوية الذي يجريه التطبيق فقط لمجموعات النقاش</string>
     <string name="InuIosStyle">نمط iOS</string>
     <string name="InuConfirmBeforeSending">التأكيد قبل الإرسال</string>
@@ -2009,4 +2010,9 @@
     <string name="InuSystemFoldersAddRecommended">إضافة الموصى بها</string>
     <string name="InuSystemFoldersInfo">اضغط على مجلد لإظهاره أو إخفائه في شريط المجلدات. اضغط مطولًا لحذفه. تبقى هذه المجلدات على هذا الجهاز.</string>
     <string name="InuVoiceMessages">الرسائل الصوتية</string>
+    <string name="InuLogsRedact">إخفاء البيانات الحساسة</string>
+    <string name="InuLogsRedactInfo">استبدال أرقام الهواتف والمعرّفات والرموز وعناوين IP وأسماء المستخدمين في السجلات برموز ثابتة أثناء الكتابة</string>
+    <string name="InuProfileJoinDate">تاريخ الانضمام</string>
+    <string name="InuTranslateAutoFallback">تبديل المزوّد عند الحظر</string>
+    <string name="InuTranslateAutoFallbackInfo">إذا حظرت Google الترجمة من شبكتك، أعد المحاولة عبر Bing ثم MyMemory. سيُرسل نصك إليهما</string>
 </resources>

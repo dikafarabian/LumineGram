@@ -3,6 +3,7 @@
     <string name="InuOpenInDiscussion">باز کردن در گفتگو</string>
     <string name="InuBanUserConfirm">%1$s از این گروه مسدود شود؟</string>
     <string name="InuSendToDiscussWithoutJoin">نوشتن در گروه‌های گفتگو بدون عضویت</string>
+    <string name="InuChatSnowflakes">دانه‌های برف در گفتگوها</string>
     <string name="InuSendToDiscussWithoutJoinInfo">رد کردن بررسی عضویت سمت برنامه برای گروه‌های گفتگو</string>
     <string name="InuIosStyle">سبک iOS</string>
     <string name="InuConfirmBeforeSending">تأیید پیش از ارسال</string>
@@ -1997,4 +1998,9 @@
     <string name="InuSystemFoldersAddRecommended">افزودن پیشنهادی‌ها</string>
     <string name="InuSystemFoldersInfo">روی پوشه بزنید تا در نوار پوشه‌ها نمایش داده یا پنهان شود. برای حذف، نگه دارید. این پوشه‌ها روی همین دستگاه می‌مانند.</string>
     <string name="InuVoiceMessages">پیام‌های صوتی</string>
+    <string name="InuLogsRedact">پنهان کردن داده‌های حساس</string>
+    <string name="InuLogsRedactInfo">شماره‌ها، شناسه‌ها، توکن‌ها، IP و نام‌های کاربری در گزارش‌ها هنگام نوشتن با جایگزین‌های ثابت عوض می‌شوند</string>
+    <string name="InuProfileJoinDate">تاریخ عضویت</string>
+    <string name="InuTranslateAutoFallback">تغییر ارائه‌دهنده هنگام مسدود شدن</string>
+    <string name="InuTranslateAutoFallbackInfo">اگر Google ترجمه را از شبکه شما مسدود کند، با Bing و سپس MyMemory دوباره تلاش می‌شود. متن شما برای آن‌ها ارسال می‌شود</string>
 </resources>

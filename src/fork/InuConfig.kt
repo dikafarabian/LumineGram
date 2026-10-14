@@ -649,6 +649,12 @@ object InuConfig {
     val SEND_TO_DISCUSS_WITHOUT_JOIN = BoolItem("send_to_discuss_without_join", true)
 
     @JvmField
+    val CHAT_SNOWFLAKES = BoolItem("chat_snowflakes", false)
+
+    @JvmField
+    val LOGS_REDACT = BoolItem("logs_redact", true)
+
+    @JvmField
     val CONFIRM_SEND_VOICE = BoolItem("confirm_send_voice", false)
 
     @JvmField
@@ -1838,6 +1844,9 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val TRANSLATE_PROVIDER = IntItem("translate_provider", 0)
+
+    @JvmField
+    val TRANSLATE_AUTO_FALLBACK = BoolItem("translate_auto_fallback", true)
 
     // lumine: skip stock 6-message detection sample threshold so translate banner shows on first detected foreign message
     @JvmField

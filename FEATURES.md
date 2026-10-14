@@ -57,6 +57,8 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
   - hide or spoiler-cover messages matching regex rules
   - optionally hide replies to filtered messages
 
+- 📡 **redact logs**: phone numbers, IDs, tokens, IPs and usernames are replaced with stable placeholders as logs are written
+
 ### restricted features
 
 - 📡 **device spoof**: choose the device name, system and app version shown in Settings → Devices, hide time zone and install source, and check what Telegram sees
@@ -127,6 +129,7 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **downloads button**: always show the downloads list button in the chats header
 - 📡 **app icon picker**: full-screen icon chooser with live preview - *ported from [exteraless](https://github.com/exteraless/exteraless)*
 - 📡 **messages appearance**: hide reply background, custom reply colors and pattern emoji - *inspired by [Finegram](https://github.com/Th3Nekit/Finegram)*
+- 📡 **snowflakes in chats**: falling snow over the chat background any time of year
 
 ### profile & identity tools
 
@@ -184,6 +187,7 @@ our own layer on top of the inugram patchset: restricted Telegram features, priv
 - 📡 **keep keyboard while typing**: scrolling the chat doesn't hide the keyboard when there's a draft
 - 📡 **keep three-dot menu**: option to keep the chats list menu button when the side menu is on
 - 📡 **keep screen on while recording**: the screen doesn't turn off during a voice or video message
+- "Save to Downloads" for regular voice messages (stock only has it for files and music)
 
 ### debloat & premium noise
 
@@ -296,7 +300,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - hide channel, group preview (🐶) and replies (🐶) bottom bar (mute/join/etc)
 - send message to discussion group without joining
 - 🐶 member count on private invite sheets (instead of "private group/channel"; like tdesktop)
-- 🐶 search: media-type filter + "show only matches"
+- 🐶 search: media-type filters, combined sender + media filtering, and "show only matches"
 - tapping a hashtag in a public channel defaults to the "This Chat" tab
 - 🐶 "from user" picker in search also finds users not in chat by name, username, or cached user ID (like tdesktop)
 - static pinned reactions in the reaction bar
@@ -333,6 +337,8 @@ the sections below contain the broader feature set: inugram functionality, featu
 - show id in profile, show user json
 - long-tap the name in profile to copy it
 - long-tap a selected user chip (privacy exceptions, add members, etc.) to open their profile (channels open the chat instead)
+- "Open Profile" in the join request preview menu
+- long-tap the join requests top bar to open the full requests page
 - "Stop" button in a bot profile stops (blocks) the bot instead of offering to delete the chat
 - 🐶 drag the pinned-music sheet by its header to scroll/expand the playlist
 - long-tap inline callback button to copy text or callback data
@@ -482,6 +488,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - high-quality photo cropping in PhotoViewer (crop *before* downscaling)
 - sticker creator output sent as photo when high-quality default is on
 - sticker-pack Edit button no longer ignores slower taps or inherits the recent-stickers Create button's long-press action
+- sticker editor send/favorites menu uses the editor's dark background instead of the app's light theme; other scrim menus also respect their local theme
 - non-square webm stickers rendered off-center in the emoji panel (precached frames were blitted top-left and scaled by width only)
 - webm sticker permanently stuck blank until the app is restarted (an image load cancelled mid-flight published a decoder-less drawable into the animation cache, whose stream stayed cancelled and which never retried decoding)
 - webm stickers played too fast (frame pacing was driven by the container's declared fps instead of frame timestamps, so variable-rate or mis-probed webm ran at up to 2x)
@@ -508,6 +515,8 @@ the sections below contain the broader feature set: inugram functionality, featu
 - image memory cache sized off `getMemoryClass()` while the app runs with `android:largeHeap` — the cache was ~29MB instead of ~56MB, too small to hold the shared media grid and the photo viewer's full-screen bitmaps at once, so opening any photo evicted the whole grid and every cell flashed its blurred thumbnail
 - attach panel: better perf, safe close before fully open
 - paid reaction animation respects litemode
+- context menus no longer let the list behind them scroll when a drag starts just before the menu window takes input
+- dialogs shown over a story (or another attached sheet) no longer lose their dismiss callback (stock bug: the fragment handed the dialog to the sheet and dropped the listener)
 - custom emoji reaction burst respects litemode (stock only gated the "around" animation of regular emoji)
 - expired once-view/self-destruct media now reliably shows the "Expired video/photo" placeholder instead of sometimes getting stuck showing live media (stock bug: the refresh triggered when `SecretMediaViewer` closes checked the media fields directly, which aren't cleared yet at that point — only a separate `forceExpired` flag is)
 - reaction counter shift during long-tap menu
@@ -586,6 +595,9 @@ the sections below contain the broader feature set: inugram functionality, featu
 - more stale notification fixes: reaction, "scheduled message sent", story and forum-topic notifications now clear when read/seen on another device while the app is connected (stock only cleared these via FCM pushes, which aren't delivered to online sessions, or on opening the chat locally); notification refresh is no longer skipped when unread counts happen to stay equal (forums, communities, muted chats)
 - unchanged notifications are no longer re-posted on every update (stock re-notifies every chat each time anything changes, making notification bridges like Mi Fitness re-forward the whole stack to the wearable)
 - notification avatars no longer go missing after the system evicts them from cache: a missing avatar is downloaded and the notification updated silently once it arrives
+- channel/supergroup profile "registration date" showed when you joined instead of when it was created; now resolved from the creation service message, falling back to a labelled join date
+- bottom folders bar had no liquid glass effect (the glass source only captured the top and main-tabs zones) and now sits slightly lower
+- translator: when Google blocks translation from your network (HTTP 429), falls back to Bing, then MyMemory instead of failing; toggle in translator settings
 - crash long-pressing a sticker set while off-screen rows are cached (reorder update bound null item on cached/hidden holders)
 - crash cutting out a sticker after the photo editor recycled the source image mid-segmentation
 - crash after transferring channel ownership (admin sort comparator overflowed on 64-bit peer ids)
