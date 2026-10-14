@@ -3,6 +3,6 @@
     <external-path name="media" path="."/>
     <files-path name="logs" path="/logs/"/>
     <files-path name="cache" path="/cache/"/>
-    <files-path name="lumine_archive_media" path="LumineGram/media/"/>
+    <files-path name="lumine_archive_media" path="luminegram/media/"/>
     <root-path name="external_files" path="/storage/" />
 </paths>

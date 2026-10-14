@@ -266,7 +266,7 @@ object Md3OnlineLyrics {
         httpJson(
             url,
             headers = mapOf(
-                "User-Agent" to "LumineGram/" + BuildVars.BUILD_VERSION_STRING + " (https://github.com/dikafarabian/LumineGram)",
+                "User-Agent" to "luminegram/" + BuildVars.BUILD_VERSION_STRING + " (https://github.com/dikafarabian/luminegram)",
                 "Accept" to "application/json",
             ),
         )

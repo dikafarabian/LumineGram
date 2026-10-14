@@ -34,7 +34,7 @@ object SavedMessagesHelper {
     private const val TAG = "SavedMessagesHelper"
 
     fun getSavedMediaDir(account: Int): File {
-        val dir = File(ApplicationLoader.applicationContext.filesDir, "LumineGram/media/account_${UserConfig.getInstance(account).clientUserId}")
+        val dir = File(ApplicationLoader.applicationContext.filesDir, "luminegram/media/account_${UserConfig.getInstance(account).clientUserId}")
         if (!dir.exists()) {
             try {
                 dir.mkdirs()
@@ -46,7 +46,7 @@ object SavedMessagesHelper {
 
     fun migrateSavedMedia(account: Int, db: org.telegram.SQLite.SQLiteDatabase) {
         try {
-            val legacyRoot = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "LumineGram/media").canonicalFile
+            val legacyRoot = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "luminegram/media").canonicalFile
             val targetRoot = getSavedMediaDir(account)
             val paths = ArrayList<String>()
             val cursor = db.queryFinalized("SELECT media_path FROM inu_deleted_messages WHERE media_path IS NOT NULL UNION SELECT media_path FROM inu_edit_history WHERE media_path IS NOT NULL")

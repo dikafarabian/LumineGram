@@ -446,7 +446,7 @@ object InuConfig {
     val ATTACH_CAMERA_SQUARE = BoolItem("attach_camera_square", true)
 
     @JvmField
-    val DOWNLOAD_DIRECTORY = StringItem("download_directory", "LumineGram")
+    val DOWNLOAD_DIRECTORY = StringItem("download_directory", "luminegram")
 
     @JvmField
     val AUTO_DISABLE_PROXY_ON_VPN = BoolItem("auto_disable_proxy_on_vpn", false)
@@ -1887,7 +1887,7 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     // lumine: where the marketplace looks; kept so a test catalog can stand in for the real one
     @JvmField
-    val MARKET_INDEX_URL = StringItem("market_index_url", "https://raw.githubusercontent.com/dikafarabian/LumineGram/main/plugins/index.json", exportable = false)
+    val MARKET_INDEX_URL = StringItem("market_index_url", "https://raw.githubusercontent.com/dikafarabian/luminegram/main/plugins/index.json", exportable = false)
 
     @JvmField
     val ACCOUNT_ORDER = StringItem("account_order", "", exportable = false)

@@ -33,7 +33,7 @@ import kotlin.math.min
 
 object UpdateHelper {
     const val USERNAME = ""
-    private const val CHANGELOG_JSON_URL = "https://raw.githubusercontent.com/dikafarabian/LumineGram/main/assets/changelog.json"
+    private const val CHANGELOG_JSON_URL = "https://raw.githubusercontent.com/dikafarabian/luminegram/main/assets/changelog.json"
     private const val CHECK_INTERVAL_MS = 4L * 60 * 60 * 1000
     private const val INFLIGHT_TIMEOUT_MS = 60L * 1000
     private const val RESOLVE_BACKOFF_MS = 30L * 60 * 1000

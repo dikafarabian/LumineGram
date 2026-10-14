@@ -6,12 +6,12 @@ import org.telegram.messenger.R
 
 /**
  * `@requires <plugin-id> [>=<version>]`, repeatable: the plugin installs and runs only while the named plugins
- * are installed and enabled. This is how a plugin depends on another, the LumineGram SDK being the first.
+ * are installed and enabled. This is how a plugin depends on another, the luminegram SDK being the first.
  */
 object PluginDependencies {
     const val KEY = "requires"
 
-    /** the plugin that carries the LumineGram SDK; plugins that use its directives require it */
+    /** the plugin that carries the luminegram SDK; plugins that use its directives require it */
     const val SDK_ID = "entinygram.sdk"
 
     class Need(val id: String, val minVersion: String?)

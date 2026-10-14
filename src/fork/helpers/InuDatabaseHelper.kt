@@ -1020,7 +1020,7 @@ object InuDatabaseHelper {
 
     private fun deleteUnreferencedMediaFiles(db: SQLiteDatabase, paths: Collection<String>) {
         val archiveRoot = try {
-            java.io.File(org.telegram.messenger.ApplicationLoader.applicationContext.filesDir, "LumineGram/media").canonicalFile
+            java.io.File(org.telegram.messenger.ApplicationLoader.applicationContext.filesDir, "luminegram/media").canonicalFile
         } catch (_: Throwable) {
             return
         }
