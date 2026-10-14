@@ -67,7 +67,7 @@
     <string name="InuDrawerKeepOptionsMenuInfo">Show the chats list menu button next to the side menu</string>
     <string name="InuShowDrawerAccounts">Show accounts in drawer</string>
     <string name="InuShowDrawerAccountsInfo">Show the expandable account switcher below your profile.</string>
-    <string name="InuSettings">LumineGram Settings</string>
+    <string name="InuSettings">luminegram Settings</string>
     <string name="InuSettingsInfo">through the land and wind I follow you</string>
     <string name="InuGeneral">General</string>
     <string name="InuWideChannelPosts">Wide posts</string>
@@ -76,7 +76,7 @@
     <string name="InuWideChannelPostsPreviewReply">Forwarded channel post</string>
     <string name="InuWideChannelPostsPreviewReplyLabel">Channel posts</string>
     <string name="InuAutoUpdateCheck">Check for updates</string>
-    <string name="InuAutoUpdateCheckInfo">Periodically check the LumineGram CI channel for new releases and offer to download them.</string>
+    <string name="InuAutoUpdateCheckInfo">Periodically check the luminegram CI channel for new releases and offer to download them.</string>
     <string name="InuUpdatesIncludeBeta">Catch beta updates</string>
     <string name="InuPushHeader">Push notifications</string>
     <string name="InuUnifiedPush">UnifiedPush</string>
@@ -484,7 +484,7 @@
     <string name="InuBubbleTails">Bubble tails</string>
     <string name="InuSendAsRoundVideo">Send as round video</string>
     <string name="InuMiscPreviewForwardedFrom">inu</string>
-    <string name="InuMiscPreviewForwardedMessage">woof! LumineGram or inuGram? 🐶</string>
+    <string name="InuMiscPreviewForwardedMessage">woof! luminegram or inuGram? 🐶</string>
     <string name="InuMiscPreviewEditedMessage">both are the best, doggo base 🐶⚡</string>
     <string name="InuDeleteForBoth">\"Delete for both\" by default</string>
     <string name="InuDeleteForBothMessages">Messages</string>
@@ -587,10 +587,10 @@
     <string name="InuConfirmReactionText">Send %1$s reaction in **%2$s**?</string>
     <string name="InuNotificationIcon">Notification icon</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
-    <string name="InuNotificationIconInugram">LumineGram</string>
-    <string name="InuNotificationIconOldLuminegram">Old LumineGram</string>
+    <string name="InuNotificationIconInugram">luminegram</string>
+    <string name="InuNotificationIconOldLuminegram">Old luminegram</string>
     <string name="InuNotificationIconInfo">On Xiaomi (MIUI/HyperOS) the system may replace this icon with the app icon, so the choice might not be visible there</string>
-    <string name="InuAppIconOldLuminegram">Old LumineGram</string>
+    <string name="InuAppIconOldLuminegram">Old luminegram</string>
     <string name="InuDisableChatBubbles">Disable Android notification bubbles</string>
     <string name="InuKeepChatsInStack">Keep previous chats open</string>
     <string name="InuKeepChatsInStackInfo">Opening another chat won\'t close the chats behind it</string>
@@ -1002,8 +1002,8 @@
     <string name="InuCodeBlock">Code block</string>
     <string name="InuCut">Cut</string>
     <string name="InuCodeLanguage">Code language</string>
-    <string name="InuVersion">LumineGram %1$s (%2$s)</string>
-    <string name="InuVersionShort">LumineGram %1$s</string>
+    <string name="InuVersion">luminegram %1$s (%2$s)</string>
+    <string name="InuVersionShort">luminegram %1$s</string>
     <string name="InuDataBackup">Backup &amp; Sync</string>
 
     <string name="InuSearchFilter">Filter by media</string>
@@ -1045,7 +1045,7 @@
     <string name="InuAppIconJungle">Jungle</string>
     <string name="InuAppIconGold">Gold</string>
     <string name="InuAppIconDish">Dish</string>
-    <string name="InuAppIconLicenseConcept">Concept icon by **LumineGram**</string>
+    <string name="InuAppIconLicenseConcept">Concept icon by **luminegram**</string>
     <string name="InuAppIconLicenseInugram">Placeholder icon, feel free to contribute a better one</string>
     <string name="InuAppIconLicenseTelegram">Icon by **Telegram**. All rights reserved.</string>
     <string name="InuJumpToBeginning">Jump to the beginning</string>
@@ -1099,11 +1099,11 @@
     <string name="InuBackupImportSheetCancel">No, leave as is</string>
     <string name="InuBackupSettings">Backup &amp; reset</string>
     <string name="InuBackupReset">Reset settings</string>
-    <string name="InuBackupResetConfirm">All LumineGram settings will be reset to their default values. Your chats, accounts, and Telegram\'s own settings stay the same.\n\nThis cannot be undone.</string>
+    <string name="InuBackupResetConfirm">All luminegram settings will be reset to their default values. Your chats, accounts, and Telegram\'s own settings stay the same.\n\nThis cannot be undone.</string>
     <string name="InuBackupResetSuccess">Reset %1$d settings</string>
     <string name="InuBackupResetNoChanges">Settings are already at their defaults</string>
     <string name="InuCloudSync">Sync settings</string>
-    <string name="InuCloudSyncDesc">Backs up your LumineGram settings to Telegram cloud via [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) — your data never touches our servers.</string>
+    <string name="InuCloudSyncDesc">Backs up your luminegram settings to Telegram cloud via [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) — your data never touches our servers.</string>
     <string name="InuCloudSyncNow">Sync now</string>
     <string name="InuCloudSyncing">Syncing…</string>
     <string name="InuCloudRestore">Restore from cloud</string>
@@ -1178,7 +1178,7 @@
     <string name="InuMentionInsertTitle">Insert mention</string>
     <string name="InuPasscode">Passcode</string>
     <string name="InuPasscodeNeeded">Set up a Telegram passcode first.</string>
-    <string name="InuPasscodeShowInSettings">Show in LumineGram settings</string>
+    <string name="InuPasscodeShowInSettings">Show in luminegram settings</string>
     <string name="InuPasscodeShowInSettingsInfo">When off, this page opens only via the link below — save it now.</string>
     <string name="InuPasscodeAccountsInfo">Per-account passcodes: enter one at the lock screen to unlock and switch to that account.</string>
     <string name="InuPasscodeStateNone">Not configured</string>
@@ -1238,13 +1238,13 @@
     <string name="InuGoToMessagePrompt">Message ID</string>
     <string name="InuPrivacySecurity">Privacy &amp; Security</string>
     <string name="InuPerAccountPasscode">Per-account passcode</string>
-    <string name="InuHideInugramSettings">Hide LumineGram settings</string>
+    <string name="InuHideInugramSettings">Hide luminegram settings</string>
     <string name="InuParanoiaDisableNotifications">Disable notifications</string>
     <string name="InuParanoiaHideOtherAccounts">Hide other accounts</string>
     <string name="InuParanoiaHideFolders">Hide folders</string>
     <string name="InuParanoiaHideMyStories">Hide my stories</string>
     <string name="InuParanoiaDisguise">Disguise as Telegram</string>
-    <string name="InuParanoiaDisguiseInfo">Only the launcher icon and name change; notifications still say \"LumineGram\".</string>
+    <string name="InuParanoiaDisguiseInfo">Only the launcher icon and name change; notifications still say \"luminegram\".</string>
     <string name="InuDisguiseName" translatable="false">Telegram</string>
     <string name="InuParanoiaMode">Paranoia mode</string>
     <string name="InuParanoiaModeInfo">Hides \"dangerous\" chats and optionally disguises the app — be ready for a snooper.</string>
@@ -1270,17 +1270,17 @@
     <string name="InuBotSettings">Bot Settings</string>
     <string name="InuBotHelp">Bot Help</string>
 
-    <string name="InuCrashTitle">LumineGram crashed last time</string>
-    <string name="InuCrashTitleOom">LumineGram ran out of memory</string>
+    <string name="InuCrashTitle">luminegram crashed last time</string>
+    <string name="InuCrashTitleOom">luminegram ran out of memory</string>
     <string name="InuCrashDesc">Sorry about that. You can share the crash log with the developer to help fix it.</string>
     <string name="InuCrashDescOom">Sorry about that. Crash logs aren\'t very useful for out-of-memory issues — a heap dump is what helps.</string>
     <string name="InuCrashDescHeapDump">A heap dump was also saved. DO NOT SHARE IT! It contains private data! Take a look at it yourself, if you want, and share your findings — that would help a lot.</string>
-    <string name="InuCrashOomEnableLogs">Enable debug mode in LumineGram Settings > About to create a heap dump on every future OOM.</string>
+    <string name="InuCrashOomEnableLogs">Enable debug mode in luminegram Settings > About to create a heap dump on every future OOM.</string>
     <string name="InuCrashShare">Share crash log</string>
     <string name="InuCrashShareHeapDump">Save heap dump</string>
     <string name="InuCrashDiscard">Discard</string>
     <string name="InuCrashChannel">Crash recovery</string>
-    <string name="InuCrashNotifTitle">LumineGram crashed</string>
+    <string name="InuCrashNotifTitle">luminegram crashed</string>
     <string name="InuCrashNotifText">Tap to restart</string>
 
     <string name="InuLogs">Debug</string>
@@ -1751,10 +1751,10 @@
     <string name="InuDeletedMarkStyleEyeCrossed">Eye Crossed</string>
     <string name="InuDeletedMarkPreviewText">Hey! This is a secret 🤫</string>
     <string name="InuDeletedMarkPreviewSender">Alina</string>
-    <string name="InuHideDevBadges">Disable LumineGram badges</string>
+    <string name="InuHideDevBadges">Disable luminegram badges</string>
     <string name="InuHideDevBadgesInfo">They don\'t mean anything, don\'t give any advantage — just a thank-you from the developer</string>
-    <string name="InuDevBadge">LumineGram team</string>
-    <string name="InuDevBadgeInfo">This account is recognized by the LumineGram team.</string>
+    <string name="InuDevBadge">luminegram team</string>
+    <string name="InuDevBadgeInfo">This account is recognized by the luminegram team.</string>
     <string name="InuStopBot">Stop bot</string>
     <string name="InuStopBotAlert">Are you sure you want to stop **%1$s**? It won\'t be able to send you messages anymore.</string>
     <string name="InuStopBotAction">Stop</string>
@@ -1807,12 +1807,12 @@
     <string name="InuRestartApp">Restart app</string>
     <string name="InuRestartAppAlert">The app will close and reopen. Unsent drafts and in-progress uploads may be lost.</string>
     <string name="InuDonateTitle">Want stable updates?</string>
-    <string name="InuDonateText">LumineGram is free and open source, with no ads. Keeping it up to date with every new Telegram version takes my time. If the community wants that, you can support it.</string>
+    <string name="InuDonateText">luminegram is free and open source, with no ads. Keeping it up to date with every new Telegram version takes my time. If the community wants that, you can support it.</string>
     <string name="InuDonateButton">Support</string>
     <string name="InuDonateHide">Hide</string>
     <string name="InuDonateHidden">Support card hidden</string>
     <string name="InuDonateRow">Support the project</string>
-    <string name="InuDonateSheetTitle">Support LumineGram</string>
+    <string name="InuDonateSheetTitle">Support luminegram</string>
     <string name="InuDonateSheetInfo">Tap to copy or open. Completely optional.</string>
     <string name="InuDonateThanks">Thank you for being here ❤️</string>
     <string name="InuDonateMonobankJar">Monobank jar</string>
@@ -1959,7 +1959,7 @@
     <string name="InuPluginsErrorNoManifest">Not a valid plugin (missing metadata header)</string>
     <string name="InuPluginsErrorRead">Couldn\'t read the selected file</string>
     <string name="InuPluginsErrorWrite">Couldn\'t save the plugin file</string>
-    <string name="InuPluginsErrorApiVersion">Needs a newer LumineGram (plugin API %1$d, this app has %2$d)</string>
+    <string name="InuPluginsErrorApiVersion">Needs a newer luminegram (plugin API %1$d, this app has %2$d)</string>
     <string name="InuPluginsErrorPlatform">Not made for this platform (needs %1$s)</string>
     <string name="InuPluginsErrorBadGrant">Invalid permissions requested (%1$s)</string>
     <string name="InuPluginsErrorUnconsentedGrants">Requests permissions that weren\'t reviewed at install (%1$s); update the plugin to review them</string>
@@ -1986,7 +1986,7 @@
 
     <string name="InuAppIconCrimson">Crimson</string>
     <string name="InuAppIconBy">by %1$s</string>
-    <string name="InuAppIconDescDefault">The classic LumineGram dish</string>
+    <string name="InuAppIconDescDefault">The classic luminegram dish</string>
     <string name="InuAppIconDescOld">Where it all began</string>
     <string name="InuAppIconDescInuTribute">A nod to the project\'s roots</string>
     <string name="InuAppIconDescRadar">Sweeping the airwaves</string>
@@ -2019,7 +2019,7 @@
     <string name="InuRecentChatsSummary">Quick chat switcher bar</string>
     <string name="InuFeedSummary">Aggregated posts from your channels</string>
     <string name="InuEditedArchive">Edited archive</string>
-    <string name="InuGroupChatArchives">Group archives in LumineGram folder</string>
+    <string name="InuGroupChatArchives">Group archives in luminegram folder</string>
     <string name="InuLogsRedact">Redact sensitive data</string>
     <string name="InuLogsRedactInfo">Replace phone numbers, IDs, tokens, IPs and usernames in logs with stable placeholders as they are written</string>
     <string name="InuProfileJoinDate">Join Date</string>

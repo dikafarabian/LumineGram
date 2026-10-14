@@ -56,7 +56,7 @@ async function ensureGoogleServicesBranding() {
 }
 
 async function main() {
-  step('Applying LumineGram branding...')
+  step('Applying luminegram branding...')
   await ensureGoogleServicesBranding()
   success('Branding applied successfully.')
 }

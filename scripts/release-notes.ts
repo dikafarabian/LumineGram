@@ -213,7 +213,7 @@ function postProblems(name: string, text: string): string[] {
 /** Runs only when a post misses the budget: no commits in the prompt, so a retry costs ~1k tokens. */
 function fitPrompt(tgEn: string, tgUk: string, problems: string[]): string {
   return [
-    'Tighten two LumineGram Telegram posts. Keep every fact, change nothing else.',
+    'Tighten two luminegram Telegram posts. Keep every fact, change nothing else.',
     ...problems.map(p => `- PROBLEM: ${p}.`),
     '',
     'Both posts: at most ' + POST_LINES + ' lines and ' + POST_CHARS + ' characters of visible text',
@@ -246,10 +246,10 @@ function buildPrompt(info: BuildInfo, commits: Commit[], offered: RegistryEntry[
   // judge which applied - so it mixed all three and drifted off the commits. One rule per idea,
   // no rule that contradicts another.
   const lines = [
-    'You write release notes for LumineGram, a fork of Telegram for Android.',
+    'You write release notes for luminegram, a fork of Telegram for Android.',
     `Release v${info.verName}, repo ${info.repo}.`,
     '',
-    'COMMITS (LumineGram\'s own work; anything merged from inugram arrives as a single sync commit):',
+    'COMMITS (luminegram\'s own work; anything merged from inugram arrives as a single sync commit):',
     list || '(no commits)',
     '',
     'Write ONLY what these commits say. If a detail is not in the commits, leave it out -',
@@ -266,10 +266,10 @@ function buildPrompt(info: BuildInfo, commits: Commit[], offered: RegistryEntry[
     'Merge commits that touch the same change into one bullet.',
     'An upstream sync (subject mentioning "sync with upstream inugram") is always exactly one',
     'bullet; never list its internal patches.',
-    'A Telegram version bump is exactly one line: "Rebase to X.Y.Z (ported by LumineGram)" for our own',
+    'A Telegram version bump is exactly one line: "Rebase to X.Y.Z (ported by luminegram)" for our own',
     'rebase onto stock Telegram (a commit like "rebase to X.Y.Z"), or "Updated to Telegram X.Y.Z (via',
     'inugram)" for an inugram sync that brings the new base. In Ukrainian the tags are "(ported by',
-    'LumineGram)" and "(через inugram)". Never credit inugram for a base update we ported ourselves.',
+    'luminegram)" and "(через inugram)". Never credit inugram for a base update we ported ourselves.',
     'NEVER state a Telegram version number unless a commit subject spells it out as X.Y.Z; a bare build number',
     'like "7112" is not a version, and a commit that only says "rebase onto ..." gets no version line at all.',
     '',
@@ -312,7 +312,7 @@ function buildPrompt(info: BuildInfo, commits: Commit[], offered: RegistryEntry[
     lines.push(
       '',
       'SETTINGS DEEP LINKS:',
-      'LumineGram has in-app deep links of the form tg://lumineSettings/<slug>. In "en", "uk", "tg_en" and "tg_uk",',
+      'luminegram has in-app deep links of the form tg://lumineSettings/<slug>. In "en", "uk", "tg_en" and "tg_uk",',
       'when a line is exactly about one entry from the list below, put the token {{slug}} where its name',
       'belongs and say what the user gets without repeating that name again in the same line. The token',
       'stands for the name; the build script renders it as a link. Rules for tokens:',
@@ -605,7 +605,7 @@ function ruleFallback(commits: Commit[]): { en: string, uk: string, changelog_en
     const marker = m ? m[1] : ''
     const text = m ? m[2] : subjectText(subject)
     const rebase = text.match(/^rebase to (\S+)/i)
-    const formatted = rebase ? `Rebase to ${rebase[1]} (ported by LumineGram)` : text
+    const formatted = rebase ? `Rebase to ${rebase[1]} (ported by luminegram)` : text
     if (marker === '+') added.push(`• ${formatted}`)
     else if (marker === '-') deleted.push(`• ${formatted}`)
     else if (marker === '=' || /(rework|rewrite|redesign|move|restructure|update|sync|rebase)/i.test(formatted)) rewrited.push(`• ${formatted}`)
@@ -687,7 +687,7 @@ if (!skipAi) {
     try {
       existing = JSON.parse(await fs.readFile(assetsChangelogPath, 'utf8'))
     } catch { }
-    const key = info.verCode ? `LumineGram ${info.verName} (${info.verCode})` : `LumineGram ${info.verName}`
+    const key = info.verCode ? `luminegram ${info.verName} (${info.verCode})` : `luminegram ${info.verName}`
     const updated: Record<string, { ua: string, en: string }> = {
       [key]: {
         ua: notes.changelog_ua || notes.uk,

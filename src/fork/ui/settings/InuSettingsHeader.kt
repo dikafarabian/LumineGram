@@ -37,9 +37,9 @@ class InuSettingsHeader(context: Context) : LinearLayout(context) {
 
     private val title = TextView(context).apply {
         text = if (BuildVars.isBetaApp()) {
-            "LumineGram ${LocaleController.getString(R.string.InuVersionBetaSuffix)}"
+            "luminegram ${LocaleController.getString(R.string.InuVersionBetaSuffix)}"
         } else {
-            "LumineGram"
+            "luminegram"
         }
         setTextSize(android.util.TypedValue.COMPLEX_UNIT_DIP, 18f)
         setTypeface(AndroidUtilities.bold())

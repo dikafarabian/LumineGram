@@ -4,24 +4,24 @@
     {
       "slug": "lumine-channel",
       "title": {
-        "en": "Official LumineGram channel",
-        "uk": "Офіційний канал LumineGram",
-        "ru": "Официальный канал LumineGram",
-        "tr": "Resmi LumineGram kanalı",
-        "ja": "LumineGram公式チャンネル",
-        "zh": "LumineGram 官方频道",
-        "ar": "القناة الرسمية لـ LumineGram",
-        "fa": "کانال رسمی LumineGram"
+        "en": "Official luminegram channel",
+        "uk": "Офіційний канал luminegram",
+        "ru": "Официальный канал luminegram",
+        "tr": "Resmi luminegram kanalı",
+        "ja": "luminegram公式チャンネル",
+        "zh": "luminegram 官方频道",
+        "ar": "القناة الرسمية لـ luminegram",
+        "fa": "کانال رسمی luminegram"
       },
       "description": {
-        "en": "Official channel with LumineGram news and updates",
-        "uk": "Новини та оновлення LumineGram",
-        "ru": "Официальный канал с новостями и обновлениями LumineGram",
-        "tr": "LumineGram haberleri ve güncellemelerinin yer aldığı resmi kanal",
-        "ja": "LumineGramのニュースとアップデートを届ける公式チャンネル",
-        "zh": "发布 LumineGram 新闻和更新的官方频道",
-        "ar": "القناة الرسمية لأخبار LumineGram وتحديثاته",
-        "fa": "کانال رسمی اخبار و به‌روزرسانی‌های LumineGram"
+        "en": "Official channel with luminegram news and updates",
+        "uk": "Новини та оновлення luminegram",
+        "ru": "Официальный канал с новостями и обновлениями luminegram",
+        "tr": "luminegram haberleri ve güncellemelerinin yer aldığı resmi kanal",
+        "ja": "luminegramのニュースとアップデートを届ける公式チャンネル",
+        "zh": "发布 luminegram 新闻和更新的官方频道",
+        "ar": "القناة الرسمية لأخبار luminegram وتحديثاته",
+        "fa": "کانال رسمی اخبار و به‌روزرسانی‌های luminegram"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5260594734346313076"
@@ -29,24 +29,24 @@
     {
       "slug": "lumine-dev",
       "title": {
-        "en": "LumineGram developer",
-        "uk": "Розробник LumineGram",
-        "ru": "Разработчик LumineGram",
-        "tr": "LumineGram geliştiricisi",
-        "ja": "LumineGram開発者",
-        "zh": "LumineGram 开发者",
-        "ar": "مطوّر LumineGram",
-        "fa": "توسعه‌دهنده LumineGram"
+        "en": "luminegram developer",
+        "uk": "Розробник luminegram",
+        "ru": "Разработчик luminegram",
+        "tr": "luminegram geliştiricisi",
+        "ja": "luminegram開発者",
+        "zh": "luminegram 开发者",
+        "ar": "مطوّر luminegram",
+        "fa": "توسعه‌دهنده luminegram"
       },
       "description": {
-        "en": "This user creates and develops LumineGram",
-        "uk": "Цей користувач створює та розвиває LumineGram",
-        "ru": "Этот пользователь создаёт и развивает LumineGram",
-        "tr": "Bu kullanıcı LumineGram'ı oluşturuyor ve geliştiriyor",
-        "ja": "LumineGramを制作・開発しているユーザーです",
-        "zh": "该用户负责创建和开发 LumineGram",
-        "ar": "هذا المستخدم يُنشئ LumineGram ويطوّره",
-        "fa": "این کاربر LumineGram را می‌سازد و توسعه می‌دهد"
+        "en": "This user creates and develops luminegram",
+        "uk": "Цей користувач створює та розвиває luminegram",
+        "ru": "Этот пользователь создаёт и развивает luminegram",
+        "tr": "Bu kullanıcı luminegram'ı oluşturuyor ve geliştiriyor",
+        "ja": "luminegramを制作・開発しているユーザーです",
+        "zh": "该用户负责创建和开发 luminegram",
+        "ar": "هذا المستخدم يُنشئ luminegram ويطوّره",
+        "fa": "این کاربر luminegram را می‌سازد و توسعه می‌دهد"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5260594734346313076"
@@ -54,14 +54,14 @@
     {
       "slug": "lumine-first",
       "title": {
-        "en": "The first person on LumineGram",
-        "uk": "Перша людина LumineGram",
-        "ru": "Первый человек в LumineGram",
-        "tr": "LumineGram'daki ilk kişi",
-        "ja": "LumineGramの最初の人",
-        "zh": "LumineGram 第一人",
-        "ar": "أول شخص في LumineGram",
-        "fa": "اولین نفر در LumineGram"
+        "en": "The first person on luminegram",
+        "uk": "Перша людина luminegram",
+        "ru": "Первый человек в luminegram",
+        "tr": "luminegram'daki ilk kişi",
+        "ja": "luminegramの最初の人",
+        "zh": "luminegram 第一人",
+        "ar": "أول شخص في luminegram",
+        "fa": "اولین نفر در luminegram"
       },
       "description": {
         "en": "He's the first one in both the chat and the channel. I'm shocked!",
@@ -79,24 +79,24 @@
     {
       "slug": "lumine-plugins",
       "title": {
-        "en": "LumineGram plugins channel",
-        "uk": "Канал з плагінами LumineGram",
-        "ru": "Канал с плагинами LumineGram",
-        "tr": "LumineGram eklenti kanalı",
-        "ja": "LumineGramプラグインチャンネル",
-        "zh": "LumineGram 插件频道",
-        "ar": "قناة إضافات LumineGram",
-        "fa": "کانال افزونه‌های LumineGram"
+        "en": "luminegram plugins channel",
+        "uk": "Канал з плагінами luminegram",
+        "ru": "Канал с плагинами luminegram",
+        "tr": "luminegram eklenti kanalı",
+        "ja": "luminegramプラグインチャンネル",
+        "zh": "luminegram 插件频道",
+        "ar": "قناة إضافات luminegram",
+        "fa": "کانال افزونه‌های luminegram"
       },
       "description": {
-        "en": "Channel with plugins for LumineGram",
-        "uk": "Канал із плагінами для LumineGram",
-        "ru": "Канал с плагинами для LumineGram",
-        "tr": "LumineGram için eklentilerin paylaşıldığı kanal",
-        "ja": "LumineGram用プラグインを配布するチャンネル",
-        "zh": "发布 LumineGram 插件的频道",
-        "ar": "قناة تحتوي على إضافات LumineGram",
-        "fa": "کانالی با افزونه‌های LumineGram"
+        "en": "Channel with plugins for luminegram",
+        "uk": "Канал із плагінами для luminegram",
+        "ru": "Канал с плагинами для luminegram",
+        "tr": "luminegram için eklentilerin paylaşıldığı kanal",
+        "ja": "luminegram用プラグインを配布するチャンネル",
+        "zh": "发布 luminegram 插件的频道",
+        "ar": "قناة تحتوي على إضافات luminegram",
+        "fa": "کانالی با افزونه‌های luminegram"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5325747421131612375"
@@ -104,24 +104,24 @@
     {
       "slug": "lumine-settings",
       "title": {
-        "en": "LumineGram settings channel",
-        "uk": "Канал з налаштуваннями LumineGram",
-        "ru": "Канал с настройками LumineGram",
-        "tr": "LumineGram ayarlar kanalı",
-        "ja": "LumineGram設定チャンネル",
-        "zh": "LumineGram 设置频道",
-        "ar": "قناة إعدادات LumineGram",
-        "fa": "کانال تنظیمات LumineGram"
+        "en": "luminegram settings channel",
+        "uk": "Канал з налаштуваннями luminegram",
+        "ru": "Канал с настройками luminegram",
+        "tr": "luminegram ayarlar kanalı",
+        "ja": "luminegram設定チャンネル",
+        "zh": "luminegram 设置频道",
+        "ar": "قناة إعدادات luminegram",
+        "fa": "کانال تنظیمات luminegram"
       },
       "description": {
-        "en": "Channel with LumineGram settings and configs",
-        "uk": "Канал із налаштуваннями та конфігами LumineGram",
-        "ru": "Канал с настройками и конфигами LumineGram",
-        "tr": "LumineGram ayarları ve yapılandırmalarının paylaşıldığı kanal",
-        "ja": "LumineGramの設定と構成を共有するチャンネル",
-        "zh": "分享 LumineGram 设置和配置的频道",
-        "ar": "قناة تحتوي على إعدادات LumineGram وملفات التهيئة",
-        "fa": "کانالی با تنظیمات و پیکربندی‌های LumineGram"
+        "en": "Channel with luminegram settings and configs",
+        "uk": "Канал із налаштуваннями та конфігами luminegram",
+        "ru": "Канал с настройками и конфигами luminegram",
+        "tr": "luminegram ayarları ve yapılandırmalarının paylaşıldığı kanal",
+        "ja": "luminegramの設定と構成を共有するチャンネル",
+        "zh": "分享 luminegram 设置和配置的频道",
+        "ar": "قناة تحتوي على إعدادات luminegram وملفات التهيئة",
+        "fa": "کانالی با تنظیمات و پیکربندی‌های luminegram"
       },
       "icon": "inu_badge_lumine",
       "emojiId": "5323484093625707895"
@@ -129,14 +129,14 @@
     {
       "slug": "lumine-tester",
       "title": {
-        "en": "LumineGram beta tester",
-        "uk": "Бета-тестер LumineGram",
-        "ru": "Бета-тестер LumineGram",
-        "tr": "LumineGram beta test kullanıcısı",
-        "ja": "LumineGramベータテスター",
-        "zh": "LumineGram 测试版体验官",
-        "ar": "مختبر بيتا لـ LumineGram",
-        "fa": "آزمایشگر بتای LumineGram"
+        "en": "luminegram beta tester",
+        "uk": "Бета-тестер luminegram",
+        "ru": "Бета-тестер luminegram",
+        "tr": "luminegram beta test kullanıcısı",
+        "ja": "luminegramベータテスター",
+        "zh": "luminegram 测试版体验官",
+        "ar": "مختبر بيتا لـ luminegram",
+        "fa": "آزمایشگر بتای luminegram"
       },
       "description": {
         "en": "Helps with and finds bugs in the app",
@@ -164,14 +164,14 @@
         "fa": "کانال رسمی inuGram"
       },
       "description": {
-        "en": "Original inuGram fork that LumineGram is based on",
-        "uk": "Оригінальний форк inuGram, на якому ґрунтується LumineGram",
-        "ru": "Оригинальный форк inuGram, на основе которого создан LumineGram",
-        "tr": "LumineGram'ın temelini oluşturan orijinal inuGram forku",
-        "ja": "LumineGramのベースとなったオリジナルのinuGramフォーク",
-        "zh": "LumineGram 所基于的原始 inuGram 分支",
-        "ar": "نسخة inuGram الأصلية التي بُني عليها LumineGram",
-        "fa": "فورک اصلی inuGram که LumineGram بر پایه آن ساخته شده"
+        "en": "Original inuGram fork that luminegram is based on",
+        "uk": "Оригінальний форк inuGram, на якому ґрунтується luminegram",
+        "ru": "Оригинальный форк inuGram, на основе которого создан luminegram",
+        "tr": "luminegram'ın temelini oluşturan orijinal inuGram forku",
+        "ja": "luminegramのベースとなったオリジナルのinuGramフォーク",
+        "zh": "luminegram 所基于的原始 inuGram 分支",
+        "ar": "نسخة inuGram الأصلية التي بُني عليها luminegram",
+        "fa": "فورک اصلی inuGram که luminegram بر پایه آن ساخته شده"
       },
       "icon": "inu_badge_inu",
       "emojiId": "5260551076003753813"
@@ -189,14 +189,14 @@
         "fa": "توسعه‌دهنده inuGram"
       },
       "description": {
-        "en": "This user is the author of inuGram, the fork LumineGram is based on",
-        "uk": "Авторка inuGram — форку, на якому ґрунтується LumineGram",
-        "ru": "Эта пользовательница — автор inuGram, форка, на основе которого создан LumineGram",
-        "tr": "LumineGram'ın temelini oluşturan inuGram forkunun yazarı",
-        "ja": "LumineGramのベースとなったinuGramの作者です",
-        "zh": "LumineGram 所基于的 inuGram 分支的作者",
-        "ar": "هذا المستخدم هو مؤلف inuGram، النسخة المشتقة التي بُني عليها LumineGram",
-        "fa": "این کاربر سازنده inuGram است، فورکی که LumineGram بر پایه آن ساخته شده"
+        "en": "This user is the author of inuGram, the fork luminegram is based on",
+        "uk": "Авторка inuGram — форку, на якому ґрунтується luminegram",
+        "ru": "Эта пользовательница — автор inuGram, форка, на основе которого создан luminegram",
+        "tr": "luminegram'ın temelini oluşturan inuGram forkunun yazarı",
+        "ja": "luminegramのベースとなったinuGramの作者です",
+        "zh": "luminegram 所基于的 inuGram 分支的作者",
+        "ar": "هذا المستخدم هو مؤلف inuGram، النسخة المشتقة التي بُني عليها luminegram",
+        "fa": "این کاربر سازنده inuGram است، فورکی که luminegram بر پایه آن ساخته شده"
       },
       "icon": "inu_badge_inu",
       "emojiId": "5260551076003753813"

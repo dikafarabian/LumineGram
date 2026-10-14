@@ -315,7 +315,7 @@ index 0000000..0000000 100644
  
 -        TranslateAlert2.setToLanguage(language);
 +        // A per-dialog choice must not reset the global target language selected in
-+        // LumineGram's Translator settings. Keep Telegram's legacy behavior only when the
++        // luminegram's Translator settings. Keep Telegram's legacy behavior only when the
 +        // fork has no explicit global target configured.
 +        if (TextUtils.isEmpty(desu.inugram.InuConfig.TRANSLATE_TARGET_LANGUAGE.getValue())) {
 +            TranslateAlert2.setToLanguage(language);
@@ -427,7 +427,7 @@ index 0000000..0000000 100644
 +            desu.inugram.helpers.translate.TranslationProviderHelper.setSourceLanguage(source, message.messageOwner.originalLanguage);
 +        }
 +
-+        // LumineGram: route to third-party providers when one is selected.
++        // luminegram: route to third-party providers when one is selected.
 +        if (desu.inugram.helpers.translate.engine.LumineTranslate.handle(
 +            dialogId, message.getId(), isTranscription, source.text, message.messageOwner.entities, language, callback, currentAccount)) {
 +            return;
@@ -521,7 +521,7 @@ index 0000000..0000000 100644
              }
              final TLRPC.TL_messageMediaPoll mediaPoll = (TLRPC.TL_messageMediaPoll) media;
              final PollText pollText = PollText.fromPoll(mediaPoll);
-+            // LumineGram: route polls to third-party providers when one is selected.
++            // luminegram: route polls to third-party providers when one is selected.
 +            if (desu.inugram.helpers.translate.engine.LumineTranslate.handlePoll(
 +                dialogId, message.getId(), pollText, language, callback, currentAccount)) {
 +                return;
@@ -664,7 +664,7 @@ index 0000000..0000000 100644
 +    }
 +
 +    private boolean isLanguageRestricted(String lng, MessageObject message, boolean respectForceTranslate) {
-+        // LumineGram: force-translate mode overrides the "own language" / do-not-translate gate
++        // luminegram: force-translate mode overrides the "own language" / do-not-translate gate
 +        if (respectForceTranslate && desu.inugram.InuConfig.FORCE_TRANSLATE.getValue()) {
 +            return false;
          }
@@ -1498,7 +1498,7 @@ index 0000000..0000000 100644
          });
  
 -        if (UserConfig.getInstance(currentAccount).isPremium() && detectedLanguageNameAccusative != null) {
-+        // LumineGram: the translate bar itself is no longer premium-gated (TranslateController
++        // luminegram: the translate bar itself is no longer premium-gated (TranslateController
 +        // .isFeatureAvailable), so its opt-out must not be either. Stock hid "Do not translate
 +        // <language>" behind Premium, which left an unlocked non-premium user with a bar in every
 +        // foreign-language chat and only the per-chat "Hide" to fight it, one chat at a time.
@@ -1511,7 +1511,7 @@ index 0000000..0000000 100644
          popupLayout.addView(new ActionBarPopupWindow.GapView(getContext(), resourcesProvider), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
  
 +        if (desu.inugram.helpers.translate.engine.LumineTranslate.isActive()) {
-+            // LumineGram: a third-party provider handles translations — name it instead of
++            // luminegram: a third-party provider handles translations — name it instead of
 +            // showing the stock Cocoon branding.
 +            final LinkSpanDrawable.LinksTextView providerButton = new LinkSpanDrawable.LinksTextView(getContext());
 +            providerButton.setPadding(dp(13), dp(8.33f), dp(13), dp(8.33f));
@@ -1717,7 +1717,7 @@ index 0000000..0000000 100644
 -                    TextSettingsCell settingsCell = new TextSettingsCell(mContext);
 -                    view = settingsCell;
 +                case VIEW_TYPE_TRANSLATOR: {
-+                    // LumineGram: "Translator" row at the top of the language picker
++                    // luminegram: "Translator" row at the top of the language picker
 +                    view = new TextCell(mContext);
                      break;
 +                }

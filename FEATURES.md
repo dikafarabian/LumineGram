@@ -1,14 +1,14 @@
-# LumineGram features
+# luminegram features
 
 > non-exhaustive list of what this fork adds, tweaks or fixes vs stock telegram android.
 > keep this updated as patches are added/removed.
 
-most things are toggleable in `Settings → LumineGram`, with sensible opinionated defaults.
+most things are toggleable in `Settings → luminegram`, with sensible opinionated defaults.
 
 🐶 - Inugram-exclusive (as far as i know, as of writing)
-📡 - LumineGram-exclusive
+📡 - luminegram-exclusive
 
-## LumineGram additions
+## luminegram additions
 
 our own layer on top of the inugram patchset: restricted Telegram features, privacy tools, and power-user controls.
 
@@ -222,7 +222,7 @@ the sections below contain the broader feature set: inugram functionality, featu
 - 🐶 classic ui mode for folders bar, shared media tabs, global search and chat elements (reverts the >12.6 "liquid glass" look)
 - icon replacement (solar pack by [480 Design](https://t.me/Design480) - *ported from [NagramX](https://github.com/risin42/NagramX)*; vkui pack by [VK](https://github.com/VKCOM/icons) - *ported from [Catogram](https://github.com/Catogram/Catogram)*)
 - 22 concept launcher icons (Inu tribute, Radar, Constellation, Orbit, Avatar, Nothing, Mono, Sunset, Amethyst, Aurora, Google ’26, Lunar, Math Book, Jungle, Gold, Dish, Blush, Nox Sky, Inverse, osu!, Among Us, Crimson) in the app icon picker, free for everyone - *icons by [@xiurann](https://t.me/xiurann) and [@mkr_infinity](https://t.me/mkr_infinity)*
-- notification icon: Telegram (default) or LumineGram
+- notification icon: Telegram (default) or luminegram
 - show seconds in timestamps
 - override Telegram's detected device performance class
 - 🐶 customizable animation speed multiplier (incl. instant)
@@ -411,7 +411,7 @@ the sections below contain the broader feature set: inugram functionality, featu
   - optional launcher long-press shortcut to enter it quickly (hidden while active)
 - biometric confirmation before deleting/clearing a chat or logging out - *inspired by [Cherrygram](https://github.com/arsLan4k1390/Cherrygram)*
 - optional biometric lock on Archived Chats — ask once per app session or every time you open the archive
-- session list in Settings > Devices shows the real app name (LumineGram) instead of the registered api_id title ("Inugram")
+- session list in Settings > Devices shows the real app name (luminegram) instead of the registered api_id title ("Inugram")
 
 ### behavior
 

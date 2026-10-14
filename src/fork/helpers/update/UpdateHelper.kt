@@ -526,7 +526,7 @@ object UpdateHelper {
                 if (conn.responseCode == 200) {
                     val body = conn.inputStream.bufferedReader().use { it.readText() }
                     val root = JSONObject(body)
-                    val exactKey = "LumineGram ${info.appVerName} (${info.verCode})"
+                    val exactKey = "luminegram ${info.appVerName} (${info.verCode})"
                     var entry = root.optJSONObject(exactKey)
                     if (entry == null) {
                         val keys = root.keys()

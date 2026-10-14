@@ -1,6 +1,6 @@
 # Setting up the project on Windows (from scratch)
 
-This is a step-by-step guide to setting up `LumineGram` on a clean Windows install (e.g.
+This is a step-by-step guide to setting up `luminegram` on a clean Windows install (e.g.
 after reinstalling the OS). Building/signing the APK is a separate topic — will be covered
 in `BUILD.md` once Android Studio / JDK / Android SDK are set up.
 

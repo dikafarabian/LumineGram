@@ -218,7 +218,7 @@ class UpdateAppAlertDialog(
             setTextColor(Theme.getColor(Theme.key_dialogTextBlack))
             isSingleLine = true
             ellipsize = TextUtils.TruncateAt.END
-            text = if (isBeta) "LumineGram β" else "LumineGram"
+            text = if (isBeta) "luminegram β" else "luminegram"
         }
         titleColumn.addView(
             titleView,

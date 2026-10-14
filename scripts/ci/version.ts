@@ -29,8 +29,8 @@ const out = {
   'ver-name': `${appVerName}-${shortSha}`,
   'ver-code': String(verCode),
   date,
-  'apk-arm64': `LumineGram-arm64-${appVerName}-release.apk`,
-  'apk-arm7': `LumineGram-armeabi-v7a-${appVerName}-release.apk`,
+  'apk-arm64': `luminegram-arm64-${appVerName}-release.apk`,
+  'apk-arm7': `luminegram-armeabi-v7a-${appVerName}-release.apk`,
 }
 
 const githubOutput = process.env.GITHUB_OUTPUT

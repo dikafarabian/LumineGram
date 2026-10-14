@@ -27,7 +27,7 @@ try {
       type: 'document',
       file: `file:${join(apkDir, file)}`,
       fileName: file,
-      caption: `LumineGram v${process.env.VER_NAME} (build ${process.env.BUILD_DATE}) ${abi}`,
+      caption: `luminegram v${process.env.VER_NAME} (build ${process.env.BUILD_DATE}) ${abi}`,
     })
     console.log(`sent ${file}`)
   }
