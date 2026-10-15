@@ -1238,10 +1238,10 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val LIQUID_GLASS_ANGLE = IntItem("liquid_glass_angle", 0)
 
     @JvmField
-    val LIQUID_GLASS_INTENSITY = IntItem("liquid_glass_intensity", 75)
+    val LIQUID_GLASS_INTENSITY = IntItem("liquid_glass_intensity", 50)
 
     @JvmField
-    val LIQUID_GLASS_TINT = IntItem("liquid_glass_tint", 100)
+    val LIQUID_GLASS_TINT = IntItem("liquid_glass_tint", 50)
 
     @JvmField
     val NICHE_SETTINGS_UNLOCKED = BoolItem("niche_settings_unlocked", false)
@@ -1295,10 +1295,10 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val CHAT_INPUT_TEXT_SIZE = IntItem("chat_input_text_size", 18)
 
     @JvmField
-    val IOS_INPUT_BUTTON_PLACEMENT = BoolItem("ios_button_placement", false)
+    val IOS_INPUT_BUTTON_PLACEMENT = BoolItem("ios_button_placement", true)
 
     @JvmField
-    val IOS_INPUT_APPEARANCE = BoolItem("ios_input_appearance", false)
+    val IOS_INPUT_APPEARANCE = BoolItem("ios_input_appearance", true)
 
     @JvmField
     val COMPACT_INPUT_SIZE = BoolItem("compact_input_size", false)
@@ -1479,7 +1479,7 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val CENTER_TITLE_MAIN = BoolItem("center_title_main", false)
 
     @JvmField
-    val CENTER_TITLE_CHATS = BoolItem("center_title_chats", false)
+    val CENTER_TITLE_CHATS = BoolItem("center_title_chats", true)
 
     @JvmField
     val CENTER_TITLE_RIGHT_AVATAR = BoolItem("center_title_right_avatar", false)
@@ -1488,7 +1488,7 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val IOS_BOTTOM_NAVIGATION_BAR = BoolItem("ios_bottom_navigation_bar", false)
 
     @JvmField
-    val IOS_CHATS_TAB_RETURNS_TO_FIRST_FOLDER = BoolItem("ios_chats_tab_returns_to_first_folder", false)
+    val IOS_CHATS_TAB_RETURNS_TO_FIRST_FOLDER = BoolItem("ios_chats_tab_returns_to_first_folder", true)
 
     @JvmField
     val DIALOG_AVATAR_OPENS_PROFILE = BoolItem("dialog_avatar_opens_profile", false)
@@ -1497,13 +1497,13 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val ALWAYS_SHOW_DOWNLOADS = BoolItem("always_show_downloads", false)
 
     @JvmField
-    val IOS_CHAT_HEADER = BoolItem("ios_chat_header", false)
+    val IOS_CHAT_HEADER = BoolItem("ios_chat_header", true)
 
     @JvmField
     val HIDE_CHAT_AVATAR = BoolItem("hide_chat_avatar", false)
 
     @JvmField
-    val IOS_CHAT_HEADER_AVATAR_SLOT = BoolItem("ios_chat_header_avatar_slot", false)
+    val IOS_CHAT_HEADER_AVATAR_SLOT = BoolItem("ios_chat_header_avatar_slot", true)
 
     @JvmField
     val IOS_CHAT_HEADER_AVATAR_STATIC = BoolItem("ios_chat_header_avatar_static", false)
@@ -1521,13 +1521,13 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     val CLOWN_AVATAR_EMOJI = IntItem("clown_avatar_emoji", 0)
 
     @JvmField
-    val CHAT_TITLE_MARQUEE = BoolItem("chat_title_marquee", false)
+    val CHAT_TITLE_MARQUEE = BoolItem("chat_title_marquee", true)
 
     @JvmField
-    val UNREAD_BADGE_ON_BACK_BUTTON = BoolItem("unread_badge_on_back_button", false)
+    val UNREAD_BADGE_ON_BACK_BUTTON = BoolItem("unread_badge_on_back_button", true)
 
     @JvmField
-    val UNREAD_BADGE_ON_BACK_BUTTON_IOS = BoolItem("unread_badge_on_back_button_ios", false)
+    val UNREAD_BADGE_ON_BACK_BUTTON_IOS = BoolItem("unread_badge_on_back_button_ios", true)
 
     @JvmField
     val SAVE_SELF_DESTRUCT_MEDIA = BoolItem("save_self_destruct_media", false)
