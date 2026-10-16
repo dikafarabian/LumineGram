@@ -186,6 +186,7 @@ object InuDatabaseHelper {
         }
 
         if (version == 19) {
+            val started = android.os.SystemClock.elapsedRealtime()
             db.executeFast("SAVEPOINT inu_edit_history_v20").stepThis().dispose()
             try {
                 db.executeFast("CREATE TABLE inu_edit_history_v20(id INTEGER PRIMARY KEY AUTOINCREMENT, dialog_id INTEGER, msg_id INTEGER, text TEXT, date INTEGER, media_path TEXT, entities BLOB, media BLOB, archived_at INTEGER)").stepThis().dispose()
@@ -197,6 +198,7 @@ object InuDatabaseHelper {
                 db.executeFast("CREATE INDEX idx_inu_edit_history_archived_at ON inu_edit_history(archived_at)").stepThis().dispose()
                 writeKv(db, "version", "20")
                 db.executeFast("RELEASE SAVEPOINT inu_edit_history_v20").stepThis().dispose()
+                version = 20
             } catch (e: Throwable) {
                 try {
                     db.executeFast("ROLLBACK TO SAVEPOINT inu_edit_history_v20").stepThis().dispose()
@@ -204,9 +206,9 @@ object InuDatabaseHelper {
                 } catch (rollbackError: Throwable) {
                     e.addSuppressed(rollbackError)
                 }
-                throw e
+                Log.e("InuDatabaseHelper", "edit history v20 rebuild failed", e)
             }
-            version = 20
+            Log.d("InuDatabaseHelper", "edit history v20 rebuild took ${android.os.SystemClock.elapsedRealtime() - started} ms")
         }
 
         // lumine: the feed no longer keeps its own cache
@@ -518,23 +520,88 @@ object InuDatabaseHelper {
     }
 
     fun saveDeletedMessage(db: SQLiteDatabase, dialogId: Long, msgId: Int, fromId: Long, text: String, date: Int, mediaPath: String? = null, message: TLRPC.Message? = null) {
-        val query = db.executeFast("INSERT OR REPLACE INTO inu_deleted_messages(dialog_id, msg_id, from_id, text, date, media_path, message) VALUES(?, ?, ?, ?, ?, COALESCE(?, (SELECT media_path FROM inu_deleted_messages WHERE dialog_id = ? AND msg_id = ?)), COALESCE(?, (SELECT message FROM inu_deleted_messages WHERE dialog_id = ? AND msg_id = ?)))")
+        val row = "FROM inu_deleted_messages WHERE dialog_id = ? AND msg_id = ?"
+        val query = db.executeFast(
+            "INSERT OR REPLACE INTO inu_deleted_messages(dialog_id, msg_id, from_id, text, date, media_path, message) VALUES(?, ?, " +
+                "CASE WHEN ? != 0 THEN ? ELSE COALESCE((SELECT from_id $row), 0) END, " +
+                "COALESCE(NULLIF(?, ''), (SELECT text $row), ''), " +
+                "COALESCE((SELECT date $row), ?), " +
+                "COALESCE(?, (SELECT media_path $row)), " +
+                "COALESCE(?, (SELECT message $row)))"
+        )
         try {
-            query.bindLong(1, dialogId)
-            query.bindInteger(2, msgId)
-            query.bindLong(3, fromId)
-            query.bindString(4, text)
-            query.bindInteger(5, if (date > 0) date else (System.currentTimeMillis() / 1000L).toInt())
-            if (mediaPath != null) query.bindString(6, mediaPath) else query.bindNull(6)
-            query.bindLong(7, dialogId)
-            query.bindInteger(8, msgId)
-            if (message != null) query.bindTlObject(9, message) else query.bindNull(9)
-            query.bindLong(10, dialogId)
-            query.bindInteger(11, msgId)
+            var index = 0
+            fun key() {
+                query.bindLong(++index, dialogId)
+                query.bindInteger(++index, msgId)
+            }
+            key()
+            query.bindLong(++index, fromId)
+            query.bindLong(++index, fromId)
+            key()
+            query.bindString(++index, text)
+            key()
+            key()
+            query.bindInteger(++index, if (date > 0) date else (System.currentTimeMillis() / 1000L).toInt())
+            if (mediaPath != null) query.bindString(++index, mediaPath) else query.bindNull(++index)
+            key()
+            if (message != null) query.bindTlObject(++index, message) else query.bindNull(++index)
+            key()
             query.step()
         } finally {
             query.dispose()
         }
+    }
+
+    fun deletedMessageMediaPath(db: SQLiteDatabase, dialogId: Long, msgId: Int): String? {
+        val cursor = db.queryFinalized("SELECT media_path FROM inu_deleted_messages WHERE dialog_id = ? AND msg_id = ? AND media_path IS NOT NULL", dialogId, msgId)
+        return try {
+            if (cursor.next()) cursor.stringValue(0)?.takeIf { it.isNotBlank() } else null
+        } finally {
+            cursor.dispose()
+        }
+    }
+
+    fun isDeletedMessageArchived(db: SQLiteDatabase, dialogId: Long, msgId: Int): Boolean {
+        val cursor = db.queryFinalized("SELECT 1 FROM inu_deleted_messages WHERE dialog_id = ? AND msg_id = ?", dialogId, msgId)
+        return try { cursor.next() } finally { cursor.dispose() }
+    }
+
+    fun archivedMessages(db: SQLiteDatabase, dialogId: Long, mids: Collection<Int>): Map<Int, TLRPC.Message> {
+        val result = HashMap<Int, TLRPC.Message>()
+        if (mids.isEmpty()) return result
+        val cursor = db.queryFinalized("SELECT msg_id, message FROM inu_deleted_messages WHERE dialog_id = ? AND msg_id IN (${mids.joinToString(",")}) AND message IS NOT NULL", dialogId)
+        try {
+            while (cursor.next()) {
+                readMessageBlob(cursor, 1)?.let { result[cursor.intValue(0)] = it }
+            }
+        } finally {
+            cursor.dispose()
+        }
+        return result
+    }
+
+    fun loadMessagesForArchive(db: SQLiteDatabase, dialogId: Long, mids: Collection<Int>): Map<Int, TLRPC.Message> {
+        val result = HashMap<Int, TLRPC.Message>()
+        if (mids.isEmpty()) return result
+        val cursor = db.queryFinalized("SELECT mid, data FROM messages_v2 WHERE uid = ? AND mid IN (${mids.joinToString(",")})", dialogId)
+        try {
+            while (cursor.next()) {
+                val mid = cursor.intValue(0)
+                readTl(cursor, 1) { data ->
+                    TLRPC.Message.TLdeserialize(data, data.readInt32(false), false)?.also { it.readAttachPath(data, 0) }
+                }?.let {
+                    it.id = mid
+                    it.dialog_id = dialogId
+                    result[mid] = it
+                }
+            }
+        } finally {
+            cursor.dispose()
+        }
+        val missing = mids.filter { it !in result }
+        if (missing.isNotEmpty()) result.putAll(archivedMessages(db, dialogId, missing))
+        return result
     }
 
     private fun readMessageBlob(cursor: org.telegram.SQLite.SQLiteCursor, column: Int): TLRPC.Message? =
@@ -556,29 +623,32 @@ object InuDatabaseHelper {
         }
     }
 
-    fun forEachDeletedMessageInfo(db: SQLiteDatabase, consumer: (dialogId: Long, messageId: Int, date: Long) -> Unit) {
-        val cursor = db.queryFinalized("SELECT dialog_id, msg_id, date FROM inu_deleted_messages")
+    fun readDeletedIndexPage(db: SQLiteDatabase, afterRowId: Long, limit: Int, consumer: (rowId: Long, dialogId: Long, messageId: Int, date: Long, mediaPath: String?) -> Unit): Int {
+        var count = 0
+        val cursor = db.queryFinalized("SELECT rowid, dialog_id, msg_id, date, media_path FROM inu_deleted_messages WHERE rowid > ? ORDER BY rowid LIMIT ?", afterRowId, limit)
         try {
             while (cursor.next()) {
-                consumer(cursor.longValue(0), cursor.intValue(1), cursor.longValue(2))
+                count++
+                consumer(cursor.longValue(0), cursor.longValue(1), cursor.intValue(2), cursor.longValue(3), if (cursor.isNull(4)) null else cursor.stringValue(4)?.takeIf { it.isNotEmpty() })
             }
         } finally {
             cursor.dispose()
         }
+        return count
     }
 
-    fun forEachDeletedMessageMedia(db: SQLiteDatabase, consumer: (dialogId: Long, messageId: Int, mediaPath: String) -> Unit) {
-        val cursor = db.queryFinalized("SELECT dialog_id, msg_id, media_path FROM inu_deleted_messages WHERE media_path IS NOT NULL")
+    fun readEditIndexPage(db: SQLiteDatabase, afterRowId: Long, limit: Int, consumer: (rowId: Long, dialogId: Long, messageId: Int) -> Unit): Int {
+        var count = 0
+        val cursor = db.queryFinalized("SELECT rowid, dialog_id, msg_id FROM inu_edit_history WHERE rowid > ? ORDER BY rowid LIMIT ?", afterRowId, limit)
         try {
             while (cursor.next()) {
-                val path = cursor.stringValue(2)
-                if (!path.isNullOrEmpty()) {
-                    consumer(cursor.longValue(0), cursor.intValue(1), path)
-                }
+                count++
+                consumer(cursor.longValue(0), cursor.longValue(1), cursor.intValue(2))
             }
         } finally {
             cursor.dispose()
         }
+        return count
     }
 
     fun writeArchiveJson(db: SQLiteDatabase, out: java.io.Writer): Int {
@@ -616,27 +686,15 @@ object InuDatabaseHelper {
         return count
     }
 
-    // lumine: pre-stream edit history keys so chat bubbles avoid SQLite queries on UI thread
-    fun forEachEditHistoryKey(db: SQLiteDatabase, consumer: (dialogId: Long, messageId: Int) -> Unit) {
-        val cursor = db.queryFinalized("SELECT DISTINCT dialog_id, msg_id FROM inu_edit_history")
-        try {
-            while (cursor.next()) {
-                consumer(cursor.longValue(0), cursor.intValue(1))
-            }
-        } finally {
-            cursor.dispose()
-        }
-    }
-
     data class MessageSearchResult(val dialogId: Long, val msgId: Int, val text: String, val date: Int, val isEdit: Boolean, val mediaPath: String? = null, val message: TLRPC.Message? = null)
 
     data class DeletedMessage(val msgId: Int, val text: String, val date: Int, val mediaPath: String? = null, val fromId: Long = 0L, val message: TLRPC.Message? = null)
 
-    fun deletedMessagesInDialog(db: SQLiteDatabase, dialogId: Long, limit: Int = 300): List<DeletedMessage> {
+    fun deletedMessagesInDialog(db: SQLiteDatabase, dialogId: Long, limit: Int = 300, offset: Int = 0): List<DeletedMessage> {
         val list = ArrayList<DeletedMessage>()
         val cursor = db.queryFinalized(
-            "SELECT msg_id, text, date, media_path, from_id, message FROM inu_deleted_messages WHERE dialog_id = ? ORDER BY date DESC LIMIT ?",
-            dialogId, limit,
+            "SELECT msg_id, text, date, media_path, from_id, message FROM inu_deleted_messages WHERE dialog_id = ? ORDER BY date DESC, msg_id DESC LIMIT ? OFFSET ?",
+            dialogId, limit, offset,
         )
         try {
             while (cursor.next()) {
@@ -650,11 +708,11 @@ object InuDatabaseHelper {
         return list
     }
 
-    fun deletedByAuthorInDialog(db: SQLiteDatabase, fromId: Long, dialogId: Long, limit: Int = 300): List<MessageSearchResult> {
+    fun deletedByAuthorInDialog(db: SQLiteDatabase, fromId: Long, dialogId: Long, limit: Int = 300, offset: Int = 0): List<MessageSearchResult> {
         val list = ArrayList<MessageSearchResult>()
         val cursor = db.queryFinalized(
-            "SELECT dialog_id, msg_id, text, date, media_path, message FROM inu_deleted_messages WHERE from_id = ? AND dialog_id = ? ORDER BY date DESC LIMIT ?",
-            fromId, dialogId, limit,
+            "SELECT dialog_id, msg_id, text, date, media_path, message FROM inu_deleted_messages WHERE from_id = ? AND dialog_id = ? ORDER BY date DESC, msg_id DESC LIMIT ? OFFSET ?",
+            fromId, dialogId, limit, offset,
         )
         try {
             while (cursor.next()) {
@@ -778,12 +836,15 @@ object InuDatabaseHelper {
         }
     }
 
-    fun loadEditHistory(db: SQLiteDatabase, dialogId: Long, msgId: Int): List<EditHistoryRow> {
+    fun lastEditHistory(db: SQLiteDatabase, dialogId: Long, msgId: Int): EditHistoryRow? =
+        readEditHistory(db, "SELECT date, text, media_path, entities, media, rowid FROM inu_edit_history WHERE dialog_id = ? AND msg_id = ? ORDER BY date DESC, rowid DESC LIMIT 1", dialogId, msgId).firstOrNull()
+
+    fun loadEditHistory(db: SQLiteDatabase, dialogId: Long, msgId: Int): List<EditHistoryRow> =
+        readEditHistory(db, "SELECT date, text, media_path, entities, media, rowid FROM inu_edit_history WHERE dialog_id = ? AND msg_id = ? ORDER BY date ASC, rowid ASC", dialogId, msgId)
+
+    private fun readEditHistory(db: SQLiteDatabase, sql: String, dialogId: Long, msgId: Int): List<EditHistoryRow> {
         val list = ArrayList<EditHistoryRow>()
-        val cursor = db.queryFinalized(
-            "SELECT date, text, media_path, entities, media, id FROM inu_edit_history WHERE dialog_id = ? AND msg_id = ? ORDER BY date ASC, id ASC",
-            dialogId, msgId,
-        )
+        val cursor = db.queryFinalized(sql, dialogId, msgId)
         try {
             while (cursor.next()) {
                 val date = cursor.longValue(0)
@@ -863,8 +924,9 @@ object InuDatabaseHelper {
         return ids
     }
 
-    fun pruneDeletedMessages(db: SQLiteDatabase, cutoffUnixSec: Long): Int {
+    fun pruneDeletedMessages(db: SQLiteDatabase, cutoffUnixSec: Long): Map<Long, List<Int>> {
         val expiredIds = expiredDeletedMessageIds(db, cutoffUnixSec)
+        if (expiredIds.isEmpty()) return expiredIds
         val mediaPaths = getMediaPaths(db, "inu_deleted_messages", "date > 0 AND date < ?", cutoffUnixSec)
         for ((dialogId, mids) in expiredIds) {
             deleteSavedMessages(db, dialogId, mids)
@@ -877,10 +939,13 @@ object InuDatabaseHelper {
                 it.dispose()
             }
         deleteUnreferencedMediaFiles(db, mediaPaths)
-        return expiredIds.values.sumOf { it.size }
+        return expiredIds
     }
 
-    fun pruneEditHistory(db: SQLiteDatabase, cutoffUnixSec: Long) {
+    fun pruneEditHistory(db: SQLiteDatabase, cutoffUnixSec: Long): Int {
+        val countCursor = db.queryFinalized("SELECT COUNT(*) FROM inu_edit_history WHERE archived_at > 0 AND archived_at < ?", cutoffUnixSec)
+        val count = try { if (countCursor.next()) countCursor.intValue(0) else 0 } finally { countCursor.dispose() }
+        if (count == 0) return 0
         val mediaPaths = getMediaPaths(db, "inu_edit_history", "archived_at > 0 AND archived_at < ?", cutoffUnixSec)
         db.executeFast("DELETE FROM inu_edit_history WHERE archived_at > 0 AND archived_at < ?")
             .also {
@@ -889,6 +954,7 @@ object InuDatabaseHelper {
                 it.dispose()
             }
         deleteUnreferencedMediaFiles(db, mediaPaths)
+        return count
     }
 
     data class DialogCacheStat(

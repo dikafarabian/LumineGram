@@ -123,7 +123,7 @@ object InuHooks {
         desu.inugram.helpers.security.PresenceHelper.load(account)
         desu.inugram.helpers.security.GhostHelper.syncPresence(account)
         desu.inugram.helpers.badges.BadgeRegistry.init(account)
-        desu.inugram.helpers.chat.SavedMessagesHelper.pruneIfNeeded(account)
+        desu.inugram.helpers.chat.SavedMessagesHelper.schedulePrune(account)
         desu.inugram.helpers.security.PresenceHelper.pruneIfNeeded(account)
         AndroidUtilities.runOnUIThread {
             val nc = NotificationCenter.getInstance(account)
@@ -205,6 +205,7 @@ object InuHooks {
     @JvmStatic
     fun onAuthSuccess(account: Int) {
         PasscodeHelper.removeForAccount(account)
+        desu.inugram.helpers.accounts.BotAccountHelper.ensurePolling()
     }
 
     @JvmStatic
@@ -216,6 +217,7 @@ object InuHooks {
         val bg = Theme.getColor(Theme.key_windowBackgroundWhite)
         launchActivity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bg))
         CrashReporter.maybeShowReportSheet(launchActivity)
+        desu.inugram.helpers.accounts.BotAccountHelper.ensurePolling()
         desu.inugram.helpers.LogsHelper.trimIfNeeded()
         ProxyVpnHelper.reconcile()
         DrawerHelper.refreshUpdateState()

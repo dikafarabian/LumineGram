@@ -538,6 +538,9 @@ object InuConfig {
     val DIALOGS_FAB_OFFSET_FOR_BOTTOM_BAR = BoolItem("dialogs_fab_offset_for_bottom_bar", true)
 
     @JvmField
+    val HIDE_DIALOG_PREVIEW = BoolItem("hide_dialog_preview", false)
+
+    @JvmField
     val DIALOGS_FAB_LEFT_SIDE = BoolItem("dialogs_fab_left_side", false)
 
     @JvmField
@@ -650,6 +653,9 @@ object InuConfig {
 
     @JvmField
     val CHAT_SNOWFLAKES = BoolItem("chat_snowflakes", false)
+
+    @JvmField
+    val ACTION_BAR_SNOWFLAKES = BoolItem("action_bar_snowflakes", true)
 
     @JvmField
     val LOGS_REDACT = BoolItem("logs_redact", true)
@@ -1029,6 +1035,9 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     @JvmField
     val PRESENCE_COLOR_DOTS = BoolItem("presence_color_dots", false)
 
+    @JvmField
+    val CHAT_PRESENCE_DOTS = BoolItem("chat_presence_dots", false)
+
     class CommunityDisplayModeItem : IntItem("community_display_mode", REGULAR) {
         companion object {
             const val REGULAR = 1
@@ -1111,6 +1120,15 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val CONFIRM_REACTION_NON_MEMBER = BoolItem("confirm_reaction_non_member", false)
+
+    @JvmField
+    val HIDE_REACTIONS_DISPLAY = BoolItem("hide_reactions_display", false)
+
+    @JvmField
+    val HIDE_REACTIONS_SET = BoolItem("hide_reactions_set", false)
+
+    @JvmField
+    val HIDE_REACTIONS_BADGES = BoolItem("hide_reactions_badges", false)
 
     @JvmField
     val HIDE_CALL_ACTION_BUTTON = BoolItem("hide_call_action_button", true)
@@ -1633,6 +1651,9 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
 
     @JvmField
     val SHOW_EDIT_HISTORY_DIFF = BoolItem("show_edit_history_diff", false)
+
+    @JvmField
+    val EDIT_HISTORY_COMPACT = BoolItem("edit_history_compact", false)
 
     @JvmField
     val SHOW_MUTUAL_CONTACT_ICON = BoolItem("show_mutual_contact_icon", true)

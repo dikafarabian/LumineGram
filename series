@@ -239,7 +239,6 @@ bugfix/reaction-animation-alignment.patch
 bugfix/dialog-preview-code-color.patch
 bugfix/recyclerview-null-holder.patch
 bugfix/sticky-date-jump.patch
-bugfix/attach-preview-caption-reorder.patch
 feature/md3-profile-actions.patch
 bugfix/message-cache-fallback.patch
 bugfix/sections-adapter-first-diff.patch
@@ -533,3 +532,12 @@ lumine/premium/force-wallet.patch
 lumine/chat/chat-snowflakes.patch
 lumine/privacy/log-redaction.patch
 lumine/tabs/folders-bottom-glass.patch
+lumine/chat/local-pins-order.patch
+lumine/chat/hide-reactions.patch
+lumine/media/sticker-pack-zip.patch
+lumine/media/send-as-sticker.patch
+lumine/ui/chat-presence-dots.patch
+lumine/accounts/bot-account-updates.patch
+lumine/ui/hide-dialog-preview.patch
+lumine/chat/attach-preview-caption-reorder.patch
+lumine/ui/light-status-bar-insets.patch

@@ -44,52 +44,141 @@ object SavedMessagesHelper {
         return dir
     }
 
-    fun migrateSavedMedia(account: Int, db: org.telegram.SQLite.SQLiteDatabase) {
-        try {
-            val legacyRoot = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "luminegram/media").canonicalFile
-            val targetRoot = getSavedMediaDir(account)
-            val paths = ArrayList<String>()
-            val cursor = db.queryFinalized("SELECT media_path FROM inu_deleted_messages WHERE media_path IS NOT NULL UNION SELECT media_path FROM inu_edit_history WHERE media_path IS NOT NULL")
-            try {
-                while (cursor.next()) cursor.stringValue(0)?.let(paths::add)
-            } finally {
-                cursor.dispose()
+    private const val AUTO_COPY_MAX_BYTES = 50L * 1024 * 1024
+    private const val STARTUP_DELAY_MS = 20_000L
+
+    // lumine: file copies run here so storageQueue only sees short database writes
+    private val mediaQueue by lazy { org.telegram.messenger.DispatchQueue("inuArchiveMedia") }
+    private val pendingCopies = HashSet<String>()
+    private val migratedAccounts = HashSet<Int>()
+
+    private fun scheduleMediaMigration(account: Int) {
+        synchronized(migratedAccounts) { if (!migratedAccounts.add(account)) return }
+        mediaQueue.postRunnable({
+            val legacyRoot = try {
+                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "luminegram/media").canonicalFile
+            } catch (e: Throwable) {
+                null
             }
-            for (path in paths) {
+            if (legacyRoot == null || !legacyRoot.isDirectory) return@postRunnable
+            val storage = MessagesStorage.getInstance(account)
+            storage.storageQueue.postRunnable {
+                val paths = ArrayList<String>()
                 try {
-                    val source = File(path).canonicalFile
-                    if (!source.path.startsWith(legacyRoot.path + File.separator) || !source.isFile || source.length() <= 0) continue
-                    val relative = source.relativeTo(legacyRoot)
-                    if (relative.parent != null && relative.parent != targetRoot.name) continue
-                    val target = File(targetRoot, "${java.util.UUID.randomUUID()}_${source.name}")
-                    val copiedPath = runMediaCopy(PendingMediaCopy(source, target)) ?: continue
-                    InuDatabaseHelper.replaceSavedMediaPath(db, path, copiedPath)
+                    val db = storage.database ?: return@postRunnable
+                    val pattern = "%/${Environment.DIRECTORY_DOWNLOADS}/luminegram/media/%"
+                    val cursor = db.queryFinalized("SELECT media_path FROM inu_deleted_messages WHERE media_path LIKE ? UNION SELECT media_path FROM inu_edit_history WHERE media_path LIKE ?", pattern, pattern)
+                    try {
+                        while (cursor.next()) cursor.stringValue(0)?.let(paths::add)
+                    } finally {
+                        cursor.dispose()
+                    }
                 } catch (e: Throwable) {
-                    android.util.Log.d(TAG, "archive media migration failed", e)
+                    android.util.Log.d(TAG, "archive media migration query failed", e)
                 }
+                if (paths.isNotEmpty()) mediaQueue.postRunnable { migrateSavedMedia(account, legacyRoot, paths) }
             }
-        } catch (e: Throwable) {
-            android.util.Log.d(TAG, "archive media migration unavailable", e)
-        }
+        }, STARTUP_DELAY_MS)
     }
 
-    // lumine: resolve archive paths on main thread but defer heavy media copies to storage queue
+    private fun migrateSavedMedia(account: Int, legacyRoot: File, paths: List<String>) {
+        val started = android.os.SystemClock.elapsedRealtime()
+        val targetRoot = getSavedMediaDir(account)
+        val storage = MessagesStorage.getInstance(account)
+        var moved = 0
+        for (path in paths) {
+            try {
+                val source = File(path).canonicalFile
+                if (!source.path.startsWith(legacyRoot.path + File.separator) || !source.isFile || source.length() <= 0) continue
+                val relative = source.relativeTo(legacyRoot)
+                if (relative.parent != null && relative.parent != targetRoot.name) continue
+                val copiedPath = runMediaCopy(PendingMediaCopy(source, File(targetRoot, "${java.util.UUID.randomUUID()}_${source.name}"))) ?: continue
+                moved++
+                storage.storageQueue.postRunnable {
+                    try {
+                        storage.database?.let { InuDatabaseHelper.replaceSavedMediaPath(it, path, copiedPath) }
+                    } catch (e: Throwable) {
+                        File(copiedPath).delete()
+                        android.util.Log.d(TAG, "archive media migration update failed", e)
+                    }
+                }
+            } catch (e: Throwable) {
+                android.util.Log.d(TAG, "archive media migration failed", e)
+            }
+        }
+        android.util.Log.d(TAG, "archive media migration: $moved of ${paths.size} files in ${android.os.SystemClock.elapsedRealtime() - started} ms")
+    }
+
     private data class PendingMediaCopy(val source: File, val target: File, val expectedSize: Long = 0L)
 
-    private fun planMediaCopy(account: Int, message: TLRPC.Message?): PendingMediaCopy? {
+    private fun planMediaCopy(account: Int, message: TLRPC.Message?, maxBytes: Long = AUTO_COPY_MAX_BYTES): PendingMediaCopy? {
         if (message?.media == null) return null
         return try {
             val fileLoader = FileLoader.getInstance(account) ?: return null
             val expectedSize = MessageObject.getMedia(message)?.document?.size ?: 0L
+            if (maxBytes > 0 && expectedSize > maxBytes) return null
             val path = sequenceOf(
                 message.attachPath?.takeIf { it.isNotBlank() }?.let { File(it) },
                 fileLoader.getPathToMessage(message),
                 fileLoader.getPathToMessage(message, true, true),
             ).filterNotNull().firstOrNull { it.isFile && it.length() > 0 && (expectedSize <= 0 || it.length() == expectedSize) && !it.name.endsWith(".enc") } ?: return null
+            if (maxBytes > 0 && path.length() > maxBytes) return null
             PendingMediaCopy(path, File(getSavedMediaDir(account), "${MessageObject.getDialogId(message)}_${message.id}_${java.util.UUID.randomUUID()}_${path.name}"), expectedSize)
         } catch (e: Throwable) {
             android.util.Log.e(TAG, "planMediaCopy error", e)
             null
+        }
+    }
+
+    private fun copyThenStore(account: Int, key: String, plan: PendingMediaCopy, store: (org.telegram.SQLite.SQLiteDatabase, String) -> Boolean) {
+        synchronized(pendingCopies) { if (!pendingCopies.add(key)) return }
+        mediaQueue.postRunnable {
+            val started = android.os.SystemClock.elapsedRealtime()
+            val copied = runMediaCopy(plan)
+            android.util.Log.d(TAG, "archive copy ${plan.source.length()} bytes in ${android.os.SystemClock.elapsedRealtime() - started} ms")
+            if (copied == null) {
+                synchronized(pendingCopies) { pendingCopies.remove(key) }
+                return@postRunnable
+            }
+            val storage = MessagesStorage.getInstance(account)
+            storage.storageQueue.postRunnable {
+                val kept = try {
+                    storage.database?.let { store(it, copied) } == true
+                } catch (e: Throwable) {
+                    android.util.Log.d(TAG, "archive copy store failed", e)
+                    false
+                }
+                if (!kept) File(copied).delete()
+                synchronized(pendingCopies) { pendingCopies.remove(key) }
+            }
+        }
+    }
+
+    private fun updateMediaPath(db: org.telegram.SQLite.SQLiteDatabase, table: String, where: String, path: String): Boolean {
+        val free = "($where) AND (media_path IS NULL OR media_path = '')"
+        val cursor = db.queryFinalized("SELECT 1 FROM $table WHERE $free")
+        val exists = try { cursor.next() } finally { cursor.dispose() }
+        if (!exists) return false
+        val query = db.executeFast("UPDATE $table SET media_path = ? WHERE $free")
+        try {
+            query.bindString(1, path)
+            query.step()
+        } finally {
+            query.dispose()
+        }
+        return true
+    }
+
+    private fun latestEditRowId(db: org.telegram.SQLite.SQLiteDatabase, dialogId: Long, msgId: Int, date: Int): Long {
+        val cursor = db.queryFinalized("SELECT MAX(rowid) FROM inu_edit_history WHERE dialog_id = $dialogId AND msg_id = $msgId AND date = $date")
+        return try { if (cursor.next()) cursor.longValue(0) else 0L } finally { cursor.dispose() }
+    }
+
+    private fun rememberDeletedMediaPath(account: Int, dialogId: Long, msgId: Int, path: String) {
+        synchronized(cacheLock) {
+            val paths = deletedMessageMediaPaths.get(account.toLong()) ?: LongSparseArray<LongSparseArray<String>>().also { deletedMessageMediaPaths.put(account.toLong(), it) }
+            val dialogPaths = paths.get(dialogId) ?: LongSparseArray<String>().also { paths.put(dialogId, it) }
+            dialogPaths.put(msgId.toLong(), path)
         }
     }
 
@@ -144,34 +233,51 @@ object SavedMessagesHelper {
                 callback(null)
                 return
             }
-            val storage = MessagesStorage.getInstance(account)
-            storage.storageQueue.postRunnable {
-                var saved: String? = null
-                try {
-                    val db = storage.database
-                    val table = if (deleted) "inu_deleted_messages" else "inu_edit_history"
-                    val where = if (deleted) "dialog_id = ${MessageObject.getDialogId(message)} AND msg_id = ${message.id}" else "id = $rowId AND dialog_id = ${MessageObject.getDialogId(message)} AND msg_id = ${message.id}"
-                    val cursor = db.queryFinalized("SELECT 1 FROM $table WHERE $where")
-                    val exists = try { cursor.next() } finally { cursor.dispose() }
-                    if (exists) {
-                        saved = runMediaCopy(planMediaCopy(account, message))
-                        if (saved != null) {
-                            val query = db.executeFast("UPDATE $table SET media_path = ? WHERE $where")
-                            try {
-                                query.bindString(1, saved)
-                                query.step()
-                            } finally { query.dispose() }
-                            invalidateMediaCache(account)
-                        }
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.d(TAG, "archive download save failed", e)
-                    saved = null
-                }
+            fun deliver(path: String?) {
                 AndroidUtilities.runOnUIThread {
                     if (active) {
                         active = false
-                        callback(saved)
+                        callback(path)
+                    }
+                }
+            }
+            val dialogId = MessageObject.getDialogId(message)
+            val table = if (deleted) "inu_deleted_messages" else "inu_edit_history"
+            val where = if (deleted) "dialog_id = $dialogId AND msg_id = ${message.id}" else "rowid = $rowId AND dialog_id = $dialogId AND msg_id = ${message.id}"
+            val storage = MessagesStorage.getInstance(account)
+            mediaQueue.postRunnable {
+                val plan = planMediaCopy(account, message, 0L)
+                if (plan == null) {
+                    deliver(null)
+                    return@postRunnable
+                }
+                val copied = runMediaCopy(plan)
+                if (copied == null) {
+                    deliver(plan.source.absolutePath)
+                    return@postRunnable
+                }
+                storage.storageQueue.postRunnable {
+                    var stored = false
+                    try {
+                        val query = storage.database.executeFast("UPDATE $table SET media_path = ? WHERE $where")
+                        try {
+                            query.bindString(1, copied)
+                            query.step()
+                        } finally {
+                            query.dispose()
+                        }
+                        val cursor = storage.database.queryFinalized("SELECT 1 FROM $table WHERE $where AND media_path = ?", copied)
+                        stored = try { cursor.next() } finally { cursor.dispose() }
+                    } catch (e: Exception) {
+                        android.util.Log.d(TAG, "archive download save failed", e)
+                    }
+                    if (stored) {
+                        if (deleted) rememberDeletedMediaPath(account, dialogId, message.id, copied)
+                        else synchronized(cacheLock) { editHistoryCache.get(account.toLong())?.get(dialogId)?.remove(message.id.toLong()) }
+                        deliver(copied)
+                    } else {
+                        File(copied).delete()
+                        deliver(plan.source.absolutePath)
                     }
                 }
             }
@@ -185,7 +291,7 @@ object SavedMessagesHelper {
         center.addObserver(observer, NotificationCenter.fileLoaded)
         center.addObserver(observer, NotificationCenter.fileLoadFailed)
         AndroidUtilities.runOnUIThread(timeout, 120_000)
-        if (planMediaCopy(account, message) != null) {
+        if (planMediaCopy(account, message, 0L) != null) {
             finish(true)
         } else if (document != null) {
             loader.loadFile(document, message, FileLoader.PRIORITY_NORMAL, 1)
@@ -236,6 +342,7 @@ object SavedMessagesHelper {
         val date: Int,
         val entities: ArrayList<TLRPC.MessageEntity>? = null,
         val media: TLRPC.MessageMedia? = null,
+        val editDate: Int = 0,
     )
 
     private val shadowMessageCache = LongSparseArray<LinkedHashMap<Pair<Long, Int>, ShadowEntry>>()
@@ -288,86 +395,84 @@ object SavedMessagesHelper {
         return true
     }
 
+    private const val LOAD_PAGE_ROWS = 2000
+    private const val LOAD_RETRY_MS = 60_000L
+    private val loadFailedAt = HashMap<Int, Long>()
+
+    private class ArchiveIndex(val generation: Long) {
+        val deleted = LongSparseArray<HashSet<Int>>()
+        val dates = LongSparseArray<LongSparseArray<Long>>()
+        val media = LongSparseArray<LongSparseArray<String>>()
+        val edits = LongSparseArray<HashSet<Int>>()
+        var lastDeletedRow = 0L
+        var lastEditRow = 0L
+        var deletedDone = false
+        var rows = 0
+        var busyMs = 0L
+    }
+
     @JvmStatic
     fun ensureAccountLoaded(account: Int) {
-        synchronized(cacheLock) {
+        val generation = synchronized(cacheLock) {
             if (loadedAccounts.contains(account) || loadingAccounts.contains(account)) return
+            val failed = loadFailedAt[account]
+            if (failed != null && android.os.SystemClock.elapsedRealtime() - failed < LOAD_RETRY_MS) return
             loadingAccounts.add(account)
+            cacheGeneration[account] ?: 0L
         }
         val storage = MessagesStorage.getInstance(account)
         if (storage == null) {
             synchronized(cacheLock) { loadingAccounts.remove(account) }
             return
         }
-        storage.storageQueue.postRunnable {
-            val asyncDb = storage.database
-            if (asyncDb == null) {
-                synchronized(cacheLock) { loadingAccounts.remove(account) }
-                return@postRunnable
+        val index = ArchiveIndex(generation)
+        storage.storageQueue.postRunnable { loadIndexPage(account, storage, index) }
+    }
+
+    // lumine: one page per runnable so dialog and message loads can run between pages
+    private fun loadIndexPage(account: Int, storage: MessagesStorage, index: ArchiveIndex) {
+        if (synchronized(cacheLock) { (cacheGeneration[account] ?: 0L) != index.generation }) return
+        val started = android.os.SystemClock.elapsedRealtime()
+        try {
+            val db = storage.database ?: throw IllegalStateException("database closed")
+            val finished: Boolean
+            if (!index.deletedDone) {
+                val count = InuDatabaseHelper.readDeletedIndexPage(db, index.lastDeletedRow, LOAD_PAGE_ROWS) { rowId, dialogId, msgId, date, mediaPath ->
+                    index.lastDeletedRow = rowId
+                    (index.deleted.get(dialogId) ?: HashSet<Int>().also { index.deleted.put(dialogId, it) }).add(msgId)
+                    if (date > 0) (index.dates.get(dialogId) ?: LongSparseArray<Long>().also { index.dates.put(dialogId, it) }).put(msgId.toLong(), date)
+                    if (mediaPath != null) (index.media.get(dialogId) ?: LongSparseArray<String>().also { index.media.put(dialogId, it) }).put(msgId.toLong(), mediaPath)
+                }
+                index.rows += count
+                if (count < LOAD_PAGE_ROWS) index.deletedDone = true
+                finished = false
+            } else {
+                val count = InuDatabaseHelper.readEditIndexPage(db, index.lastEditRow, LOAD_PAGE_ROWS) { rowId, dialogId, msgId ->
+                    index.lastEditRow = rowId
+                    (index.edits.get(dialogId) ?: HashSet<Int>().also { index.edits.put(dialogId, it) }).add(msgId)
+                }
+                index.rows += count
+                finished = count < LOAD_PAGE_ROWS
             }
-            try {
-                loadFromDb(account, asyncDb)
-            } catch (e: Throwable) {
-                synchronized(cacheLock) { loadingAccounts.remove(account) }
-                android.util.Log.e(TAG, "load archive failed", e)
+            index.busyMs += android.os.SystemClock.elapsedRealtime() - started
+            if (finished) finishIndex(account, index) else storage.storageQueue.postRunnable { loadIndexPage(account, storage, index) }
+        } catch (e: Throwable) {
+            synchronized(cacheLock) {
+                loadingAccounts.remove(account)
+                loadFailedAt[account] = android.os.SystemClock.elapsedRealtime()
             }
+            android.util.Log.e(TAG, "load archive failed", e)
         }
     }
 
-    private fun loadFromDb(account: Int, db: org.telegram.SQLite.SQLiteDatabase) {
-        val generation = synchronized(cacheLock) { cacheGeneration[account] ?: 0L }
-        synchronized(cacheLock) {
-            if (loadedAccounts.contains(account)) return
-        }
-
-        migrateSavedMedia(account, db)
-        val ttlDays = InuConfig.DELETED_MESSAGES_TTL.value
-        if (ttlDays > 0) {
-            val cutoff = System.currentTimeMillis() / 1000L - ttlDays * 86400L
-            val expired = InuDatabaseHelper.expiredDeletedMessageIds(db, cutoff)
-            InuDatabaseHelper.pruneDeletedMessages(db, cutoff)
-            for ((dialogId, mids) in expired) {
-                MessagesStorage.getInstance(account).updateDialogsWithDeletedMessages(dialogId, getChannelId(account, dialogId), ArrayList(mids), null)
-            }
-            InuDatabaseHelper.pruneEditHistory(db, cutoff)
-        }
-
-        val deletedArray = LongSparseArray<HashSet<Int>>()
-        val dateArray = LongSparseArray<LongSparseArray<Long>>()
-        InuDatabaseHelper.forEachDeletedMessageInfo(db) { dialogId, msgId, date ->
-            var ids = deletedArray.get(dialogId)
-            if (ids == null) {
-                ids = HashSet()
-                deletedArray.put(dialogId, ids)
-            }
-            ids.add(msgId)
-            if (date > 0) {
-                var dates = dateArray.get(dialogId)
-                if (dates == null) {
-                    dates = LongSparseArray()
-                    dateArray.put(dialogId, dates)
-                }
-                dates.put(msgId.toLong(), date)
-            }
-        }
-        val editArray = LongSparseArray<HashSet<Int>>()
-        InuDatabaseHelper.forEachEditHistoryKey(db) { dialogId, msgId ->
-            var ids = editArray.get(dialogId)
-            if (ids == null) {
-                ids = HashSet()
-                editArray.put(dialogId, ids)
-            }
-            ids.add(msgId)
-        }
-        val mediaPathArray = LongSparseArray<LongSparseArray<String>>()
-        InuDatabaseHelper.forEachDeletedMessageMedia(db) { dialogId, msgId, mediaPath ->
-            var paths = mediaPathArray.get(dialogId)
-            if (paths == null) {
-                paths = LongSparseArray()
-                mediaPathArray.put(dialogId, paths)
-            }
-            paths.put(msgId.toLong(), mediaPath)
-        }
+    private fun finishIndex(account: Int, index: ArchiveIndex) {
+        val generation = index.generation
+        val deletedArray = index.deleted
+        val dateArray = index.dates
+        val editArray = index.edits
+        val mediaPathArray = index.media
+        android.util.Log.d(TAG, "archive index: ${index.rows} rows, ${index.busyMs} ms on storage queue")
+        scheduleMediaMigration(account)
         org.telegram.messenger.AndroidUtilities.runOnUIThread {
             synchronized(cacheLock) {
                 if ((cacheGeneration[account] ?: 0L) != generation) return@runOnUIThread
@@ -435,8 +540,15 @@ object SavedMessagesHelper {
                 }
                 loadedAccounts.add(account)
                 loadingAccounts.remove(account)
+                loadFailedAt.remove(account)
             }
         }
+    }
+
+    @JvmStatic
+    fun schedulePrune(account: Int) {
+        if (InuConfig.DELETED_MESSAGES_TTL.value == 0) return
+        MessagesStorage.getInstance(account)?.storageQueue?.postRunnable({ pruneIfNeeded(account) }, STARTUP_DELAY_MS)
     }
 
     @JvmStatic
@@ -447,12 +559,20 @@ object SavedMessagesHelper {
         val storage = MessagesStorage.getInstance(account) ?: return
         storage.storageQueue.postRunnable {
             val db = storage.database ?: return@postRunnable
-            val expired = InuDatabaseHelper.expiredDeletedMessageIds(db, cutoff)
-            InuDatabaseHelper.pruneDeletedMessages(db, cutoff)
-            for ((dialogId, mids) in expired) {
-                storage.updateDialogsWithDeletedMessages(dialogId, getChannelId(account, dialogId), ArrayList(mids), null)
-            }
-            InuDatabaseHelper.pruneEditHistory(db, cutoff)
+            val started = android.os.SystemClock.elapsedRealtime()
+            val result = try {
+                val pruned = InuDatabaseHelper.pruneDeletedMessages(db, cutoff)
+                for ((dialogId, mids) in pruned) {
+                    storage.updateDialogsWithDeletedMessages(dialogId, getChannelId(account, dialogId), ArrayList(mids), null)
+                }
+                pruned to InuDatabaseHelper.pruneEditHistory(db, cutoff)
+            } catch (e: Throwable) {
+                android.util.Log.e(TAG, "archive prune failed", e)
+                null
+            } ?: return@postRunnable
+            val (expired, editsPruned) = result
+            android.util.Log.d(TAG, "archive prune: ${expired.values.sumOf { it.size }} deleted, $editsPruned edits in ${android.os.SystemClock.elapsedRealtime() - started} ms")
+            if (expired.isEmpty() && editsPruned == 0) return@postRunnable
             org.telegram.messenger.AndroidUtilities.runOnUIThread {
                 synchronized(cacheLock) {
                     cacheGeneration[account] = (cacheGeneration[account] ?: 0L) + 1L
@@ -491,9 +611,18 @@ object SavedMessagesHelper {
 
     @JvmStatic
     fun clearEditHistory(account: Int, onDone: Runnable? = null) {
+        clearEditHistory(account, null, onDone)
+    }
+
+    @JvmStatic
+    fun clearEditHistory(account: Int, dialogIds: Collection<Long>?, onDone: Runnable?) {
         val storage = MessagesStorage.getInstance(account) ?: return
         storage.storageQueue.postRunnable {
-            storage.database?.let { InuDatabaseHelper.clearEditHistory(it) }
+            try {
+                storage.database?.let { InuDatabaseHelper.clearEditHistory(it, dialogIds) }
+            } catch (e: Throwable) {
+                android.util.Log.d(TAG, "clear edit history failed", e)
+            }
             org.telegram.messenger.AndroidUtilities.runOnUIThread {
                 synchronized(cacheLock) {
                     cacheGeneration[account] = (cacheGeneration[account] ?: 0L) + 1L
@@ -527,7 +656,7 @@ object SavedMessagesHelper {
                     val controller = org.telegram.messenger.MessagesController.getInstance(account)
                     for ((dialogId, mids) in pairs) {
                         for (mid in mids) {
-                            controller.dialogMessagesByIds.remove(mid)
+                            if (controller.dialogMessagesByIds.get(mid)?.dialogId == dialogId) controller.dialogMessagesByIds.remove(mid)
                         }
                         val list = controller.dialogMessage.get(dialogId)
                         if (list != null) {
@@ -606,7 +735,7 @@ object SavedMessagesHelper {
                 val controller = MessagesController.getInstance(account)
                 val idSet = msgIds.toHashSet()
                 for (msgId in msgIds) {
-                    controller.dialogMessagesByIds.remove(msgId)
+                    if (controller.dialogMessagesByIds.get(msgId)?.dialogId == dialogId) controller.dialogMessagesByIds.remove(msgId)
                 }
                 val list = controller.dialogMessage.get(dialogId)
                 if (list != null) {
@@ -834,7 +963,7 @@ object SavedMessagesHelper {
         }
     }
 
-    private fun archiveText(text: String?, message: TLRPC.Message?): String {
+    internal fun archiveText(text: String?, message: TLRPC.Message?): String {
         if (!text.isNullOrBlank()) return text
         val media = message?.media ?: return ""
         val res = when (media) {
@@ -901,10 +1030,17 @@ object SavedMessagesHelper {
 
     @JvmStatic
     @JvmOverloads
-    fun markMessageDeleted(account: Int, dialogId: Long, msgIdIn: Int, fromId: Long, textIn: String?, date: Int, message: TLRPC.Message? = null, forceSave: Boolean = false) {
-        var dialogId = dialogId
-        var text = textIn
+    fun markMessageDeleted(account: Int, dialogIdIn: Long, msgIdIn: Int, fromIdIn: Long, textIn: String?, date: Int, messageIn: TLRPC.Message? = null, forceSave: Boolean = false) {
+        var dialogId = dialogIdIn
+        // lumine: dialogMessagesByIds is keyed by mid only, so a channel delete can hand over another chat's message
+        val foreign = messageIn != null && dialogIdIn != 0L && MessageObject.getDialogId(messageIn) != dialogIdIn
+        val message = if (foreign) null else messageIn
+        var text = if (foreign) null else textIn
+        var fromId = if (foreign) 0L else fromIdIn
         val msgId = msgIdIn
+        if (fromId == 0L && message != null && !message.out && message.from_id == null && org.telegram.messenger.DialogObject.isUserDialog(dialogIdIn)) {
+            fromId = dialogIdIn
+        }
         // lumine: private deletes arrive without a dialog id, recover it from the shadow cache
         if (dialogId == 0L && message == null && msgId > 0) {
             findShadowDialog(account, msgId)?.let { dialogId = it }
@@ -954,19 +1090,22 @@ object SavedMessagesHelper {
                 dateDialog = LongSparseArray()
                 dateAcc.put(dialogId, dateDialog)
             }
-            dateDialog.put(msgId.toLong(), deletionTime)
-
+            if (dateDialog.get(msgId.toLong()) == null) dateDialog.put(msgId.toLong(), deletionTime)
         }
 
         val storage = MessagesStorage.getInstance(account) ?: return
         val persist = Runnable {
             val db = storage.database ?: return@Runnable
-            val savedPath = runMediaCopy(mediaCopy)
+            val savedPath = InuDatabaseHelper.deletedMessageMediaPath(db, dialogId, msgId)?.takeIf { File(it).isFile }
             InuDatabaseHelper.saveDeletedMessage(db, dialogId, msgId, fromId, archiveText(text, message ?: snapshot), deletionTime.toInt(), savedPath, snapshot)
-            if (savedPath != null) synchronized(cacheLock) {
-                val paths = deletedMessageMediaPaths.get(account.toLong()) ?: LongSparseArray<LongSparseArray<String>>().also { deletedMessageMediaPaths.put(account.toLong(), it) }
-                val dialogPaths = paths.get(dialogId) ?: LongSparseArray<String>().also { paths.put(dialogId, it) }
-                dialogPaths.put(msgId.toLong(), savedPath)
+            if (savedPath != null) {
+                rememberDeletedMediaPath(account, dialogId, msgId, savedPath)
+            } else if (mediaCopy != null) {
+                copyThenStore(account, "d:$account:$dialogId:$msgId", mediaCopy) { copyDb, copied ->
+                    val stored = updateMediaPath(copyDb, "inu_deleted_messages", "dialog_id = $dialogId AND msg_id = $msgId", copied)
+                    if (stored) rememberDeletedMediaPath(account, dialogId, msgId, copied)
+                    stored
+                }
             }
         }
         if (Thread.currentThread() === storage.storageQueue) persist.run() else storage.storageQueue.postRunnable(persist)
@@ -990,6 +1129,57 @@ object SavedMessagesHelper {
         return true
     }
 
+    @JvmStatic
+    fun replyIdsToClear(account: Int, messagesByDialogs: LongSparseArray<ArrayList<Int>>?, mids: List<Int>?, ids: String): String {
+        if (mids.isNullOrEmpty() || messagesByDialogs == null || !isSaveDeletedEnabled()) return ids
+        val kept = HashSet<Int>()
+        for (i in 0 until messagesByDialogs.size()) {
+            val dialogId = messagesByDialogs.keyAt(i)
+            messagesByDialogs.valueAt(i)?.forEach {
+                if (isMessageDeleted(account, dialogId, it) && !isPermanentDeleteRequested(account, dialogId, it)) kept.add(it)
+            }
+        }
+        return if (kept.isEmpty()) ids else mids.filter { it !in kept }.joinToString(",")
+    }
+
+    @JvmStatic
+    fun dropStaleDeletedReply(account: Int, message: TLRPC.Message?) {
+        if (message == null || message.replyMessage !is TLRPC.TL_messageEmpty || !isSaveDeletedEnabled()) return
+        val replyId = message.reply_to?.reply_to_msg_id ?: return
+        if (replyId == 0) return
+        val db = MessagesStorage.getInstance(account).database ?: return
+        try {
+            if (InuDatabaseHelper.isDeletedMessageArchived(db, MessageObject.getReplyToDialogId(message), replyId)) message.replyMessage = null
+        } catch (e: Throwable) {
+            android.util.Log.d(TAG, "stale reply check failed", e)
+        }
+    }
+
+    @JvmStatic
+    fun fillArchivedReplies(
+        account: Int,
+        db: org.telegram.SQLite.SQLiteDatabase?,
+        dialogId: Long,
+        ids: List<Int>?,
+        owners: SparseArray<ArrayList<TLRPC.Message>>?,
+        usersToLoad: ArrayList<Long>?,
+        chatsToLoad: ArrayList<Long>?,
+    ) {
+        if (!isSaveDeletedEnabled() || db == null || ids.isNullOrEmpty() || owners == null) return
+        val missing = ids.filter { id -> owners.get(id)?.any { it.replyMessage == null } == true }
+        if (missing.isEmpty()) return
+        try {
+            for ((id, message) in InuDatabaseHelper.archivedMessages(db, dialogId, missing)) {
+                message.id = id
+                message.dialog_id = dialogId
+                MessagesStorage.addUsersAndChatsFromMessage(message, usersToLoad, chatsToLoad, null)
+                owners.get(id)?.forEach { if (it.replyMessage == null) it.replyMessage = message }
+            }
+        } catch (e: Throwable) {
+            android.util.Log.d(TAG, "archived reply lookup failed", e)
+        }
+    }
+
     // lumine: record deletions with dialog ids resolved by MessagesStorage from messages_v2
     @JvmStatic
     fun markMessagesDeletedFromStorage(
@@ -1004,15 +1194,26 @@ object SavedMessagesHelper {
             m.dialog_id = dialogId
             byId[dialogId to m.id] = m
         }
-        for (i in 0 until messagesByDialogs.size()) {
-            val dialogId = messagesByDialogs.keyAt(i)
-            val mids = messagesByDialogs.valueAt(i) ?: continue
-            for (mid in mids) {
-                val message = byId[dialogId to mid]
-                val fromId = message?.from_id?.let { org.telegram.messenger.DialogObject.getPeerDialogId(it) } ?: 0L
-                markMessageDeleted(account, dialogId, mid, fromId, message?.message ?: "", 0, message)
+        var total = 0
+        for (i in 0 until messagesByDialogs.size()) total += messagesByDialogs.valueAt(i)?.size ?: 0
+        val db = if (total > 1) MessagesStorage.getInstance(account).database else null
+        val started = android.os.SystemClock.elapsedRealtime()
+        // lumine: one savepoint instead of an autocommit per archived row; nests safely inside stock transactions
+        db?.executeFast("SAVEPOINT inu_archive_batch")?.stepThis()?.dispose()
+        try {
+            for (i in 0 until messagesByDialogs.size()) {
+                val dialogId = messagesByDialogs.keyAt(i)
+                val mids = messagesByDialogs.valueAt(i) ?: continue
+                for (mid in mids) {
+                    val message = byId[dialogId to mid]
+                    val fromId = message?.from_id?.let { org.telegram.messenger.DialogObject.getPeerDialogId(it) } ?: 0L
+                    markMessageDeleted(account, dialogId, mid, fromId, message?.message ?: "", 0, message)
+                }
             }
+        } finally {
+            db?.executeFast("RELEASE SAVEPOINT inu_archive_batch")?.stepThis()?.dispose()
         }
+        if (total > 50) android.util.Log.d(TAG, "archived $total deletions in ${android.os.SystemClock.elapsedRealtime() - started} ms")
     }
 
     @JvmStatic
@@ -1155,17 +1356,28 @@ object SavedMessagesHelper {
         val storage = MessagesStorage.getInstance(account) ?: return
         storage.storageQueue.postRunnable {
             val db = storage.database ?: return@postRunnable
-            val last = InuDatabaseHelper.loadEditHistory(db, dialogId, msgId).lastOrNull()
-            if (last != null && last.text == oldText && sameContent(last.entities, last.media, keptEntities, keptMedia)) {
+            try {
+                val last = InuDatabaseHelper.lastEditHistory(db, dialogId, msgId)
+                if (last != null && last.text == oldText && sameContent(last.entities, last.media, keptEntities, keptMedia)) {
+                    synchronized(cacheLock) {
+                        editHistoryCache.get(account.toLong())?.get(dialogId)?.remove(msgId.toLong())
+                    }
+                    return@postRunnable
+                }
+                InuDatabaseHelper.saveEditHistory(db, dialogId, msgId, oldText, now.toInt(), null, keptEntities, keptMedia)
                 synchronized(cacheLock) {
                     editHistoryCache.get(account.toLong())?.get(dialogId)?.remove(msgId.toLong())
                 }
-                return@postRunnable
-            }
-            val savedPath = runMediaCopy(mediaCopy)
-            InuDatabaseHelper.saveEditHistory(db, dialogId, msgId, oldText, now.toInt(), savedPath, keptEntities, keptMedia)
-            synchronized(cacheLock) {
-                editHistoryCache.get(account.toLong())?.get(dialogId)?.remove(msgId.toLong())
+                if (mediaCopy != null) {
+                    val rowId = latestEditRowId(db, dialogId, msgId, now.toInt())
+                    if (rowId > 0) copyThenStore(account, "e:$account:$rowId", mediaCopy) { copyDb, copied ->
+                        val stored = updateMediaPath(copyDb, "inu_edit_history", "rowid = $rowId", copied)
+                        if (stored) synchronized(cacheLock) { editHistoryCache.get(account.toLong())?.get(dialogId)?.remove(msgId.toLong()) }
+                        stored
+                    }
+                }
+            } catch (e: Throwable) {
+                android.util.Log.d(TAG, "edit history save failed", e)
             }
         }
     }
@@ -1177,18 +1389,24 @@ object SavedMessagesHelper {
 
     @JvmStatic
     fun rememberMessage(account: Int, dialogId: Long, msgId: Int, text: String?, hasMedia: Boolean, date: Int, entities: ArrayList<TLRPC.MessageEntity>?, media: TLRPC.MessageMedia?) {
+        rememberShadow(account, dialogId, msgId, text, hasMedia, date, entities, media, 0)
+    }
+
+    private fun rememberShadow(account: Int, dialogId: Long, msgId: Int, text: String?, hasMedia: Boolean, date: Int, entities: ArrayList<TLRPC.MessageEntity>?, media: TLRPC.MessageMedia?, editDate: Int) {
         if (!isSaveEditedEnabled() && !isSaveDeletedEnabled()) return
+        val entry = ShadowEntry(
+            text ?: "",
+            hasMedia,
+            date,
+            if (entities.isNullOrEmpty()) null else ArrayList(entities),
+            InuDatabaseHelper.cloneMedia(media),
+            editDate,
+        )
         synchronized(cacheLock) {
             val map = shadowMessageCache.get(account.toLong())
                 ?: BoundedLinkedHashMap<Pair<Long, Int>, ShadowEntry>(SHADOW_CACHE_MAX_PER_ACCOUNT)
                     .also { shadowMessageCache.put(account.toLong(), it) }
-            map[dialogId to msgId] = ShadowEntry(
-                text ?: "",
-                hasMedia,
-                date,
-                if (entities.isNullOrEmpty()) null else ArrayList(entities),
-                InuDatabaseHelper.cloneMedia(media),
-            )
+            map[dialogId to msgId] = entry
         }
     }
 
@@ -1196,13 +1414,24 @@ object SavedMessagesHelper {
     fun recordEditHistoryFromShadow(account: Int, dialogId: Long, msgId: Int, newMessage: TLRPC.Message) {
         if (!isSaveEditedEnabled()) return
         val old = synchronized(cacheLock) {
-            shadowMessageCache.get(account.toLong())?.remove(dialogId to msgId)
+            shadowMessageCache.get(account.toLong())?.get(dialogId to msgId)
         } ?: return
         val textChanged = old.text != (newMessage.message ?: "")
         val mediaChanged = !sameContent(old.entities, old.media, newMessage.entities, newMessage.media)
         if (textChanged || mediaChanged) {
-            recordEditHistory(account, dialogId, msgId, old.text, old.date, null, old.entities, old.media)
+            recordEditHistory(account, dialogId, msgId, old.text, old.editDate.takeIf { it > 0 } ?: old.date, null, old.entities, old.media)
+            rememberShadow(account, dialogId, msgId, newMessage.message, newMessage.media != null, old.date, newMessage.entities, newMessage.media, newMessage.edit_date)
         }
+    }
+
+    @JvmStatic
+    fun recordOwnEdit(account: Int, obj: MessageObject?, newText: String?, newEntities: ArrayList<TLRPC.MessageEntity>?) {
+        val old = obj?.messageOwner ?: return
+        if (!isSaveEditedEnabled() || old.message.isNullOrEmpty()) return
+        val textChanged = old.message != newText
+        val formatChanged = newEntities != null && !sameContent(old.entities, null, newEntities, null)
+        if (!textChanged && !formatChanged) return
+        recordEditHistory(account, obj.dialogId, obj.id, old.message, if (old.edit_date != 0) old.edit_date else old.date, old)
     }
 
     @JvmStatic
@@ -1248,9 +1477,11 @@ object SavedMessagesHelper {
     @JvmStatic
     fun handleMessageEdited(account: Int, newMessage: TLRPC.Message, cached: MessageObject?) {
         if (!isSaveEditedEnabled()) return
-        val old = cached?.messageOwner
+        val old = cached?.takeIf { it.dialogId == newMessage.dialog_id }?.messageOwner
         if (old != null) {
             recordEditHistoryIfChanged(account, newMessage.dialog_id, newMessage.id, old, newMessage)
+            val shadow = synchronized(cacheLock) { shadowMessageCache.get(account.toLong())?.get(newMessage.dialog_id to newMessage.id) }
+            if (shadow != null) rememberShadow(account, newMessage.dialog_id, newMessage.id, newMessage.message, newMessage.media != null, shadow.date, newMessage.entities, newMessage.media, newMessage.edit_date)
         } else {
             // lumine: dialogMessagesByIds holds only the dialog preview, so fall back to the shadow cache
             recordEditHistoryFromShadow(account, newMessage.dialog_id, newMessage.id, newMessage)
@@ -1329,6 +1560,19 @@ object SavedMessagesHelper {
         }
     }
 
+    private val historyTimeLabels = java.util.WeakHashMap<MessageObject, CharSequence>()
+
+    @JvmStatic
+    fun setHistoryTimeLabel(msg: MessageObject, label: CharSequence) {
+        synchronized(historyTimeLabels) { historyTimeLabels[msg] = label }
+    }
+
+    @JvmStatic
+    fun historyTimeLabel(msg: MessageObject?): CharSequence? {
+        if (msg == null) return null
+        return synchronized(historyTimeLabels) { historyTimeLabels[msg] }
+    }
+
     @JvmStatic
     fun markAsHistoryPreview(msg: MessageObject) {
         synchronized(historyPreviewObjects) { historyPreviewObjects.add(msg) }
@@ -1349,7 +1593,7 @@ object SavedMessagesHelper {
     fun showEditHistoryDialog(context: android.content.Context?, activity: org.telegram.ui.ChatActivity?, dialogId: Long, msgId: Int) {
         val account = activity?.currentAccount ?: UserConfig.selectedAccount
         val controller = MessagesController.getInstance(account)
-        var msgObj: MessageObject? = controller.dialogMessagesByIds.get(msgId)
+        var msgObj: MessageObject? = controller.dialogMessagesByIds.get(msgId)?.takeIf { it.dialogId == dialogId }
         if (msgObj == null) {
             val dummyMsg = TLRPC.TL_message().apply {
                 id = msgId
