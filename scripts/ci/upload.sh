@@ -64,7 +64,7 @@ fi
 send_apk() {
     local apk="$1" name abi ver sha caption attempt=1 http_code
     local thread_args=()
-    [ -n "$THREAD_ID" ] && thread_args=(-F "message_thread_id=${THREAD_ID}")
+    [ -n "$THREAD_ID" ] && thread_args=(--form-string "message_thread_id=${THREAD_ID}")
     name="$(basename "$apk")"
     abi="arm64-v8a"
     case "$name" in *armeabi-v7a*) abi="armeabi-v7a" ;; esac
@@ -76,7 +76,7 @@ send_apk() {
         http_code=$(curl -s -o "$RESPONSE_FILE" -w "%{http_code}" \
             --max-time "$API_TIMEOUT" --retry 0 \
             -X POST "$API_BASE/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
-            -F "chat_id=${CHAT_ID}" \
+            --form-string "chat_id=${CHAT_ID}" \
             "${thread_args[@]}" \
             --form-string "caption=${caption}" \
             --form-string "parse_mode=HTML" \
