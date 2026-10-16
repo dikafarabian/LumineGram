@@ -541,3 +541,4 @@ lumine/accounts/bot-account-updates.patch
 lumine/ui/hide-dialog-preview.patch
 lumine/chat/attach-preview-caption-reorder.patch
 lumine/ui/light-status-bar-insets.patch
+lumine/chat/reply-quote-command-color.patch
