@@ -163,6 +163,7 @@ jobs:
         id: info
         env:
           RUNS_TODAY: ${{ needs.prepare.outputs.runs-today }}
+          BUILD_TYPE: ${{ inputs.build_type }}
         run: bun run tsx scripts/ci/version.ts
 
       - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
@@ -250,5 +251,6 @@ jobs:
           DESTINATION: ${{ inputs.destination }}
           APK_DIR: out
           VER_NAME: ${{ steps.info.outputs.ver-name }}
+          BUILD_TYPE: ${{ inputs.build_type }}
           BUILD_DATE: ${{ steps.info.outputs.date }}
         run: bash scripts/ci/upload.sh

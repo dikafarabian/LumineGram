@@ -8,6 +8,8 @@ set -euo pipefail
 
 : "${TELEGRAM_API_ID:?}" "${TELEGRAM_API_HASH:?}" "${TELEGRAM_BOT_TOKEN:?}"
 
+BUILD_TYPE="${BUILD_TYPE:-release}"
+
 DESTINATION="${DESTINATION:-private}"
 case "$DESTINATION" in
     private)
@@ -70,7 +72,7 @@ send_apk() {
     case "$name" in *armeabi-v7a*) abi="armeabi-v7a" ;; esac
     ver="${VER_NAME%-*}"
     sha="${VER_NAME##*-}"
-    caption="$(printf '<code>luminegram</code>\n<code>%s</code>\n<code>%s</code>\n<code>%s</code>' "$ver" "$sha" "$abi")"
+    caption="$(printf '<code>luminegram</code>\n<code>%s</code>\n<code>%s</code>\n<code>%s</code>\n<code>%s</code>' "$ver" "$sha" "$abi" "$BUILD_TYPE")"
 
     while [ "$attempt" -le "$MAX_RETRIES" ]; do
         http_code=$(curl -s -o "$RESPONSE_FILE" -w "%{http_code}" \

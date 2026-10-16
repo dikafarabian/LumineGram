@@ -5,6 +5,9 @@ const props = await fs.readFile(`${worktree}/gradle.properties`, 'utf8')
 const appVerName = /^APP_VERSION_NAME=(.+)$/m.exec(props)?.[1]
 if (!appVerName) throw new Error('failed to read APP_VERSION_NAME')
 
+const buildType = process.env.BUILD_TYPE ?? 'release'
+if (buildType !== 'beta' && buildType !== 'release') throw new Error(`invalid BUILD_TYPE: ${buildType}`)
+
 const shortSha = (process.env.GITHUB_SHA ?? '').slice(0, 7)
 
 const now = new Date()
@@ -29,8 +32,8 @@ const out = {
   'ver-name': `${appVerName}-${shortSha}`,
   'ver-code': String(verCode),
   date,
-  'apk-arm64': `luminegram-arm64-${appVerName}-release.apk`,
-  'apk-arm7': `luminegram-armeabi-v7a-${appVerName}-release.apk`,
+  'apk-arm64': `luminegram-arm64-${appVerName}-${buildType}.apk`,
+  'apk-arm7': `luminegram-armeabi-v7a-${appVerName}-${buildType}.apk`,
 }
 
 const githubOutput = process.env.GITHUB_OUTPUT
