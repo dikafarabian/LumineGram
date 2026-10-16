@@ -72,7 +72,7 @@ send_apk() {
     case "$name" in *armeabi-v7a*) abi="armeabi-v7a" ;; esac
     ver="${VER_NAME%-*}"
     sha="${VER_NAME##*-}"
-    caption="$(printf '<code>luminegram</code>\n<code>%s</code>\n<code>%s</code>\n<code>%s</code>\n<code>%s</code>' "$ver" "$sha" "$abi" "$BUILD_TYPE")"
+    caption="$(printf '<code>luminegram-%s</code>\n<code>%s</code>\n<code>%s</code>\n<code>%s</code>' "$BUILD_TYPE" "$ver" "$sha" "$abi")"
 
     while [ "$attempt" -le "$MAX_RETRIES" ]; do
         http_code=$(curl -s -o "$RESPONSE_FILE" -w "%{http_code}" \
