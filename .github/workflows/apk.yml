@@ -18,6 +18,13 @@ on:
           - beta
           - release
         default: beta
+      destination:
+        description: Send to
+        type: choice
+        options:
+          - private
+          - community
+        default: private
 
 concurrency:
   group: build-apk-${{ github.ref }}
@@ -238,6 +245,9 @@ jobs:
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_DM_CHAT: ${{ vars.TELEGRAM_DM_CHAT_ID }}
+          TELEGRAM_COMMUNITY_CHAT: '@LuminaireCI'
+          TELEGRAM_COMMUNITY_THREAD: '1391'
+          DESTINATION: ${{ inputs.destination }}
           APK_DIR: out
           VER_NAME: ${{ steps.info.outputs.ver-name }}
           BUILD_DATE: ${{ steps.info.outputs.date }}

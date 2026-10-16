@@ -6,7 +6,25 @@
 
 set -euo pipefail
 
-: "${TELEGRAM_API_ID:?}" "${TELEGRAM_API_HASH:?}" "${TELEGRAM_BOT_TOKEN:?}" "${TELEGRAM_DM_CHAT:?}"
+: "${TELEGRAM_API_ID:?}" "${TELEGRAM_API_HASH:?}" "${TELEGRAM_BOT_TOKEN:?}"
+
+DESTINATION="${DESTINATION:-private}"
+case "$DESTINATION" in
+    private)
+        : "${TELEGRAM_DM_CHAT:?}"
+        CHAT_ID="$TELEGRAM_DM_CHAT"
+        THREAD_ID=""
+        ;;
+    community)
+        : "${TELEGRAM_COMMUNITY_CHAT:?}" "${TELEGRAM_COMMUNITY_THREAD:?}"
+        CHAT_ID="$TELEGRAM_COMMUNITY_CHAT"
+        THREAD_ID="$TELEGRAM_COMMUNITY_THREAD"
+        ;;
+    *)
+        echo "unknown destination: $DESTINATION" >&2
+        exit 1
+        ;;
+esac
 
 APK_DIR="${APK_DIR:-out}"
 API_BASE="http://localhost:8081"
@@ -45,6 +63,8 @@ fi
 
 send_apk() {
     local apk="$1" name abi ver sha caption attempt=1 http_code
+    local thread_args=()
+    [ -n "$THREAD_ID" ] && thread_args=(-F "message_thread_id=${THREAD_ID}")
     name="$(basename "$apk")"
     abi="arm64-v8a"
     case "$name" in *armeabi-v7a*) abi="armeabi-v7a" ;; esac
@@ -56,7 +76,8 @@ send_apk() {
         http_code=$(curl -s -o "$RESPONSE_FILE" -w "%{http_code}" \
             --max-time "$API_TIMEOUT" --retry 0 \
             -X POST "$API_BASE/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
-            -F "chat_id=${TELEGRAM_DM_CHAT}" \
+            -F "chat_id=${CHAT_ID}" \
+            "${thread_args[@]}" \
             --form-string "caption=${caption}" \
             --form-string "parse_mode=HTML" \
             -F "document=@${apk};filename=${name}") || http_code="000"
